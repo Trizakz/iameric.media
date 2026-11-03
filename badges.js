@@ -157,4 +157,12 @@ export const BADGES = [
     "col": 4,
     "icon": "eyeglasses_2"
   },
+  {
+    "id": "badge-16",
+    "title": "obsidian.md",
+    "col": 2,
+    "row": 4,
+    "level": 2,
+    "icon": "folder_copy"
+  },
 ];

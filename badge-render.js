@@ -2,7 +2,7 @@
 // badge looks the same in both. A badge is a sharp-cornered plate with the icon above the title, and
 // its `level` says how much the interest means: 1 cream, 2 holo (the higher, the more notched its outline). The colour is
 // soft patches running into each other, set a little differently per badge; soft occlusion along the
-// edges; the plate sits in a frosted glass mount. Icons are Google Material
+// edges. Icons are Google Material
 // Symbols, always filled (drawn as ligature text, so any icon name works), text is set in the site's
 // fonts. badge-fx.js adds the holo badges' light and specks on the about page.
 //
@@ -13,7 +13,7 @@
 
 // the levels, lowest first, with the colour of icon and text
 export const LEVELS = [
-  { name: 'creme', ink: '#ece9f5' }, // light ink on the dark glow plate
+  { name: 'creme', ink: '#17130c' }, // one ink for every level: both plates are light
   { name: 'holo', ink: '#17130c' },
 ];
 
@@ -86,13 +86,13 @@ function notched(notches, chamfer) {
 
 // each level's colours: the ground, then soft patches as [colour, x, y, radius] in shares of the plate
 const FINISH = [
-  { // the first tier (still called cream): a dark plate with a soft lavender glow rising from its bottom edge
-    // (google-blur-glow-ui), a few blurred shapes in the site's --signal
-    base: '#121116',
-    fades: [['#5a43c4', 0.5, 1.1, 0.62], ['#b39dff', 0.5, 1.14, 0.34], ['#1d1a2b', 0.25, 0.12, 0.6], ['#0d0c10', 0.85, 0.25, 0.5]],
-    occlusion: '#000000',
+  { // the first tier (still called cream): a light, near neutral pearl plate, a white glow rising from its
+    // bottom edge, only a breath of lavender in the corners
+    base: '#d9d8de',
+    fades: [['#ffffff', 0.5, 1.08, 0.6], ['#f4f3f7', 0.5, 0.7, 0.4], ['#c9c6d4', 0.15, 0.12, 0.55], ['#cfcdd6', 0.88, 0.2, 0.5]],
+    occlusion: '#2a2733',
     outline: HEX,
-    plane: 'rgba(255, 255, 255, 0.025)',
+    plane: 'rgba(255, 255, 255, 0.18)',
   },
   { // holo: luminous, a lavender light dome glowing up from the bottom with a bright core, lilac iridescent bands
     // flowing across (google-blur-glow-ui)
@@ -189,12 +189,12 @@ export function badgeSVG(input, { uid = input.id, cls = 'ab-badge', place = true
   const gloss = l.gloss ? `<rect width="200" height="200" fill="url(#${id}-gloss)"/>` : '';
   // a groove is the outline again, smaller: a dark cut with a lit lip just below it
   const groove = k => {
-    const at = dy => `transform="translate(100 ${100 + dy}) scale(${k}) translate(-100 -100)"`, w = f(1.3 / k);
-    return `<path d="${shape}" fill="none" stroke="#2a1600" stroke-opacity="0.26" stroke-width="${f(5 / k)}" filter="url(#${id}-soft)" ${at(0)}/><path d="${shape}" fill="none" stroke="#fff" stroke-opacity="0.65" stroke-width="${w}" ${at(1.2)}/><path d="${shape}" fill="none" stroke="#2a1600" stroke-opacity="0.42" stroke-width="${w}" ${at(0)}/>`;
+    const at = dy => `transform="translate(100 ${100 + dy}) scale(${k}) translate(-100 -100)"`, w = f(2.4 / k);
+    return `<path d="${shape}" fill="none" stroke="#2a1600" stroke-opacity="0.26" stroke-width="${f(7 / k)}" filter="url(#${id}-soft)" ${at(0)}/><path d="${shape}" fill="none" stroke="#fff" stroke-opacity="0.65" stroke-width="${w}" ${at(1.6)}/><path d="${shape}" fill="none" stroke="#2a1600" stroke-opacity="0.42" stroke-width="${w}" ${at(0)}/>`;
   };
   const grooves = (l.grooves || []).map(groove).join('');
-  // the hover ring: a white line just outside the mount, a plain hexagon too, lit when the badge is hovered (about.css)
-  const ring = `<path class="ring" d="${HEX}" fill="none" stroke="#fff" stroke-width="2.5" stroke-linejoin="round" transform="translate(100 100) scale(1.06) translate(-100 -100)" pointer-events="none"/>`;
+  // the hover ring: a white line just outside the plate, a plain hexagon, lit when the badge is hovered (about.css)
+  const ring = `<path class="ring" d="${HEX}" fill="none" stroke="#fff" stroke-width="2.5" stroke-linejoin="round" transform="translate(100 100) scale(0.93) translate(-100 -100)" pointer-events="none"/>`;
   let halo = '', shine = '', iris = '';
   if (holo) {
     const colors = l.iris;
@@ -212,8 +212,6 @@ export function badgeSVG(input, { uid = input.id, cls = 'ab-badge', place = true
 
   return `<svg class="${cls}" data-badge="${esc(b.id)}" data-level="${level}" viewBox="0 0 200 200" shape-rendering="geometricPrecision"${style} role="img" aria-label="badge: ${esc(b.title.replace(/\n/g, ' '))}, level ${level} of ${LEVELS.length}"><defs>${defs}</defs>`
     + halo
-    // the mount: a pane of frosted glass the plate sits in, a little smaller, always a plain hexagon
-    + `<path d="${HEX}" fill="#fff" fill-opacity="0.1" stroke="#fff" stroke-opacity="0.28" stroke-width="1.5" stroke-linejoin="round"/>`
     + `<g transform="translate(100 100) scale(0.86) translate(-100 -100)">`
     + `<g filter="url(#${id}-edge)"><g mask="url(#${id}-plate)">${plate}${gloss}${grooves}</g></g>`
     + iris

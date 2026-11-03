@@ -10,30 +10,39 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400&family=DM+Sans:opsz,wght@9..40,500&family=Unbounded:wght@600&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,1,0&icon_names=arrow_back&display=block" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,1,0&icon_names=arrow_back,arrow_downward,camera,grid_view,language,palette,search,videocam,view_agenda&display=block" rel="stylesheet">
   <link rel="stylesheet" href="sub.css">
   <link rel="stylesheet" href="links.css">
   <link rel="stylesheet" href="footer.css">
 </head>
 <body class="subpage">
-  <!-- the projects as a bento grid of glow tiles (google-blur-glow-ui); the home page loads this <main> into itself -->
-  <main class="screen scrolls">
+  <!-- the projects, drawn by projects-page.js from projects.js: search, category chips, sorted by date. The home page
+       loads this <main> into itself; data-page names the module it mounts -->
+  <main class="screen scrolls" data-page="projects-page.js">
     <a class="sub-mark" href="index.html" data-back aria-label="iameric, back to the home page"><i class="mark-logo" aria-hidden="true"></i><span class="mark-word" aria-hidden="true">iameric</span><span class="mark-back" aria-hidden="true"><span class="material-symbols-outlined">arrow_back</span>back</span></a>
     <h1 tabindex="-1">projects</h1>
-    <ul class="pj-grid">
-      <li class="pj-tile"><div class="pj-art art-dome" aria-hidden="true"><i></i><i></i><i></i></div>
-        <p class="pj-meta">01 · video</p><p class="pj-title">video editing for TV, YouTube and social media</p></li>
-      <li class="pj-tile"><div class="pj-art art-orb" aria-hidden="true"><i></i><i></i></div>
-        <p class="pj-meta">02 · youtube</p><p class="pj-title"><a href="https://www.youtube.com/@trizakz" target="_blank" rel="noopener">@trizakz</a> and <a href="https://www.youtube.com/@ericleutemann" target="_blank" rel="noopener">@ericleutemann</a></p></li>
-      <li class="pj-tile"><div class="pj-art art-curves"><svg viewBox="0 0 200 160" fill="none" aria-hidden="true"><g stroke="rgba(255,255,255,0.08)"><path d="M20 20V140"/><path d="M40 20V140"/><path d="M60 20V140"/><path d="M80 20V140"/><path d="M100 20V140"/><path d="M120 20V140"/><path d="M140 20V140"/><path d="M160 20V140"/><path d="M180 20V140"/><path d="M20 20H180"/><path d="M20 40H180"/><path d="M20 60H180"/><path d="M20 80H180"/><path d="M20 100H180"/><path d="M20 120H180"/><path d="M20 140H180"/></g><g stroke="#b39dff" stroke-width="1.6"><path d="M20 130C60 130 80 30 180 30"/><path d="M20 130C72 130 92 30 180 30"/><path d="M20 130C84 130 104 30 180 30"/><path d="M20 130C96 130 116 30 180 30"/><path d="M20 130C108 130 128 30 180 30"/></g><circle cx="20" cy="130" r="3" fill="#b39dff"/><circle cx="180" cy="30" r="3" fill="#b39dff"/></svg></div>
-        <p class="pj-meta">03 · motion</p><p class="pj-title">motion design, thumbnails and logos</p></li>
-      <li class="pj-tile"><div class="pj-art art-phone"><svg viewBox="0 0 200 160" fill="none" aria-hidden="true"><path d="M70 170V36a22 22 0 0 1 22-22h96" stroke="#e6e4df" stroke-width="4"/><path d="M134 86c3 14 8 19 22 22-14 3-19 8-22 22-3-14-8-19-22-22 14-3 19-8 22-22Z" fill="#b39dff"/></svg></div>
-        <p class="pj-meta">04 · web</p><p class="pj-title">websites, this one included</p></li>
-      <li class="pj-tile"><div class="pj-art art-panel" aria-hidden="true"><b></b><b></b><b></b></div>
-        <p class="pj-meta">05 · photo</p><p class="pj-title">photography and colour grading</p></li>
-      <li class="pj-tile soon"><div class="pj-art art-horizon" aria-hidden="true"><i></i><i></i></div>
-        <p class="pj-meta">06 · soon</p><p class="pj-title">more projects are on their way</p></li>
-    </ul>
+    <section class="pj" aria-label="projects">
+      <div class="pj-intro" lang="en">
+        <p>This page shows a selection of projects I have worked on in the areas of video, design, and web development. It provides an overview of my skills and experience across different types of media.</p>
+        <p><b>Disclaimer:</b> All works presented on this page were created and produced by me unless stated otherwise.</p>
+      </div>
+      <div class="pj-tools">
+        <div class="pj-find">
+          <label class="pj-search">
+            <span class="material-symbols-outlined" aria-hidden="true">search</span>
+            <input type="search" placeholder="search projects" aria-label="search projects" autocomplete="off" spellcheck="false">
+            <button type="button" class="pj-sort" aria-label="sorted newest first, show oldest first"><span class="material-symbols-outlined" aria-hidden="true">arrow_downward</span></button>
+          </label>
+          <div class="pj-views" role="group" aria-label="view">
+            <button type="button" data-view="grid" aria-pressed="true" aria-label="grid" title="grid"><span class="material-symbols-outlined" aria-hidden="true">grid_view</span></button>
+            <button type="button" data-view="rows" aria-pressed="false" aria-label="rows" title="rows"><span class="material-symbols-outlined" aria-hidden="true">view_agenda</span></button>
+          </div>
+        </div>
+        <div class="pj-chips" role="group" aria-label="category"></div>
+      </div>
+      <ul class="pj-list"></ul>
+      <p class="pj-empty" hidden>no projects match that.</p>
+    </section>
     <footer class="sub-foot foot">
       <img class="foot-code" src="assets/barcode.svg" alt="" width="110" height="22">
       <p class="foot-col"><span>© <span class="year">2026</span></span><b>iameric</b></p>
@@ -43,5 +52,9 @@
     </footer>
   </main>
   <script src="sub.js"></script>
+  <script type="module">
+    import { mount } from './projects-page.js';
+    mount(document.body);
+  </script>
 </body>
 </html>

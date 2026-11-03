@@ -8,7 +8,7 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <title>iameric</title>
   <script>
-    // start the page in its intro state: the wordmark fades in from left to right while the tags boot (tags.js),
+    // start the page in its intro state: the wordmark's logo builds itself while the tags boot (tags.js),
     // then the glass blob appears behind them
     if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
       document.documentElement.classList.add('intro');
@@ -30,7 +30,7 @@
   <link rel="stylesheet" href="links.css">
   <link rel="stylesheet" href="footer.css">
   <script src="logo.js" defer></script>
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,1,0&icon_names=arrow_back,code,deployed_code,design_services,edit,live_tv,mail,movie_edit,person,photo_camera,play_circle&display=block" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,1,0&icon_names=arrow_back,arrow_downward,camera,code,deployed_code,design_services,edit,grid_view,language,live_tv,mail,movie_edit,palette,person,photo_camera,play_circle,search,videocam,view_agenda&display=block" rel="stylesheet">
   <style>
     /* "graphit": neutral greys from the near-black ground up to a warm off-white text, plus one accent
        colour, --signal. The 3D tags use the same greys plus a light side part (SCHEMES in tags.js).
@@ -144,36 +144,10 @@
       font-size: clamp(19px, 1.6vw, 27px);
       color: var(--signal);
     }
-    /* intro: first the logo builds itself, small (the module below, logo-build.js, MARK_BUILD); then a soft edge
-       sweeps from left to right across the word, which sharpens */
-    @property --reveal {
-      syntax: "<percentage>";
-      inherits: false;
-      initial-value: -40%;
-    }
-    .intro .wordmark {
-      padding: 20px;
-      margin: -20px;
-      -webkit-mask-image: linear-gradient(90deg, #000 var(--reveal), transparent calc(var(--reveal) + 40%));
-      mask-image: linear-gradient(90deg, #000 var(--reveal), transparent calc(var(--reveal) + 40%));
-      animation: reveal 1.9s var(--ease) 2.2s both, settle 1.9s var(--ease) 2.2s both;
-    }
-    /* while it builds, the drawn logo stands in for the static one */
+    /* intro: the logo builds itself, small (logo-build.js, buildMark); while it builds, the drawn logo stands in
+       for the static one */
     .intro .mark .mark-logo {
       visibility: hidden;
-    }
-    .mark-build {
-      flex: none;
-      /* the build's box (6..194) is wider than the logo's own (22..178): 188 / 155.9, centred on the logo's place */
-      width: 1.206em;
-      height: 1.206em;
-      margin: -0.103em;
-    }
-    @keyframes reveal {
-      to { --reveal: 100%; }
-    }
-    @keyframes settle {
-      from { filter: blur(8px); }
     }
 
     /* glass blob (blob.js) behind the tags: its canvas is a little larger than the old sphere, so the
@@ -371,35 +345,13 @@
   </script>
   <script type="module" src="splash.js"></script>
   <script type="module">
-    // the wordmark's intro: the logo builds itself once, small, in its place (the same build as the splash, a little
-    // quicker), then the word sweeps in beside it (CSS, .intro .wordmark). After a splash it waits for it to end
-    import { buildState, drawState } from './logo-build.js';
-    const html = document.documentElement, MARK_BUILD = 2400;
-    function buildMark() {
-      const logo = document.querySelector('.mark .mark-logo');
-      const canvas = document.createElement('canvas');
-      canvas.className = 'mark-build';
-      canvas.setAttribute('aria-hidden', 'true');
-      logo.before(canvas);
-      logo.style.display = 'none';
-      const size = Math.round(canvas.getBoundingClientRect().width * Math.min(devicePixelRatio || 1, 2) * 2);
-      canvas.width = canvas.height = size;
-      const start = performance.now();
-      const frame = now => {
-        const t = Math.min(1, (now - start) / MARK_BUILD);
-        drawState(buildState(t), '.mark-build');
-        if (t < 1) return requestAnimationFrame(frame);
-        // done: back to the static logo, and the GPU context goes back to the page
-        canvas._gl?.gl.getExtension('WEBGL_lose_context')?.loseContext();
-        canvas.remove();
-        logo.style.display = '';
-        logo.style.visibility = 'visible';
-      };
-      requestAnimationFrame(frame);
-    }
+    // the wordmark's intro: the logo builds itself once (logo-build.js). After a splash it waits for it to end
+    import { buildMark } from './logo-build.js';
+    const html = document.documentElement;
+    const buildHomeMark = () => buildMark(document.querySelector('.mark .mark-logo'));
     if (html.classList.contains('intro')) {
-      if (html.classList.contains('splash')) addEventListener('iameric:splashdone', buildMark, { once: true });
-      else buildMark();
+      if (html.classList.contains('splash')) addEventListener('iameric:splashdone', buildHomeMark, { once: true });
+      else buildHomeMark();
     }
   </script>
   <script src="sub.js"></script>
@@ -407,6 +359,7 @@
     import { mountTags } from './tags.js';
     import { mountBlob } from './blob.js';
     import { mountParticles } from './particles.js';
+    import { buildMark } from './logo-build.js';
 
     const tags = await mountTags(document.querySelector('.tags'), [
       { title: 'projects', sub: 'video, editing, web', icon: 'deployed_code', href: 'projects.html', scheme: 'a' },
@@ -467,6 +420,9 @@
       el.append(doc.querySelector('main'));
       document.body.append(el);
       fitSubTitle(el);
+      // the sub page's wordmark: its logo builds itself, as on a page of its own (sub.js); sub.css keeps it hidden till then
+      const markLogo = el.querySelector('.sub-mark .mark-logo');
+      if (markLogo && !matchMedia('(prefers-reduced-motion: reduce)').matches) buildMark(markLogo);
       el.querySelectorAll('.year').forEach(y => { y.textContent = document.querySelector('.footer .year').textContent; });
       // a sub page with its own behaviour names its module in <main data-page> (about.js)
       const mod = el.querySelector('[data-page]')?.dataset.page;
@@ -547,8 +503,8 @@
 
     const html = document.documentElement;
 
-    // the wordmark intro is pure CSS; drop its state once it has settled
-    const introDone = () => setTimeout(() => html.classList.remove('intro'), 4200); // the logo's build, then the word's sweep
+    // drop the wordmark's intro state once the logo has built
+    const introDone = () => setTimeout(() => html.classList.remove('intro'), 2400);
     if (html.classList.contains('intro')) {
       if (html.classList.contains('splash')) addEventListener('iameric:splashdone', introDone, { once: true });
       else introDone();

@@ -22,6 +22,12 @@ export function mount(root) {
   }
   ensureFonts(document, BADGES);
   pile.innerHTML = BADGES.map(b => badgeSVG(b)).join('');
+  // the key: a blank plate of each tier
+  page.querySelectorAll('.ab-key li').forEach(li => {
+    const level = +li.dataset.level;
+    li.insertAdjacentHTML('afterbegin', badgeSVG({ title: '', icon: '', level, id: `key${level}` }, { place: false }));
+    li.firstElementChild.setAttribute('aria-hidden', 'true');
+  });
   const els = [...pile.querySelectorAll('.ab-badge')];
   // the honeycomb from badges.js; phones pour the badges into four columns, reading order kept.
   // They arrive one after another in reading order

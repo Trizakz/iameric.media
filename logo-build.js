@@ -1,9 +1,10 @@
 // The logo's build and orbit, one signed distance field drawn with WebGL (see FRAG), as approved in
-// logo/animation/logo-loop-final.html. Used by splash.js (the home page's splash) and by the home page's wordmark
-// intro (the logo builds itself, small, before the word sweeps in).
+// logo/animation/logo-loop-final.html. Used by splash.js (the home page's splash) and by the wordmark's intro on
+// every page (the logo builds itself, small, beside the word).
 //
 //   drawState(buildState(t), 'canvas.x');   // the build at t (0..1, over BUILD ms) into every matching canvas
 //   drawState(loopState(ms), 'canvas.x');   // the build once, then the orbit; ms since the start
+//   buildMark(logoEl);                      // the wordmark's logo builds itself once, in its place
 //   (each canvas takes its colour from its CSS color)
 
   const RING = { x: 141.55, y: 141.55, r: 36.4 }, HOLE = { x: 134.27, y: 134.27, r: 16.74 };
@@ -236,4 +237,29 @@
     return st;
   }
 
-export { BUILD, CYCLE, HOLD, buildState, orbitState, loopState, drawState };
+  // the wordmark's intro: the logo builds itself once, small, in its place (the same build as the splash, a little
+  // quicker), on a canvas standing in for the static logo (.mark-build in sub.css)
+  const MARK_BUILD = 2400;
+  function buildMark(logo) {
+    const canvas = document.createElement('canvas');
+    canvas.className = 'mark-build';
+    canvas.setAttribute('aria-hidden', 'true');
+    logo.before(canvas);
+    logo.style.display = 'none';
+    const size = Math.round(canvas.getBoundingClientRect().width * Math.min(devicePixelRatio || 1, 2) * 2);
+    canvas.width = canvas.height = size;
+    const start = performance.now();
+    const frame = now => {
+      const t = Math.min(1, (now - start) / MARK_BUILD);
+      drawState(buildState(t), '.mark-build');
+      if (t < 1) return requestAnimationFrame(frame);
+      // done: back to the static logo, and the GPU context goes back to the page
+      canvas._gl?.gl.getExtension('WEBGL_lose_context')?.loseContext();
+      canvas.remove();
+      logo.style.display = '';
+      logo.style.visibility = 'visible';
+    };
+    requestAnimationFrame(frame);
+  }
+
+export { BUILD, CYCLE, HOLD, buildState, orbitState, loopState, drawState, buildMark };

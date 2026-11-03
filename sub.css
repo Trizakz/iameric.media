@@ -114,25 +114,20 @@
   -webkit-mask-image: linear-gradient(90deg, transparent var(--sweep), #000 calc(var(--sweep) + 40%));
   mask-image: linear-gradient(90deg, transparent var(--sweep), #000 calc(var(--sweep) + 40%));
 }
-/* arrival: the wordmark comes in like the home page's intro, a soft edge sweeping from left to right while
-   the letters sharpen. A second mask layer, intersected with the hover sweep above; it only fills
-   backwards, so once it has run the hover's blur and sweep work as before */
-@property --intro {
-  syntax: "<percentage>";
-  inherits: false;
-  initial-value: 100%;
-}
+/* arrival: the logo builds itself (sub.js, logo-build.js), the word is there at once; until the build starts
+   the static logo is hidden */
 @media (prefers-reduced-motion: no-preference) {
-  .subpage .sub-mark .mark-word {
-    -webkit-mask-image: linear-gradient(90deg, transparent var(--sweep), #000 calc(var(--sweep) + 40%)), linear-gradient(90deg, #000 var(--intro), transparent calc(var(--intro) + 40%));
-    mask-image: linear-gradient(90deg, transparent var(--sweep), #000 calc(var(--sweep) + 40%)), linear-gradient(90deg, #000 var(--intro), transparent calc(var(--intro) + 40%));
-    -webkit-mask-composite: source-in;
-    mask-composite: intersect;
-    animation: mark-intro 1.9s var(--ease) 0.5s backwards;
+  .subpage .sub-mark .mark-logo {
+    visibility: hidden;
   }
 }
-@keyframes mark-intro {
-  from { --intro: -40%; filter: blur(8px); }
+/* the canvas the wordmark's logo builds on (here and on the home page): the build's box (6..194) is wider than
+   the logo's own (22..178): 188 / 155.9, centred on the logo's place */
+.mark-build {
+  flex: none;
+  width: 1.206em;
+  height: 1.206em;
+  margin: -0.103em;
 }
 .subpage .sub-mark .mark-back {
   display: inline-flex;
@@ -212,103 +207,397 @@ html:has(> body.subpage .screen.scrolls) {
   overflow: hidden;
 }
 
-/* ---- projects: a bento grid of tiles, each with one glow motif (google-blur-glow-ui) ---- */
-.pj-grid {
+/* ---- projects (projects-page.js): the intro, a search bar with the sort arrow, category chips, then the cards.
+   Built like the about page's badges and connections: frosted glass panes, a white ring and a small lift on hover ---- */
+.pj {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
-  margin: clamp(28px, 6vh, 56px) 0 clamp(40px, 8vh, 80px);
-  padding: 0;
-  list-style: none;
+  grid-template-columns: minmax(0, 1fr); /* never wider than the page, whatever the content wants */
+  margin-bottom: clamp(48px, 9vh, 96px);
 }
-.pj-tile {
+.pj-intro {
   display: grid;
-  grid-template-rows: auto auto;
-  gap: 16px;
-  padding: 14px 14px 20px;
-  border-radius: 28px;
-  background: #131315;
-  border: 1px solid var(--line);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(20px, 4vw, 64px);
+  margin-top: clamp(24px, 5vh, 48px);
 }
-.pj-tile p {
+.pj-intro p {
   margin: 0;
-  padding: 0 8px;
+  max-width: 34em;
+  font-size: 17px;
+  line-height: 1.6;
+  color: rgba(230, 228, 223, 0.78);
+  text-wrap: pretty;
 }
-.pj-meta {
-  font: 12px var(--mono);
-  letter-spacing: 0.02em;
-  color: color-mix(in srgb, var(--text) 55%, transparent);
-}
-.pj-title {
-  margin-top: 6px !important;
-  font: 500 20px/1.2 "DM Sans", sans-serif;
+.pj-intro b {
+  font-weight: 500;
   color: var(--text);
 }
-.pj-title a {
-  color: var(--signal);
-  text-decoration: none;
+.pj-tools {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: center;
+  gap: 16px;
+  margin-top: clamp(48px, 10vh, 112px);
 }
-/* the motif: an inner card (radius 28 - 14 of padding, see nested-border-radius) holding blurred shapes */
-.pj-art {
-  position: relative;
-  aspect-ratio: 1.25;
-  border-radius: 14px;
-  overflow: hidden;
-  background: #0d0d0f;
+/* the search bar with the view switch beside it */
+.pj-find {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: min(100%, 640px);
 }
-.pj-art i {
-  position: absolute;
+.pj-views {
+  flex: none;
+  display: flex;
+  gap: 2px;
+  height: 50px;
+  box-sizing: border-box;
+  padding: 5px;
+  border-radius: 999px;
+  border: 1.5px solid rgba(255, 255, 255, 0.28);
+}
+.pj-views button {
+  display: grid;
+  place-items: center;
+  width: 37px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: color-mix(in srgb, var(--text) 62%, transparent);
+  cursor: pointer;
+  transition: background-color 0.2s ease-out, color 0.2s ease-out;
+}
+.pj-views button:hover {
+  color: var(--text);
+}
+.pj-views button:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
+}
+.pj-views button[aria-pressed="true"] {
+  background: var(--signal);
+  color: var(--bg);
+}
+.pj-views .material-symbols-outlined {
+  font-size: 20px;
+}
+/* the search bar: a frosted pill, the sort arrow as a filled disc at its end */
+.pj-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-sizing: border-box;
+  flex: 1;
+  min-width: 0;
+  height: 50px;
+  padding: 0 6px 0 18px;
+  border-radius: 999px;
+  border: 1.5px solid rgba(255, 255, 255, 0.28);
+  transition: border-color 0.25s ease-out, box-shadow 0.25s ease-out;
+}
+.pj-search:focus-within {
+  border-color: #fff;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+}
+.pj-search > .material-symbols-outlined {
+  font-size: 20px;
+  color: color-mix(in srgb, var(--text) 62%, transparent);
+}
+.pj-search input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font: 400 16px "DM Sans", sans-serif;
+  color: var(--text);
+  caret-color: var(--signal);
+}
+.pj-search input::placeholder {
+  color: color-mix(in srgb, var(--text) 50%, transparent);
+}
+.pj-search input::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+}
+.pj-sort {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border: 0;
   border-radius: 50%;
-  filter: blur(var(--b, 18px));
+  background: var(--signal);
+  color: var(--bg);
+  cursor: pointer;
+  transition: filter 0.2s ease-out;
 }
-/* stacked glowing domes rising from the bottom */
-.art-dome i:nth-child(1) { left: 6%; right: 6%; top: 30%; height: 90%; background: #3b2a8f; --b: 26px; }
-.art-dome i:nth-child(2) { left: 16%; right: 16%; top: 42%; height: 80%; background: #8f73ef; --b: 20px; }
-.art-dome i:nth-child(3) { left: 27%; right: 27%; top: 54%; height: 70%; background: #e9e1ff; --b: 14px; }
-/* an orb: a glowing ring around a soft core */
-.art-orb i:nth-child(1) { inset: 14% 28%; background: radial-gradient(circle, transparent 34%, #b39dff 52%, #4a33b0 70%, transparent 72%); --b: 6px; }
-.art-orb i:nth-child(2) { inset: 34% 40%; background: #6f4bd8; --b: 10px; }
-/* a lavender panel falling into the dark, with a slider line and its dots */
-.art-panel { background: linear-gradient(180deg, #ece6ff 0%, #b39dff 38%, #5a3cc4 72%, #0d0d0f 100%); }
-.art-panel::before {
+.pj-sort:hover {
+  filter: brightness(1.1);
+}
+.pj-sort:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 3px;
+}
+/* the arrow turns over when the order flips, with a small overshoot */
+.pj-sort .material-symbols-outlined {
+  font-size: 22px;
+  transition: rotate 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.pj-sort.flipped .material-symbols-outlined {
+  rotate: 180deg;
+}
+.pj-chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+.pj-chip {
+  padding: 7px 15px;
+  border-radius: 999px;
+  border: 1.5px solid rgba(255, 255, 255, 0.28);
+  background: transparent;
+  font: 500 14px/1 "DM Sans", sans-serif;
+  color: var(--text);
+  cursor: pointer;
+  transition: border-color 0.2s ease-out, background-color 0.2s ease-out, color 0.2s ease-out;
+}
+.pj-chip:hover {
+  border-color: #fff;
+}
+.pj-chip:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 3px;
+}
+.pj-chip[aria-pressed="true"] {
+  border-color: var(--signal);
+  background: var(--signal);
+  color: var(--bg);
+}
+/* the cards: a pearl plate, like the about page's connections. The picture is inset, the date sits in a notch cut
+   into its top right corner; below, the title and the categories as tags. .rows lays the same cards out as lines */
+.pj-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
+  gap: clamp(24px, 2.6vw, 36px);
+  margin: clamp(40px, 7vh, 72px) 0 0;
+  padding: 12px;
+  list-style: none;
+}
+.pj-card {
+  --plate: #dcdbe1;
+  --ink: #17130c; /* the badges' ink */
+  --fillet: 14px; /* the notch's inner curves */
+  position: relative;
+  display: grid;
+  align-content: start;
+  padding: 8px;
+  border-radius: 26px; /* 18 + 8 */
+  background: radial-gradient(120% 50% at 50% 118%, #fff, transparent 70%), var(--plate);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.45);
+  color: var(--ink);
+  transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.3s ease-out 0.12s;
+}
+/* the white ring round the hovered card, with a soft glow */
+.pj-card::after {
   content: "";
   position: absolute;
-  left: 50%;
-  top: 12%;
-  bottom: 12%;
-  width: 1px;
-  background: rgba(255, 255, 255, 0.55);
+  inset: -6px;
+  border-radius: 32px;
+  border: 2px solid #fff;
+  filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.8));
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease-out;
 }
-.art-panel b {
-  position: absolute;
-  left: 50%;
-  width: 7px;
-  height: 7px;
-  margin: -3.5px 0 0 -3.5px;
-  border-radius: 50%;
-  background: #fff;
+.pj-card:hover {
+  transform: scale(1.03);
 }
-.art-panel b:nth-of-type(1) { top: 12%; background: #0d0d0f; }
-.art-panel b:nth-of-type(2) { top: 46%; }
-.art-panel b:nth-of-type(3) { top: 88%; }
-/* svg motifs (easing curves, the phone with its sparkle) fill the card */
-.pj-art svg {
+.pj-card:hover::after {
+  opacity: 1;
+}
+@media (hover: hover) {
+  .pj-list:has(.pj-card:hover) .pj-card:not(:hover) {
+    filter: brightness(0.68);
+    transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.3s ease-out;
+  }
+}
+.pj-pic {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 18px;
+  overflow: hidden;
+  background: #121116;
+}
+.pj-pic img,
+.pj-ph {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
+  transition: scale 0.6s var(--ease);
 }
-/* a horizon, quieter: for what comes next */
-.art-horizon i:nth-child(1) { left: -10%; right: -10%; top: 62%; height: 80%; background: #4a33b0; --b: 28px; }
-.art-horizon i:nth-child(2) { left: 20%; right: 20%; top: 78%; height: 50%; background: #c9b8ff; --b: 22px; }
-.pj-tile.soon {
-  opacity: 0.7;
+.pj-pic img {
+  object-fit: cover;
+  display: block;
 }
-@media (max-width: 1000px) {
-  .pj-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+/* the picture leans in a little under the pointer */
+.pj-card:hover .pj-pic img,
+.pj-card:hover .pj-ph {
+  scale: 1.05;
 }
-@media (max-width: 600px) {
-  .pj-grid { grid-template-columns: minmax(0, 1fr); }
+/* no picture yet: the same for every project, one gradient from deep violet into the lavender of --signal (no
+   white), a soft lavender glow at the bottom, the logo faint in white in the middle */
+.pj-ph {
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(70% 40% at 50% 104%, rgba(179, 157, 255, 0.7), transparent 70%),
+    linear-gradient(180deg, #2a1c86 0%, #4b35c2 38%, #7d63e0 72%, #b39dff 100%);
+}
+.pj-ph i {
+  width: 32%;
+  aspect-ratio: 1;
+  background: #fff;
+  opacity: 0.14;
+  -webkit-mask: url(assets/logo.svg) center / contain no-repeat;
+  mask: url(assets/logo.svg) center / contain no-repeat;
+}
+/* the notch: from the card's own corner into the picture's, in the plate's colour, joined to the picture's top
+   and right edges by two concave curves (a square of plate colour with a quarter circle of picture left in it).
+   It reaches over the picture's rounded corner, so nothing of that corner shows */
+.pj-date {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  right: 0;
+  padding: 16px 16px 9px 14px;
+  border-radius: 0 26px 0 16px;
+  background: var(--plate);
+  font: 500 13px/1 var(--mono);
+  letter-spacing: 0.02em;
+  color: var(--ink);
+}
+.pj-date::before,
+.pj-date::after {
+  content: "";
+  position: absolute;
+  width: var(--fillet);
+  height: var(--fillet);
+  background: radial-gradient(circle at 0 100%, transparent calc(var(--fillet) - 0.5px), var(--plate) var(--fillet));
+}
+/* each fillet reaches 1px past its edges, into the plate and under the notch, so no hairline of the picture opens
+   between the pieces while the card is scaled on hover; the curve's centre stays on the picture's corner */
+.pj-date::before {
+  top: 7px; /* the picture's top edge is at 8px */
+  right: calc(100% - 1px);
+  width: calc(var(--fillet) + 1px);
+  height: calc(var(--fillet) + 1px);
+}
+.pj-date::after {
+  top: calc(100% - 1px);
+  right: 7px; /* the picture's right edge is at 8px */
+  width: calc(var(--fillet) + 1px);
+  height: calc(var(--fillet) + 1px);
+}
+.pj-info {
+  display: grid;
+  gap: 12px;
+  padding: 16px 10px 10px 12px;
+}
+.subpage .pj-name {
+  margin: 0;
+  font: 500 20px/1.2 "DM Sans", sans-serif;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  text-wrap: balance;
+}
+/* the date beside the title, for rows only (the notch is too large on the small picture) */
+.pj-when {
+  display: none;
+  font: 13px/1 var(--mono);
+  color: color-mix(in srgb, var(--ink) 65%, transparent);
+}
+.pj-cats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.pj-cats li {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 11px 5px 8px;
+  border-radius: 999px;
+  background: rgba(23, 19, 12, 0.08);
+  font: 500 12px/1 "DM Sans", sans-serif;
+  color: color-mix(in srgb, var(--ink) 75%, transparent);
+}
+.pj-cats .material-symbols-outlined {
+  font-size: 15px;
+}
+/* rows: the picture small on the left, title, date and tags beside it */
+.pj-list.rows {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 24px;
+}
+.pj-list.rows .pj-card {
+  grid-template-columns: 140px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+}
+.pj-list.rows .pj-card:hover {
+  transform: scale(1.01);
+}
+.pj-list.rows .pj-pic {
+  aspect-ratio: 4 / 3;
+}
+.pj-list.rows .pj-date {
+  display: none;
+}
+.pj-list.rows .pj-when {
+  display: block;
+}
+.pj-list.rows .pj-info {
+  gap: 8px;
+  padding: 4px 12px 4px 16px;
+}
+.pj-empty {
+  margin: 40px 0 0;
+  text-align: center;
+  font: 13px var(--mono);
+  color: color-mix(in srgb, var(--text) 55%, transparent);
+}
+@media (max-width: 700px) {
+  .pj-intro {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .pj-find {
+    gap: 8px;
+  }
+  .pj-list.rows .pj-card {
+    grid-template-columns: 96px minmax(0, 1fr);
+  }
+  .subpage .pj-list.rows .pj-name {
+    font-size: 15px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pj-sort .material-symbols-outlined,
+  .pj-card,
+  .pj-pic img,
+  .pj-ph {
+    transition: none;
+  }
 }
 
 /* ---- contact: one line and one white pill button over the rising glow ---- */
