@@ -349,17 +349,24 @@
       { title: 'about', sub: 'work, interests', icon: 'person', href: 'about.html', scheme: 'b' },
       { title: 'contact', sub: 'commissions, mail', icon: 'mail', href: 'contact.html', scheme: 'a' },
     ], { focusBlur: true });
+    // during the logo splash each scene waits paused from the moment it is mounted, before drawing a single frame,
+    // so the tags' boot intro (and the blob's and the dust's fade-in) play in full once the splash is gone
+    const splash = document.documentElement.classList.contains('splash');
+    const waitForSplash = scene => {
+      if (!splash) return;
+      scene.setPaused(true);
+      addEventListener('iameric:splashdone', () => scene.setPaused(false), { once: true });
+    };
+    waitForSplash(tags);
     const tagBox = document.querySelector('.tags');
     // the disc behind the glass takes the hovered tag's colour: its keys colour (SCHEMES in tags.js), more
     // saturated so it still reads as colour through the glass. Projects and contact share scheme a.
     const blob = await mountBlob(document.querySelector('.blob'), { idle: '#45464d', colors: ['#9a7bff', '#b9a2ff', '#9a7bff'] });
+    waitForSplash(blob);
     tagBox.addEventListener('tagactive', e => blob.setActive(e.detail));
     const particles = mountParticles(document.querySelector('.particles'));
+    waitForSplash(particles);
     tagBox.addEventListener('taglaunchstart', () => document.body.classList.add('launching'));
-    if (document.documentElement.classList.contains('splash')) {
-      [tags, blob, particles].forEach(s => s.setPaused(true));
-      addEventListener('iameric:splashdone', () => [tags, blob, particles].forEach(s => s.setPaused(false)), { once: true });
-    }
     dispatchEvent(new Event('iameric:ready'));
     // sub pages open over the home page instead of replacing it: after the zoom the page's <main> is
     // fetched and shown in a full-window panel, and the address changes with pushState. Going back
