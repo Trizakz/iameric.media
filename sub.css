@@ -98,6 +98,9 @@
 }
 .subpage .sub-mark {
   display: inline-grid;
+  grid-template-columns: auto auto; /* the logo (links.css), then word and "back" in one cell */
+  align-items: center;
+  column-gap: 0.4em;
   --sweep: -40%;
   transition: --sweep 0.7s var(--ease);
 }
@@ -106,7 +109,7 @@
   --sweep: 100%;
 }
 .subpage .sub-mark > span {
-  grid-area: 1 / 1;
+  grid-area: 1 / 2;
   padding: 14px 20px;
   margin: -14px -20px;
   transition: filter 0.7s var(--ease);

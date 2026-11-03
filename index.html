@@ -123,6 +123,14 @@
       letter-spacing: -0.01em;
       color: var(--signal);
     }
+    /* the logo (links.css) before the wordmark, at the wordmark's size */
+    .mark {
+      display: flex;
+      align-items: center;
+      gap: 0.4em;
+      font-size: clamp(19px, 1.6vw, 27px);
+      color: var(--signal);
+    }
     /* intro: a soft edge sweeps from left to right across the wordmark, which and sharpens */
     @property --reveal {
       syntax: "<percentage>";
@@ -253,7 +261,7 @@
     <!-- inside the stage so it sits on the ground but under the blob and the tags -->
     <div id="scanlines" aria-hidden="true"></div>
     <header class="top">
-      <div class="mark"><h1 class="wordmark">iameric</h1></div>
+      <div class="mark"><i class="mark-logo" aria-hidden="true"></i><h1 class="wordmark">iameric</h1></div>
     </header>
 
     <main class="hero">
@@ -271,7 +279,7 @@
     </main>
 
     <footer class="bar footer foot">
-      <img class="foot-code" src="assets/barcode.svg" alt="" width="220" height="30">
+      <img class="foot-code" src="assets/barcode.svg" alt="" width="110" height="22">
       <p class="foot-col"><span>© <span class="year">2026</span></span><b>iameric</b></p>
       <p class="foot-col"><span>version</span><b class="version">v1.0</b></p>
       <p class="foot-col"><span>imprint</span><a class="lk" href="legal.html">legal notice</a></p>

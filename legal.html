@@ -91,6 +91,9 @@
     }
     .mark {
       display: inline-grid;
+      grid-template-columns: auto auto; /* the logo (links.css), then word and "back" in one cell */
+      align-items: center;
+      column-gap: 0.4em;
       --sweep: -40%;
       transition: --sweep 0.7s var(--ease);
     }
@@ -99,7 +102,7 @@
       --sweep: 100%;
     }
     .mark > span {
-      grid-area: 1 / 1;
+      grid-area: 1 / 2;
       padding: 14px 20px;
       margin: -14px -20px;
       transition: filter 0.7s var(--ease);
@@ -206,7 +209,7 @@
   <link rel="stylesheet" href="footer.css">
 </head>
 <body>
-  <a class="mark" href="index.html" aria-label="iameric, back to the home page"><span class="mark-word" aria-hidden="true">iameric</span><span class="mark-back" aria-hidden="true"><span class="material-symbols-outlined">arrow_back</span>back</span></a>
+  <a class="mark" href="index.html" aria-label="iameric, back to the home page"><i class="mark-logo" aria-hidden="true"></i><span class="mark-word" aria-hidden="true">iameric</span><span class="mark-back" aria-hidden="true"><span class="material-symbols-outlined">arrow_back</span>back</span></a>
 
   <main>
     <h1>legal notice</h1>
@@ -251,7 +254,7 @@
   </main>
 
   <footer class="bar foot">
-    <img class="foot-code" src="assets/barcode.svg" alt="" width="220" height="30">
+    <img class="foot-code" src="assets/barcode.svg" alt="" width="110" height="22">
     <p class="foot-col"><span>© <span class="year">2026</span></span><b>iameric</b></p>
     <p class="foot-col"><span>version</span><b class="version">v1.0</b></p>
     <p class="foot-col"><span>imprint</span><a class="lk" href="legal.html" aria-current="page">legal notice</a></p>
