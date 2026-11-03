@@ -820,10 +820,14 @@ export async function mountTags(container, tags, { focusBlur = false, returnTo =
   // screens, 2 on high-density ones and 1 beyond that; lower it if a weak GPU stutters. No MSAA on the
   // internal targets: SS already gives 4-9 samples per pixel, and three@0.160's multisample resolve
   // also blits depth, which WebGL rejects for these targets.
-  const dpr = Math.min(window.devicePixelRatio || 1, 3);
+  // phones (touch) start at 2x at most: their 3x screens cost more than twice the pixels for a
+  // difference nobody sees on the tags, and their GPUs are the weakest
+  const dpr = Math.min(window.devicePixelRatio || 1, matchMedia('(pointer: coarse)').matches ? 2 : 3);
   const maxSS = dpr < 1.5 ? 3 : dpr < 2.5 ? 2 : 1;
+  const minRatio = Math.min(dpr, 1);
   let SS = maxSS; // lowered at runtime if the GPU can't keep up, see adapt()
-  renderer.setPixelRatio(dpr);
+  let ratio = dpr; // the pixel ratio, lowered after SS once that is down to 1, see adapt()
+  renderer.setPixelRatio(ratio);
   const frame = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType });
   // drawn exactly as it would be on screen: three.js applies tone mapping and sRGB output to a render
   // target only when it is flagged as an XR target (render-target internals of three@0.160)
@@ -1018,8 +1022,9 @@ export async function mountTags(container, tags, { focusBlur = false, returnTo =
     return Math.sin(v * 47) > 0.2 - v ? 0.4 + 0.6 * v : 0.05; // a few uneven blinks, then steady
   }
   // adaptive quality, like drei's PerformanceMonitor: frame times are averaged over one-second
-  // windows; two slow windows in a row (under ~50 fps) drop the supersampling one step, a long run of
-  // smooth windows raises it again. It may rise at most twice, so it can't keep flip-flopping.
+  // windows; two slow windows in a row (under ~50 fps) drop the supersampling one step, and once that
+  // is down to 1 the pixel ratio by half steps (to 1 at the least); a long run of smooth windows raises
+  // them again, pixel ratio first. It may rise at most twice, so it can't keep flip-flopping.
   let last = 0, sum = 0, frames = 0, slow = 0, smooth = 0, raises = 0;
   function adapt(time) {
     // only judge steady frames: not a render outside the loop (resize), not the intro or a zoom
@@ -1033,8 +1038,19 @@ export async function mountTags(container, tags, { focusBlur = false, returnTo =
     const avg = sum / frames;
     sum = frames = 0;
     if (avg > 20) { slow++; smooth = 0; } else if (avg < 17.5) { smooth++; slow = 0; } else { slow = smooth = 0; }
-    if (slow >= 2 && SS > 1) { SS--; slow = 0; fit(); }
-    if (smooth >= 8 && SS < maxSS && raises < 2) { SS++; raises++; smooth = 0; fit(); }
+    if (slow >= 2 && (SS > 1 || ratio > minRatio)) {
+      if (SS > 1) SS--;
+      else renderer.setPixelRatio((ratio = Math.max(minRatio, ratio - 0.5)));
+      slow = 0;
+      fit();
+    }
+    if (smooth >= 8 && (ratio < dpr || SS < maxSS) && raises < 2) {
+      if (ratio < dpr) renderer.setPixelRatio((ratio = Math.min(dpr, ratio + 0.5)));
+      else SS++;
+      raises++;
+      smooth = 0;
+      fit();
+    }
   }
 
   function render(time) {

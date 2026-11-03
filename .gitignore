@@ -12,3 +12,5 @@ _*.js
 PRODUCT.md
 .impeccable/
 .claude/
+# logo source files (only what a page uses gets uploaded)
+logo/

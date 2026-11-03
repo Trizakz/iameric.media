@@ -193,14 +193,16 @@ export function badgeSVG(input, { uid = input.id, cls = 'ab-badge', place = true
   const grooves = (l.grooves || []).map(groove).join('');
   // the hover ring: a white line just outside the mount, a plain hexagon too, lit when the badge is hovered (about.css)
   const ring = `<path class="ring" d="${HEX}" fill="none" stroke="#fff" stroke-width="2.5" stroke-linejoin="round" transform="translate(100 100) scale(1.06) translate(-100 -100)" pointer-events="none"/>`;
-  let halo = '', shine = '';
+  let halo = '', shine = '', iris = '';
   if (holo) {
-    const iris = l.iris;
-    defs += `<linearGradient id="${id}-iris" x2="1" y2="1">${iris.map((c, i) => `<stop offset="${f((i / (iris.length - 1)) * 100)}%" stop-color="${c}"/>`).join('')}</linearGradient>`
+    const colors = l.iris;
+    defs += `<linearGradient id="${id}-iris" x2="1" y2="1">${colors.map((c, i) => `<stop offset="${f((i / (colors.length - 1)) * 100)}%" stop-color="${c}"/>`).join('')}</linearGradient>`
       + `<filter id="${id}-halo" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="9"/></filter>`
       + `<linearGradient id="${id}-shine" x1="0" x2="1"><stop offset="0.2" stop-color="#fff" stop-opacity="0"/><stop offset="0.5" stop-color="#fff" stop-opacity="0.5"/><stop offset="0.8" stop-color="#fff" stop-opacity="0"/></linearGradient>`;
     // the iridescence: a wide band of colours, far larger than the plate, that drifts and follows the pointer
-    plate += `<g class="iris-hand"><g class="iris"><rect x="-120" y="-120" width="440" height="440" fill="url(#${id}-iris)"/></g></g>`;
+    // kept out of the plate's edge filter (in its own masked group, below), so the drift never makes the
+    // browser run that filter again: Safari keeps a filter's result as long as what it filters stays the same
+    iris = `<g class="iris-layer" mask="url(#${id}-plate)"><g class="iris-hand"><g class="iris"><rect x="-120" y="-120" width="440" height="440" fill="url(#${id}-iris)"/></g></g></g>`;
     halo = `<path class="halo" d="${shape}" fill="url(#${id}-iris)" filter="url(#${id}-halo)"/>`;
     // a soft band of light, parked outside the badge until badge-fx.js sends it across
     shine = `<g mask="url(#${id}-plate)" pointer-events="none"><g class="shine" style="translate: -200px 0"><rect x="10" y="-60" width="180" height="320" fill="url(#${id}-shine)" transform="rotate(18 100 100)"/></g></g>`;
@@ -212,6 +214,7 @@ export function badgeSVG(input, { uid = input.id, cls = 'ab-badge', place = true
     + `<path d="${HEX}" fill="#fff" fill-opacity="0.1" stroke="#fff" stroke-opacity="0.28" stroke-width="1.5" stroke-linejoin="round"/>`
     + `<g transform="translate(100 100) scale(0.86) translate(-100 -100)">`
     + `<g filter="url(#${id}-edge)"><g mask="url(#${id}-plate)">${plate}${gloss}${grooves}</g></g>`
+    + iris
     + content(b, t.ink, id)
     + shine
     + `</g>`

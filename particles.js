@@ -116,12 +116,16 @@ function shaft(v) {
   return mesh;
 }
 
+const PIXEL = 3; // CSS px per drawn pixel
+
 export function mountParticles(container) {
   const v = VARIANTS.home;
   const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: false, powerPreference: 'high-performance' });
   renderer.setClearColor(0x000000, 0);
   const canvas = renderer.domElement;
-  canvas.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;display:block';
+  // drawn at a third of the CSS resolution and scaled up without smoothing: the blocky PS1 look, and only
+  // a ninth of the pixels to draw
+  canvas.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;display:block;image-rendering:pixelated';
   container.append(canvas);
 
   const scene = new THREE.Scene();
@@ -134,7 +138,7 @@ export function mountParticles(container) {
   function fit() {
     const w = container.clientWidth, h = container.clientHeight;
     if (!w || !h) return;
-    const dpr = Math.min(devicePixelRatio, 2);
+    const dpr = 1 / PIXEL;
     renderer.setPixelRatio(dpr);
     renderer.setSize(w, h, false);
     mats.forEach(m => { m.uniforms.uAspect.value = w / h; });

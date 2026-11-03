@@ -130,15 +130,18 @@ html:has(> body.subpage .screen.long) {
   height: calc(100% + 180px);
   pointer-events: none;
   z-index: 60;
+  image-rendering: pixelated; /* drawn at a third of the resolution (badge-fx.js) */
 }
 /* holo glows, slowly breathing */
 .ab-badge .iris-hand {
   translate: var(--ix, 0px) var(--iy, 0px);
   transition: translate 0.5s var(--ease);
 }
-.ab-badge .iris {
-  mix-blend-mode: multiply;
+.ab-badge .iris-layer {
+  mix-blend-mode: multiply; /* on the masked group: a mask isolates what is inside it */
   opacity: 0.6;
+}
+.ab-badge .iris {
   animation: ab-iris 16s ease-in-out infinite alternate;
 }
 @keyframes ab-iris {

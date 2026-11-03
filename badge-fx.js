@@ -53,9 +53,10 @@ export function mountBadgeFx(pile, badges) {
   const ctx = canvas.getContext('2d');
   const sprites = COLORS.map(sprite), discs = BOKEH.map(disc);
   const BLEED = 90; // the canvas reaches this far past the pile (.ab-fx in about.css)
-  let dpr = 1;
+  // drawn at a third of the CSS resolution and scaled up without smoothing (image-rendering in about.css):
+  // the blocky PS1 look, and only a ninth of the pixels to draw
+  const dpr = 1 / 3;
   const fit = () => {
-    dpr = Math.min(devicePixelRatio, 2);
     canvas.width = (pile.clientWidth + 2 * BLEED) * dpr;
     canvas.height = (pile.clientHeight + 2 * BLEED) * dpr;
   };
@@ -117,7 +118,8 @@ export function mountBadgeFx(pile, badges) {
       if (Math.random() < BOKEH_RATE * k * dt) spawn(el, true, hot);
     }
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.imageSmoothingEnabled = false; // a speck takes its sprite's bright middle, not a blurred average (reset by fit)
+    ctx.clearRect(0, 0, canvas.width / dpr, canvas.height / dpr); // in CSS px, like everything drawn
     ctx.globalCompositeOperation = 'lighter';
     for (let i = specks.length - 1; i >= 0; i--) {
       const s = specks[i];
@@ -128,7 +130,8 @@ export function mountBadgeFx(pile, badges) {
       const k = s.age / s.life;
       const twinkle = s.bokeh ? 1 : 0.6 + 0.4 * Math.sin(s.age * 2.2 + s.seed);
       ctx.globalAlpha = s.peak * Math.min(1, k * (s.bokeh ? 3 : 5)) * (1 - k) * twinkle;
-      ctx.drawImage(s.img, s.x - s.size, s.y - s.size, s.size * 2, s.size * 2);
+      const size = Math.max(s.size, 1.5); // at least one drawn pixel across, or a speck fades to nothing
+      ctx.drawImage(s.img, s.x - size, s.y - size, size * 2, size * 2);
     }
   }
   const seen = new IntersectionObserver(([e]) => {
