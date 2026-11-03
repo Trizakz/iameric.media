@@ -148,7 +148,7 @@ function screenTexture(tag, aod) {
   g.fillText('open', 152, 512);
   g.fillRect(c.width - 400, 462, 3, 68);
   g.textAlign = 'right';
-  g.fillText(`/${(tag.href || '').replace(/\.html$/, '')}`, c.width - 92, 512);
+  g.fillText(`/${tag.title}`, c.width - 92, 512); // the page's name (the file of projects is German: projekte.html)
   return canvasTexture(c);
 }
 
@@ -171,9 +171,13 @@ function cursorTexture(tag) {
 }
 
 // the narrow icon screen's foreground, redrawn when something changes: the link's icon, the local time
-// in Halle (Saale), a divider and a battery whose bars run down one by one and then charge back up.
-// Transparent canvas over the gradient; `color` is the ink.
+// in Halle (Saale), a divider and the iameric logo (assets/logo.svg). Transparent canvas over the gradient;
+// `color` is the ink.
 export const CLOCK = new Intl.DateTimeFormat('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' });
+// the logo's parts in its own 22..178 box (assets/logo.svg): the i dot, the join, the ring with its eye
+const LOGO = new Path2D('M39.52 58.45a18.93 18.93 0 1 0 37.86 0a18.93 18.93 0 1 0 -37.86 0Z'
+  + 'M105.15 58.45A36.4 36.4 0 1 1 141.55 94.85A46.7 46.7 0 0 0 94.85 141.55A36.4 36.4 0 1 1 58.45 105.15A46.7 46.7 0 0 0 105.15 58.45Z'
+  + 'M105.15 141.55a36.4 36.4 0 1 0 72.8 0a36.4 36.4 0 1 0 -72.8 0ZM117.53 134.27a16.74 16.74 0 1 0 33.49 0a16.74 16.74 0 1 0 -33.49 0Z');
 function iconScreen(tag, color) {
   const c = document.createElement('canvas');
   c.width = 640;
@@ -183,8 +187,8 @@ function iconScreen(tag, color) {
   let drawn = '';
   return {
     texture,
-    draw(time, bars) {
-      const key = `${time}|${bars}`;
+    draw(time) {
+      const key = time;
       if (key === drawn) return;
       drawn = key;
       g.clearRect(0, 0, c.width, c.height);
@@ -195,10 +199,13 @@ function iconScreen(tag, color) {
       g.font = '400 74px "DM Mono", monospace';
       g.fillText(time, 166, c.height / 2 + 4);
       g.fillRect(430, 52, 3, 120);
-      g.lineWidth = 9;
-      g.strokeRect(472, 84, 96, 56);
-      g.fillRect(570, 100, 12, 24);
-      for (let b = 0; b < bars; b++) g.fillRect(483 + b * 19.5, 95, 15, 34);
+      // the logo, 104 px square, where the battery used to be
+      g.save();
+      g.translate(470, c.height / 2 - 52);
+      g.scale(104 / 155.9, 104 / 155.9);
+      g.translate(-22.05, -22.05);
+      g.fill(LOGO, 'evenodd');
+      g.restore();
       texture.needsUpdate = true;
     },
   };
@@ -671,7 +678,7 @@ function buildTag(tag, scheme) {
   const gradMat = gradientMaterial(scheme.keys, [96, 34], 1);
   add(panel(0.4, 0.14, 0.03, gradMat), cx, BEZEL_TOP - iconBezelH / 2, fz + 0.005);
   const icon = iconScreen(tag, COLORS.ink);
-  icon.draw(CLOCK.format(new Date()), 4);
+  icon.draw(CLOCK.format(new Date()));
   const iconMat = new THREE.MeshBasicMaterial({ map: icon.texture, transparent: true, toneMapped: false });
   add(panel(0.4, 0.14, 0.03, iconMat), cx, BEZEL_TOP - iconBezelH / 2, fz + 0.006);
   add(panel(0.46, iconBezelH, 0.05, GLASS_ICON), cx, BEZEL_TOP - iconBezelH / 2, fz + 0.007);
@@ -913,8 +920,6 @@ export async function mountTags(container, tags, { focusBlur = false, returnTo =
       const prev = items[i] || {};
       return {
         mesh, base, phase: i * 1.7, href: tag.href, lift: prev.lift || 0, blur: prev.blur || 0,
-        // battery: 4 bars, one lost every 25-60 s, then a quick charge back to full
-        bars: prev.bars || 4, nextBar: prev.nextBar || performance.now() + 25000 + Math.random() * 35000, charging: 0,
       };
     });
     rimA.color.set(schemes.b.keys);
@@ -1129,22 +1134,7 @@ export async function mountTags(container, tags, { focusBlur = false, returnTo =
       iconInk.emissive.copy(keyColor).multiplyScalar(flash * 3);
       milky.emissive.copy(keyColor).multiplyScalar(flash * 0.35);
 
-      // battery: lose a bar now and then; when it would be empty, charge back up bar by bar
-      if (!still && now > it.nextBar) {
-        if (it.charging) {
-          it.bars++;
-          it.nextBar = now + 350;
-          if (it.bars >= 4) { it.charging = 0; it.nextBar = now + 25000 + Math.random() * 35000; }
-        } else if (it.bars > 1) {
-          it.bars--;
-          it.nextBar = now + 25000 + Math.random() * 35000;
-        } else {
-          it.charging = 1;
-          it.bars = 0;
-          it.nextBar = now + 600;
-        }
-      }
-      mesh.userData.parts.icon.draw(clock, it.bars);
+      mesh.userData.parts.icon.draw(clock);
       // selected: the main screen switches from always-on (black, white text) to the gradient with the
       // full layout, and lights its surroundings a little
       const { screenGrad, screenMat, cursorMat, screenAod, gradMat, iconMat, glowMat, lamp, glassMain } = mesh.userData.parts;
