@@ -178,19 +178,9 @@
   letter-spacing: 0.02em;
   opacity: 0.62;
 }
-/* a footer in the bottom right corner: copyright and the legal notice */
+/* the footer along the bottom (footer.css) */
 .subpage .sub-foot {
-  align-self: flex-end;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 20px;
-  font: 14px/1 "DM Sans", sans-serif;
-}
-.subpage .sub-foot p {
-  margin: 0;
-  color: color-mix(in srgb, var(--text) 62%, transparent);
+  align-self: stretch;
 }
 @media (prefers-reduced-motion: reduce) {
   .subpage::before { animation: none; }

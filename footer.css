@@ -1,0 +1,58 @@
+/* the footer on every page, on one line: a barcode label on the left (scanned, it says something), three
+   label/value pairs, the logo on the right. Where it sits is up to each page (.footer, .sub-foot, .bar) */
+.foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+/* one CSS px per bar module: crisp, and big enough for a phone camera to read off a screen */
+.foot-code {
+  display: block;
+  width: auto;
+  height: 30px;
+}
+/* the site's own type: the label in DM Mono like the tags' small lines, the value in DM Sans like the
+   old footer, and the link as every link (links.css) */
+.foot-col {
+  display: grid;
+  grid-template-rows: 12px 14px; /* fixed rows, so the smaller link sits level with the other values */
+  justify-items: start;
+  align-items: end;
+  gap: 7px;
+  margin: 0;
+  font: 14px/1 "DM Sans", sans-serif;
+}
+.foot-col > span {
+  font: 12px/1 var(--mono);
+  letter-spacing: 0.02em;
+  color: color-mix(in srgb, var(--text) 62%, transparent);
+}
+.foot-col > b {
+  font-weight: 500;
+  color: var(--text);
+}
+.foot-logo {
+  display: block;
+  width: 30px;
+  height: 30px;
+}
+/* phones: barcode and logo on top, the three pairs in a row below */
+@media (max-width: 760px) {
+  .foot {
+    display: grid;
+    grid-template-columns: repeat(3, auto);
+    justify-content: space-between;
+    row-gap: 20px;
+  }
+  .foot-code {
+    grid-area: 1 / 1 / 2 / 3;
+  }
+  .foot-logo {
+    grid-area: 1 / 3;
+    justify-self: end;
+  }
+  .foot-col {
+    grid-row: 2;
+  }
+}

@@ -16,6 +16,7 @@
   <link rel="stylesheet" href="sub.css">
   <link rel="stylesheet" href="about.css">
   <link rel="stylesheet" href="links.css">
+  <link rel="stylesheet" href="footer.css">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,1,0&icon_names=arrow_back,code,deployed_code,design_services,edit,live_tv,mail,movie_edit,person,photo_camera,play_circle&display=block" rel="stylesheet">
   <style>
     /* "graphit": neutral greys from the near-black ground up to a warm off-white text, plus one accent
@@ -172,10 +173,10 @@
     /* page change: while a tag zooms in, the page around it fades away; once its screen covers the
        window, the screen colour fades over everything and the next page (which starts in that colour)
        loads */
-    .top, .bar, .socials {
+    .top, .bar {
       transition: opacity 0.5s var(--ease);
     }
-    .launching .top, .launching .bar, .launching .socials {
+    .launching .top, .launching .bar {
       opacity: 0;
     }
     .launch-fade {
@@ -197,34 +198,11 @@
       color: var(--text);
       font: 14px/1 "DM Sans", sans-serif;
     }
-    /* in the bottom right corner, like the sub pages' footer */
+    /* along the bottom edge, like the sub pages' footer (footer.css) */
     .footer {
+      left: var(--edge);
       right: var(--edge);
       bottom: var(--edge-y);
-      align-self: flex-end;
-      display: flex;
-      align-items: center;
-      gap: 20px;
-    }
-    .footer p {
-      margin: 0;
-      color: color-mix(in srgb, var(--text) 62%, transparent);
-    }
-    /* socials: plain links in the bottom left, on the footer's line, no panel */
-    .socials {
-      position: absolute;
-      z-index: 3;
-      left: var(--edge);
-      bottom: var(--edge-y);
-      display: flex;
-      gap: 20px;
-      font: 14px/1 "DM Sans", sans-serif;
-      margin: 0;
-      padding: 0;
-      list-style: none;
-    }
-    .socials li {
-      display: flex; /* no fractional line height: text snaps to whole pixels, the link's block would not */
     }
 
     /* faint scanlines on the page ground, behind the blob and the 3D tags */
@@ -250,7 +228,7 @@
         flex-direction: column;
         gap: 16px;
       }
-      .top, .hero, .footer, .socials {
+      .top, .hero, .footer {
         position: relative;
         left: auto;
         right: auto;
@@ -292,14 +270,12 @@
       </nav>
     </main>
 
-    <ul class="socials" aria-label="socials">
-      <li><a class="lk" href="https://www.youtube.com/@trizakz" target="_blank" rel="noopener" aria-label="YouTube @trizakz"><span class="material-symbols-outlined" aria-hidden="true">play_circle</span>@trizakz</a></li>
-      <li><a class="lk" href="https://www.youtube.com/@ericleutemann" target="_blank" rel="noopener" aria-label="YouTube @ericleutemann"><span class="material-symbols-outlined" aria-hidden="true">play_circle</span>@ericleutemann</a></li>
-    </ul>
-
-    <footer class="bar footer">
-      <p>© <span class="year">2026</span>, iameric · <span class="version">v1.0</span></p>
-      <a class="lk" href="legal.html">legal notice</a>
+    <footer class="bar footer foot">
+      <img class="foot-code" src="assets/barcode.svg" alt="" width="220" height="30">
+      <p class="foot-col"><span>© <span class="year">2026</span></span><b>iameric</b></p>
+      <p class="foot-col"><span>version</span><b class="version">v1.0</b></p>
+      <p class="foot-col"><span>imprint</span><a class="lk" href="legal.html">legal notice</a></p>
+      <img class="foot-logo" src="assets/logo.svg" alt="" width="30" height="30">
     </footer>
   </div>
 

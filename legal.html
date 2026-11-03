@@ -197,23 +197,13 @@
       }
     }
 
-    /* a footer in the bottom right corner: copyright and the legal notice */
+    /* the footer along the bottom (footer.css) */
     .bar {
-      align-self: flex-end;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: flex-end;
-      align-items: center;
       margin: 0 var(--edge) var(--edge-y);
-      gap: 20px;
-      font: 14px/1 "DM Sans", sans-serif;
-    }
-    .bar p {
-      margin: 0;
-      color: color-mix(in srgb, var(--text) 62%, transparent);
     }
   </style>
   <link rel="stylesheet" href="links.css">
+  <link rel="stylesheet" href="footer.css">
 </head>
 <body>
   <a class="mark" href="index.html" aria-label="iameric, back to the home page"><span class="mark-word" aria-hidden="true">iameric</span><span class="mark-back" aria-hidden="true"><span class="material-symbols-outlined">arrow_back</span>back</span></a>
@@ -260,9 +250,12 @@
     </section>
   </main>
 
-  <footer class="bar">
-    <p>© <span class="year">2026</span>, iameric · <span class="version">v1.0</span></p>
-    <a class="lk" href="legal.html" aria-current="page">legal notice</a>
+  <footer class="bar foot">
+    <img class="foot-code" src="assets/barcode.svg" alt="" width="220" height="30">
+    <p class="foot-col"><span>© <span class="year">2026</span></span><b>iameric</b></p>
+    <p class="foot-col"><span>version</span><b class="version">v1.0</b></p>
+    <p class="foot-col"><span>imprint</span><a class="lk" href="legal.html" aria-current="page">legal notice</a></p>
+    <img class="foot-logo" src="assets/logo.svg" alt="" width="30" height="30">
   </footer>
 
   <script>
