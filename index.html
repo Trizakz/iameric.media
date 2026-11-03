@@ -360,6 +360,7 @@
     import { mountBlob } from './blob.js';
     import { mountParticles } from './particles.js';
     import { buildMark } from './logo-build.js';
+    import { mountDust } from './glow-dust.js';
 
     const tags = await mountTags(document.querySelector('.tags'), [
       { title: 'projects', sub: 'video, editing, web', icon: 'deployed_code', href: 'projects.html', scheme: 'a' },
@@ -423,6 +424,7 @@
       // the sub page's wordmark: its logo builds itself, as on a page of its own (sub.js); sub.css keeps it hidden till then
       const markLogo = el.querySelector('.sub-mark .mark-logo');
       if (markLogo && !matchMedia('(prefers-reduced-motion: reduce)').matches) buildMark(markLogo);
+      const dust = mountDust(el); // a few specks floating up through its glow
       el.querySelectorAll('.year').forEach(y => { y.textContent = document.querySelector('.footer .year').textContent; });
       // a sub page with its own behaviour names its module in <main data-page> (about.js)
       const mod = el.querySelector('[data-page]')?.dataset.page;
@@ -432,11 +434,12 @@
       tags.setPaused(true); // nothing to draw behind it
       blob.setPaused(true);
       particles.setPaused(true);
-      open = { index, color, el, page };
+      open = { index, color, el, page, dust };
     }
     function closeSub() {
-      const { index, color, el, page } = open;
+      const { index, color, el, page, dust } = open;
       open = null;
+      dust.dispose();
       if (page) page.then(p => p.dispose());
       el.classList.add('leaving'); // back into the screen colour
       setTimeout(() => {

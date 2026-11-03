@@ -169,9 +169,10 @@
   align-self: stretch;
 }
 /* ---- the glow (google-blur-glow-ui): a soft lavender horizon rising from the bottom edge, built like the
-   references from a few large shapes, blurred (here as wide radial gradients), under everything. It lives, barely:
-   the shapes drift a few percent sideways, breathe a little brighter and dimmer, and the lavender leans a touch
-   bluer and back, each on its own slow rhythm so the three never line up into a visible loop ---- */
+   references from a few large shapes, blurred (here as wide radial gradients), under everything. It lives: the
+   shapes drift sideways against each other, breathe brighter and dimmer, and the lavender leans bluer and back,
+   each on its own slow rhythm so the three never line up into a visible loop. A few specks float up through it
+   (glow-dust.js) ---- */
 @property --glow-drift {
   syntax: "<percentage>";
   inherits: false;
@@ -192,25 +193,33 @@
   --glow-mid: color-mix(in oklch, rgb(179 157 255), rgb(158 170 255) var(--glow-tint));
   --glow-deep: color-mix(in oklch, rgb(86 58 186), rgb(70 66 196) var(--glow-tint));
   background:
-    radial-gradient(55% 26% at calc(50% + var(--glow-drift)) 104%, rgb(238 232 255 / calc(0.42 * var(--glow-breath))), transparent 70%),
+    radial-gradient(55% 26% at calc(50% + var(--glow-drift)) 104%, rgb(200 184 255 / calc(0.36 * var(--glow-breath))), transparent 70%),
     radial-gradient(80% 44% at calc(44% - var(--glow-drift)) 110%, color-mix(in oklch, var(--glow-mid) calc(34% * var(--glow-breath)), transparent), transparent 72%),
     radial-gradient(120% 66% at calc(60% + var(--glow-drift) / 2) 120%, color-mix(in oklch, var(--glow-deep) 36%, transparent), transparent 76%),
     var(--bg);
 }
+/* the specks (glow-dust.js): fixed over the glow, under the page's content */
+.glow-dust {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
 @media (prefers-reduced-motion: no-preference) {
   .subpage {
-    animation: glow-drift 31s ease-in-out infinite alternate, glow-breath 11s ease-in-out infinite alternate, glow-tint 19s ease-in-out infinite alternate;
+    animation: glow-drift 23s ease-in-out infinite alternate, glow-breath 8s ease-in-out infinite alternate, glow-tint 15s ease-in-out infinite alternate;
   }
 }
 @keyframes glow-drift {
-  from { --glow-drift: -3%; }
-  to { --glow-drift: 3%; }
+  from { --glow-drift: -8%; }
+  to { --glow-drift: 8%; }
 }
 @keyframes glow-breath {
-  to { --glow-breath: 0.86; }
+  to { --glow-breath: 0.7; }
 }
 @keyframes glow-tint {
-  to { --glow-tint: 35%; }
+  to { --glow-tint: 60%; }
 }
 /* a page of its own: <html> gets the ground colour, or the body's glow would be painted onto <html>'s box, which
    has no height (the body is fixed to the window) */
@@ -220,7 +229,7 @@ html:has(> body.subpage) {
 /* contact: the glow rises higher, like a sun coming up behind the page */
 .subpage:has(.ct) {
   background:
-    radial-gradient(48% 30% at calc(50% + var(--glow-drift)) 100%, rgb(246 242 255 / calc(0.7 * var(--glow-breath))), transparent 72%),
+    radial-gradient(48% 30% at calc(50% + var(--glow-drift)) 100%, rgb(206 192 255 / calc(0.6 * var(--glow-breath))), transparent 72%),
     radial-gradient(78% 56% at calc(46% - var(--glow-drift)) 106%, color-mix(in oklch, var(--glow-mid) calc(55% * var(--glow-breath)), transparent), transparent 74%),
     radial-gradient(120% 84% at calc(58% + var(--glow-drift) / 2) 116%, color-mix(in oklch, var(--glow-deep) 50%, transparent), transparent 78%),
     var(--bg);
