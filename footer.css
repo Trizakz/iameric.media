@@ -38,6 +38,14 @@
   width: 30px;
   height: 30px;
 }
+/* on the sub pages the logo is a link home, like the wordmark (data-back: in the home page's overlay it goes back) */
+a.foot-logo {
+  border-radius: 4px;
+}
+a.foot-logo:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 4px;
+}
 /* phones: barcode and logo on top, the three pairs in a row below */
 @media (max-width: 760px) {
   .foot {
