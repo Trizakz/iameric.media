@@ -102,14 +102,15 @@ function backdrop() {
         // shades of the current colour: deep, mid, light, and a cooler, bluer accent (a warm one turned the lavender peach)
         vec3 deep = uColor * 0.25, light = mix(uColor, vec3(1.0), 0.55), accent = uColor * vec3(0.9, 0.95, 1.3);
         vec3 inside = deep;
-        inside = mix(inside, deep * 1.3, spot(p, 23.0, 0.0, 0.2, 0.22));
-        inside = mix(inside, uColor, spot(p, -31.0, 2.0, 0.18, 0.2));
-        inside = mix(inside, light, spot(p, 19.0, 4.0, 0.16, 0.17));
-        inside = mix(inside, accent, 0.9 * spot(p, -27.0, 1.0, 0.2, 0.15));
+        // larger, softer spots: blurred shapes melting into each other (google-blur-glow-ui)
+        inside = mix(inside, deep * 1.3, spot(p, 23.0, 0.0, 0.2, 0.3));
+        inside = mix(inside, uColor, spot(p, -31.0, 2.0, 0.16, 0.28));
+        inside = mix(inside, light, spot(p, 19.0, 4.0, 0.14, 0.22));
+        inside = mix(inside, accent, 0.9 * spot(p, -27.0, 1.0, 0.18, 0.2));
         // coloured fringe just inside the rim, lighter on the lower left, like light splitting at a lens edge
         float fringe = smoothstep(0.24, 0.335, d) * smoothstep(0.345, 0.33, d);
-        inside += fringe * mix(uColor, light, 0.5 - 0.5 * normalize(p + 1e-4).x) * 0.5;
-        float disc = smoothstep(0.35, 0.33, d);
+        inside += fringe * mix(uColor, light, 0.5 - 0.5 * normalize(p + 1e-4).x) * 0.25;
+        float disc = smoothstep(0.37, 0.24, d); // a soft edge: a glow, not a cut-out disc
         float halo = exp(-pow(max(d - 0.33, 0.0) / 0.16, 2.0)) * 0.35;
         vec3 c = disc * inside + (1.0 - disc) * halo * uColor;
         // the glass reads this as linear light and encodes it again: give it linear values, or it washes out

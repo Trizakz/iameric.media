@@ -200,7 +200,7 @@ html:has(> body.subpage .screen.long) {
   margin-top: auto;
 }
 
-/* ---- connections: the profile links, in a wrapping row under their own title ---- */
+/* ---- connections: the profile links as tiles, each with a faint glow from below (google-blur-glow-ui) ---- */
 .ab-links {
   padding-bottom: clamp(56px, 10vh, 120px);
 }
@@ -212,13 +212,37 @@ html:has(> body.subpage .screen.long) {
   letter-spacing: -0.04em;
 }
 .ab-links ul {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 18px 32px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 12px;
   margin: 0;
   padding: 0;
   list-style: none;
   font-size: 17px;
+}
+.ab-links a.lk {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 28px;
+  min-height: 112px;
+  box-sizing: border-box;
+  height: 100%;
+  padding: 18px 20px;
+  border-radius: 22px;
+  border: 1px solid var(--line);
+  background: radial-gradient(120% 90% at 50% 135%, rgba(179, 157, 255, 0.24), transparent 62%), #131315;
+  white-space: normal;
+  transition: border-color 0.3s ease-out, background-color 0.3s ease-out;
+}
+.ab-links a.lk:hover {
+  border-color: color-mix(in srgb, var(--signal) 45%, var(--line));
+  background-color: #17161b;
+}
+.ab-links a.lk .lk-logo {
+  width: 26px;
+  height: 26px;
 }
 /* the brands' own logos, in the link colour, as tall as the letters like the icons in a.lk */
 .lk-logo {

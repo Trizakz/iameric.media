@@ -86,7 +86,7 @@
   outline: 2px solid var(--text);
   outline-offset: 4px;
 }
-/* hovering (or focusing) the wordmark swaps it for "<- back", the way the home page's intro
+/* (the hover swap to "<- back" is switched off for now, Eric wants it calmer; the styles stay for later) the wordmark could swap for "<- back", the way the home page's intro
    brings the wordmark in: a soft edge sweeps from left to right, the word blurs away behind it and
    "back" sharpens in, dark on a block of the accent colour that closes with the letters (0.1em and
    0.77em are Unbounded's measures, like the links in links.css). Both sit in one grid cell; the padding gives the blur room inside
@@ -103,10 +103,6 @@
   column-gap: 0.4em;
   --sweep: -40%;
   transition: --sweep 0.7s var(--ease);
-}
-.subpage .sub-mark:hover,
-.subpage .sub-mark:focus-visible {
-  --sweep: 100%;
 }
 .subpage .sub-mark > span {
   grid-area: 1 / 2;
@@ -158,14 +154,6 @@
   font-size: 1.05em;
   margin-block: -1em; /* taller than the letters: it must not move them off the block */
 }
-.subpage .sub-mark:hover .mark-word,
-.subpage .sub-mark:focus-visible .mark-word {
-  filter: blur(8px);
-}
-.subpage .sub-mark:hover .mark-back,
-.subpage .sub-mark:focus-visible .mark-back {
-  filter: none;
-}
 .subpage h1 {
   margin: clamp(28px, 7vh, 72px) 0 0;
   font-weight: 500;
@@ -184,6 +172,182 @@
 /* the footer along the bottom (footer.css) */
 .subpage .sub-foot {
   align-self: stretch;
+}
+/* ---- the glow (google-blur-glow-ui): a soft lavender horizon rising from the bottom edge, built like the
+   references from a few large shapes, blurred (here as wide radial gradients), under everything ---- */
+.subpage {
+  background:
+    radial-gradient(55% 26% at 50% 104%, rgba(238, 232, 255, 0.42), transparent 70%),
+    radial-gradient(80% 44% at 44% 110%, rgba(179, 157, 255, 0.34), transparent 72%),
+    radial-gradient(120% 66% at 60% 120%, rgba(86, 58, 186, 0.36), transparent 76%),
+    var(--bg);
+}
+/* a page of its own: <html> gets the ground colour, or the body's glow would be painted onto <html>'s box, which
+   has no height (the body is fixed to the window) */
+html:has(> body.subpage) {
+  background: #0b0b0c;
+}
+/* contact: the glow rises higher, like a sun coming up behind the page */
+.subpage:has(.ct) {
+  background:
+    radial-gradient(48% 30% at 50% 100%, rgba(246, 242, 255, 0.7), transparent 72%),
+    radial-gradient(78% 56% at 46% 106%, rgba(179, 157, 255, 0.55), transparent 74%),
+    radial-gradient(120% 84% at 58% 116%, rgba(86, 58, 186, 0.5), transparent 78%),
+    var(--bg);
+}
+
+/* pages taller than the window scroll inside their panel (like about, about.css) */
+.subpage:has(.screen.scrolls) {
+  overflow-y: auto;
+}
+.subpage:has(.screen.scrolls)::after,
+.subpage:has(.screen.scrolls)::before {
+  position: fixed;
+}
+.subpage .screen.scrolls {
+  height: auto;
+  min-height: 100%;
+}
+html:has(> body.subpage .screen.scrolls) {
+  overflow: hidden;
+}
+
+/* ---- projects: a bento grid of tiles, each with one glow motif (google-blur-glow-ui) ---- */
+.pj-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin: clamp(28px, 6vh, 56px) 0 clamp(40px, 8vh, 80px);
+  padding: 0;
+  list-style: none;
+}
+.pj-tile {
+  display: grid;
+  grid-template-rows: auto auto;
+  gap: 16px;
+  padding: 14px 14px 20px;
+  border-radius: 28px;
+  background: #131315;
+  border: 1px solid var(--line);
+}
+.pj-tile p {
+  margin: 0;
+  padding: 0 8px;
+}
+.pj-meta {
+  font: 12px var(--mono);
+  letter-spacing: 0.02em;
+  color: color-mix(in srgb, var(--text) 55%, transparent);
+}
+.pj-title {
+  margin-top: 6px !important;
+  font: 500 20px/1.2 "DM Sans", sans-serif;
+  color: var(--text);
+}
+.pj-title a {
+  color: var(--signal);
+  text-decoration: none;
+}
+/* the motif: an inner card (radius 28 - 14 of padding, see nested-border-radius) holding blurred shapes */
+.pj-art {
+  position: relative;
+  aspect-ratio: 1.25;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #0d0d0f;
+}
+.pj-art i {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(var(--b, 18px));
+}
+/* stacked glowing domes rising from the bottom */
+.art-dome i:nth-child(1) { left: 6%; right: 6%; top: 30%; height: 90%; background: #3b2a8f; --b: 26px; }
+.art-dome i:nth-child(2) { left: 16%; right: 16%; top: 42%; height: 80%; background: #8f73ef; --b: 20px; }
+.art-dome i:nth-child(3) { left: 27%; right: 27%; top: 54%; height: 70%; background: #e9e1ff; --b: 14px; }
+/* an orb: a glowing ring around a soft core */
+.art-orb i:nth-child(1) { inset: 14% 28%; background: radial-gradient(circle, transparent 34%, #b39dff 52%, #4a33b0 70%, transparent 72%); --b: 6px; }
+.art-orb i:nth-child(2) { inset: 34% 40%; background: #6f4bd8; --b: 10px; }
+/* a lavender panel falling into the dark, with a slider line and its dots */
+.art-panel { background: linear-gradient(180deg, #ece6ff 0%, #b39dff 38%, #5a3cc4 72%, #0d0d0f 100%); }
+.art-panel::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 12%;
+  bottom: 12%;
+  width: 1px;
+  background: rgba(255, 255, 255, 0.55);
+}
+.art-panel b {
+  position: absolute;
+  left: 50%;
+  width: 7px;
+  height: 7px;
+  margin: -3.5px 0 0 -3.5px;
+  border-radius: 50%;
+  background: #fff;
+}
+.art-panel b:nth-of-type(1) { top: 12%; background: #0d0d0f; }
+.art-panel b:nth-of-type(2) { top: 46%; }
+.art-panel b:nth-of-type(3) { top: 88%; }
+/* svg motifs (easing curves, the phone with its sparkle) fill the card */
+.pj-art svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+/* a horizon, quieter: for what comes next */
+.art-horizon i:nth-child(1) { left: -10%; right: -10%; top: 62%; height: 80%; background: #4a33b0; --b: 28px; }
+.art-horizon i:nth-child(2) { left: 20%; right: 20%; top: 78%; height: 50%; background: #c9b8ff; --b: 22px; }
+.pj-tile.soon {
+  opacity: 0.7;
+}
+@media (max-width: 1000px) {
+  .pj-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 600px) {
+  .pj-grid { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* ---- contact: one line and one white pill button over the rising glow ---- */
+.ct {
+  margin: clamp(28px, 7vh, 72px) 0 auto;
+  display: grid;
+  justify-items: start;
+  gap: 28px;
+}
+.ct p {
+  margin: 0;
+  max-width: 26em;
+  font: 400 clamp(18px, 1.6vw, 22px)/1.5 "DM Sans", sans-serif;
+  color: color-mix(in srgb, var(--text) 80%, transparent);
+}
+.ct-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 26px;
+  border-radius: 999px;
+  background: #fff;
+  color: #0b0b0c;
+  font: 500 16px/1 "DM Sans", sans-serif;
+  text-decoration: none;
+  transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease);
+}
+.ct-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 40px rgba(179, 157, 255, 0.35);
+}
+.ct-button:focus-visible {
+  outline: 2px solid var(--signal);
+  outline-offset: 4px;
+}
+.ct-mail {
+  font: 12px var(--mono);
+  letter-spacing: 0.02em;
+  color: color-mix(in srgb, var(--text) 55%, transparent) !important;
 }
 @media (prefers-reduced-motion: reduce) {
   .subpage::before { animation: none; }

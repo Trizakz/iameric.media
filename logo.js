@@ -1,9 +1,6 @@
-// The logo as live SVG, on every page: the mark before the wordmark (<i class="mark-logo">, a CSS mask in
-// links.css until this runs) becomes an inline SVG whose eye glances round once when the wordmark is hovered;
-// and the same mark as a small loader whose eye rests on the "i", looks round once and comes back ("glance",
+// The logo as a small loader: the eye rests on the "i", looks round once and comes back ("glance",
 // logo/animation/logo-loader-final.html).
 //
-//   iamericUpgradeLogos(root);         // turns the root's <i class="mark-logo"> into live marks (done for document)
 //   el.innerHTML = iamericGlance(32);  // a looping loader, 32 px
 (() => {
   // the logo's three parts (assets/logo.svg): the i dot, the join, the ring; the eye is cut by a mask so it can turn
@@ -22,22 +19,8 @@
       + `<path d="${DOT}"/><path d="${JOIN}"/><circle cx="141.55" cy="141.55" r="36.4" mask="url(#${id})"/></svg>`;
   }
 
-  // the mark before the wordmark: on hover the eye looks round once
-  const HOVER = `values="0 ${C};360 ${C}" keyTimes="0;1" calcMode="spline" keySplines="0.65 0 0.35 1" dur="1.2s" begin="indefinite" fill="freeze"`;
-  window.iamericUpgradeLogos = root => {
-    root.querySelectorAll('i.mark-logo').forEach(i => {
-      i.insertAdjacentHTML('afterend', mark(HOVER, 'class="mark-logo"'));
-      const svg = i.nextElementSibling, turn = svg.querySelector('animateTransform');
-      i.remove();
-      if (!turn) return;
-      const host = svg.closest('a, .mark') || svg;
-      host.addEventListener('mouseenter', () => turn.beginElement());
-    });
-  };
-
   // the loader: the eye rests on the "i", looks round once (eased), and so on
   const GLANCE = `values="0 ${C};0 ${C};360 ${C}" keyTimes="0;0.4;1" calcMode="spline" keySplines="0 0 1 1;0.65 0 0.25 1" dur="3.2s" repeatCount="indefinite"`;
   window.iamericGlance = size => mark(GLANCE, `width="${size}" height="${size}" class="glance"`);
 
-  iamericUpgradeLogos(document);
 })();

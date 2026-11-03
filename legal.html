@@ -97,10 +97,6 @@
       --sweep: -40%;
       transition: --sweep 0.7s var(--ease);
     }
-    .mark:hover,
-    .mark:focus-visible {
-      --sweep: 100%;
-    }
     .mark > span {
       grid-area: 1 / 2;
       padding: 14px 20px;
@@ -151,14 +147,6 @@
       font-size: 1.05em;
       margin-block: -1em; /* taller than the letters: it must not move them off the block */
     }
-    .mark:hover .mark-word,
-    .mark:focus-visible .mark-word {
-      filter: blur(8px);
-    }
-    .mark:hover .mark-back,
-    .mark:focus-visible .mark-back {
-      filter: none;
-    }
     main {
       flex: 1;
       box-sizing: border-box;
@@ -207,7 +195,6 @@
   </style>
   <link rel="stylesheet" href="links.css">
   <link rel="stylesheet" href="footer.css">
-  <script src="logo.js" defer></script>
 </head>
 <body>
   <a class="mark" href="index.html" aria-label="iameric, back to the home page"><i class="mark-logo" aria-hidden="true"></i><span class="mark-word" aria-hidden="true">iameric</span><span class="mark-back" aria-hidden="true"><span class="material-symbols-outlined">arrow_back</span>back</span></a>
