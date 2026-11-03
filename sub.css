@@ -7,7 +7,7 @@
   --panel: #151517;
   --line: #2c2c30;
   --text: #e6e4df;
-  --signal: #ff6a2b;
+  --signal: #b39dff;
   --edge: clamp(20px, calc(16vw - 60px), 220px); /* content kept towards the middle */
   --edge-y: clamp(16px, calc(7vh - 14px), 64px);
   --ease: cubic-bezier(0.22, 1, 0.36, 1);

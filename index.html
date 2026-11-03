@@ -29,7 +29,7 @@
       --text: #e6e4df;
       --petrol: #232327;
       --mint: #45464d;
-      --signal: #ff6a2b;
+      --signal: #b39dff;
       --red: #6a6b73;
       --edge: clamp(20px, calc(16vw - 60px), 220px); /* content kept towards the middle */
       --edge-y: clamp(16px, calc(7vh - 14px), 64px);
@@ -213,16 +213,6 @@
       bottom: var(--edge-y);
     }
 
-    /* faint scanlines on the page ground, behind the blob and the 3D tags */
-    #scanlines {
-      position: fixed;
-      z-index: 1;
-      inset: 0;
-      pointer-events: none;
-      opacity: 0.06;
-      mix-blend-mode: overlay;
-      background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.9) 0 1px, transparent 1px 3px);
-    }
 
 
     /* phones and short windows: one scrolling column */
@@ -259,7 +249,6 @@
 <body>
   <div class="stage">
     <!-- inside the stage so it sits on the ground but under the blob and the tags -->
-    <div id="scanlines" aria-hidden="true"></div>
     <header class="top">
       <div class="mark"><i class="mark-logo" aria-hidden="true"></i><h1 class="wordmark">iameric</h1></div>
     </header>
@@ -309,7 +298,7 @@
     const tagBox = document.querySelector('.tags');
     // the disc behind the glass takes the hovered tag's colour: its keys colour (SCHEMES in tags.js), more
     // saturated so it still reads as colour through the glass. Projects and contact share scheme a.
-    const blob = await mountBlob(document.querySelector('.blob'), { idle: '#45464d', colors: ['#ff5a14', '#ff8040', '#ff5a14'] });
+    const blob = await mountBlob(document.querySelector('.blob'), { idle: '#45464d', colors: ['#9a7bff', '#b9a2ff', '#9a7bff'] });
     tagBox.addEventListener('tagactive', e => blob.setActive(e.detail));
     const particles = mountParticles(document.querySelector('.particles'));
     tagBox.addEventListener('taglaunchstart', () => document.body.classList.add('launching'));

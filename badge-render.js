@@ -93,11 +93,11 @@ const FINISH = [
     outline: HEX,
     plane: 'rgba(120, 95, 50, 0.08)',
   },
-  { // holo: pearl white in the middle, the site's --signal orange creeping in from the edges, warm iridescent bands flowing across
-    base: '#fdf6f1',
-    fades: [['#ff6a2b', 0.98, 0.42, 0.38], ['#ff9c7a', 0.0, 0.38, 0.4], ['#ff7a5c', 0.18, 0.92, 0.36], ['#ffbc66', 0.88, 0.95, 0.34], ['#ffe2c4', 0.5, 0.0, 0.42], ['#ffffff', 0.5, 0.45, 0.42]],
-    iris: ['#fff3ea', '#ffb08a', '#ffe6cc', '#ff9466', '#fff8f2', '#ffc890', '#ffd2c4', '#fff3ea', '#ffb08a', '#ffe6cc', '#ff9466', '#fff8f2', '#ffc890'],
-    occlusion: '#7a2c10',
+  { // holo: pearl white in the middle, the site's lavender --signal creeping in from the edges, lilac iridescent bands flowing across
+    base: '#f8f5ff',
+    fades: [['#9b7bff', 0.98, 0.42, 0.38], ['#c3a8ff', 0.0, 0.38, 0.4], ['#8f6cf0', 0.18, 0.92, 0.36], ['#d8c4ff', 0.88, 0.95, 0.34], ['#ece4ff', 0.5, 0.0, 0.42], ['#ffffff', 0.5, 0.45, 0.42]],
+    iris: ['#f5f0ff', '#c8b4ff', '#ece4ff', '#a98cff', '#faf8ff', '#dccbff', '#e6dcff', '#f5f0ff', '#c8b4ff', '#ece4ff', '#a98cff', '#faf8ff', '#dccbff'],
+    occlusion: '#2e2350',
     gloss: 0.6,
     grooves: [0.9, 0.85],
     outline: notched([[1, 0.2, 0.8, 5], [4, 0.2, 0.8, 5]], 0.035), // two, on the right and left sides

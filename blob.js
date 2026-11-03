@@ -99,8 +99,8 @@ function backdrop() {
       void main() {
         vec2 p = vUv * 2.0 - 1.0;
         float d = length(p);
-        // shades of the current colour: deep, mid, light, and a warmer, yellower accent
-        vec3 deep = uColor * 0.25, light = mix(uColor, vec3(1.0), 0.55), accent = uColor * vec3(1.35, 1.0, 0.6);
+        // shades of the current colour: deep, mid, light, and a cooler, bluer accent (a warm one turned the lavender peach)
+        vec3 deep = uColor * 0.25, light = mix(uColor, vec3(1.0), 0.55), accent = uColor * vec3(0.9, 0.95, 1.3);
         vec3 inside = deep;
         inside = mix(inside, deep * 1.3, spot(p, 23.0, 0.0, 0.2, 0.22));
         inside = mix(inside, uColor, spot(p, -31.0, 2.0, 0.18, 0.2));

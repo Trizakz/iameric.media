@@ -28,7 +28,7 @@ const VARIANTS = {
   home: {
     count: 520,
     // off-white like the tags' side parts, with a little of the accent
-    colors: ['#f2f0ea', '#f2f0ea', '#f2f0ea', '#dcd8cd', '#ffa67f'],
+    colors: ['#f2f0ea', '#f2f0ea', '#f2f0ea', '#dcd8cd', '#c9b8ff'],
     light: shared,
     // slow drift: upwards and to the right, faster when near (parallax), with a lazy sway
     motion: 'position.xy + vec2(0.012, 0.02) * uTime * (0.3 + z * 1.2) + 0.03 * vec2(sin(uTime * 0.21 + seed * 40.0), cos(uTime * 0.17 + seed * 30.0))',

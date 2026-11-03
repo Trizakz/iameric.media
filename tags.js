@@ -39,8 +39,8 @@ import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 // `keys` colours the play button and the side button; the screen gradients run from a lighter to a
 // darker shade of `keys`
 export const SCHEMES = {
-  a: { front: '#232327', back: '#131316', side: '#dcd8cd', keys: '#ff6a2b' },
-  b: { front: '#45464d', back: '#232327', side: '#dcd8cd', keys: '#ffa67f' },
+  a: { front: '#232327', back: '#131316', side: '#dcd8cd', keys: '#a68cff' },
+  b: { front: '#45464d', back: '#232327', side: '#dcd8cd', keys: '#cbbcff' },
 };
 export const COLORS = {
   bezel: '#121411',

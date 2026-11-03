@@ -8,11 +8,11 @@
 //   fx.dispose();
 
 const HOLO_LEVEL = 2;
-const COLORS = ['#ffffff', '#ffffff', '#ffd6c2', '#ffc2a8', '#ffe6cc'];
+const COLORS = ['#ffffff', '#ffffff', '#e2d6ff', '#cdbbff', '#efe8ff'];
 const RATE = 0.5; // specks per second, per badge: few, there are many holo badges
 const BOKEH_RATE = 0.1; // discs per second, per badge
 const HOT = 5; // how many times as many while hovered
-const BOKEH = ['#ffb48a', '#ff9a80', '#ffd59a', '#ffe7cf', '#ff8f5c'];
+const BOKEH = ['#c6b2ff', '#b39dff', '#dccbff', '#efe8ff', '#a48aff'];
 
 // one tiny soft dot per colour, drawn once and stamped from then on
 function sprite(color) {
