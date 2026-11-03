@@ -23,6 +23,13 @@ a.lk:focus-visible {
   -webkit-mask: url(assets/logo.svg) center / contain no-repeat;
   mask: url(assets/logo.svg) center / contain no-repeat;
 }
+/* once logo.js has run, the mark is an inline SVG (its eye can turn): no mask any more */
+svg.mark-logo {
+  background: none;
+  -webkit-mask: none;
+  mask: none;
+  overflow: visible;
+}
 /* the icon's disc stands exactly as tall as the letters, on the same baseline */
 .lk .material-symbols-outlined {
   font-size: 0.92em;

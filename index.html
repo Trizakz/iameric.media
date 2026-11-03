@@ -7,7 +7,16 @@
   <script>
     // start the page in its intro state: the wordmark fades in from left to right while the tags boot (tags.js),
     // then the glass blob appears behind them
-    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentElement.classList.add('intro');
+    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      document.documentElement.classList.add('intro');
+      // the logo splash (splash.js), once per visit
+      try {
+        if (!sessionStorage.getItem('iameric-splash')) {
+          sessionStorage.setItem('iameric-splash', '1');
+          document.documentElement.classList.add('splash');
+        }
+      } catch {}
+    }
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,6 +26,7 @@
   <link rel="stylesheet" href="about.css">
   <link rel="stylesheet" href="links.css">
   <link rel="stylesheet" href="footer.css">
+  <script src="logo.js" defer></script>
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,1,0&icon_names=arrow_back,code,deployed_code,design_services,edit,live_tv,mail,movie_edit,person,photo_camera,play_circle&display=block" rel="stylesheet">
   <style>
     /* "graphit": neutral greys from the near-black ground up to a warm off-white text, plus one accent
@@ -215,6 +225,48 @@
 
 
 
+    /* the logo splash (splash.js): over everything on the first visit; the page's own intro waits under it */
+    .splash-screen {
+      position: fixed;
+      z-index: 100;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      background: var(--bg);
+      color: var(--text);
+      cursor: pointer;
+      transition: opacity 0.6s var(--ease);
+    }
+    .splash-screen.out {
+      opacity: 0;
+    }
+    .splash-screen canvas {
+      width: min(44vmin, 260px);
+      aspect-ratio: 1;
+    }
+    html:not(.splash) .splash-screen {
+      display: none;
+    }
+    html.splash body *,
+    html.splash body *::before,
+    html.splash body *::after {
+      animation-play-state: paused !important;
+    }
+    /* a small loader while a sub page is fetched (only if that takes a moment), the logo's glance (logo.js) */
+    .sub-loading {
+      position: fixed;
+      z-index: 40;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      color: var(--text);
+      pointer-events: none;
+      animation: sub-loading-in 0.3s ease-out both;
+    }
+    @keyframes sub-loading-in {
+      from { opacity: 0; }
+    }
+
     /* phones and short windows: one scrolling column */
     @media (max-width: 760px), (max-height: 600px) {
       .stage {
@@ -247,6 +299,7 @@
   </style>
 </head>
 <body>
+  <div class="splash-screen" aria-hidden="true"><canvas></canvas></div>
   <div class="stage">
     <!-- inside the stage so it sits on the ground but under the blob and the tags -->
     <header class="top">
@@ -284,6 +337,7 @@
       }
     }
   </script>
+  <script type="module" src="splash.js"></script>
   <script src="sub.js"></script>
   <script type="module">
     import { mountTags } from './tags.js';
@@ -302,6 +356,11 @@
     tagBox.addEventListener('tagactive', e => blob.setActive(e.detail));
     const particles = mountParticles(document.querySelector('.particles'));
     tagBox.addEventListener('taglaunchstart', () => document.body.classList.add('launching'));
+    if (document.documentElement.classList.contains('splash')) {
+      [tags, blob, particles].forEach(s => s.setPaused(true));
+      addEventListener('iameric:splashdone', () => [tags, blob, particles].forEach(s => s.setPaused(false)), { once: true });
+    }
+    dispatchEvent(new Event('iameric:ready'));
     // sub pages open over the home page instead of replacing it: after the zoom the page's <main> is
     // fetched and shown in a full-window panel, and the address changes with pushState. Going back
     // only closes the panel and plays the zoom backwards; the home page never reloads, so nothing
@@ -316,12 +375,27 @@
       return fade;
     };
     async function openSub({ href, index, color }, instant) {
-      const doc = new DOMParser().parseFromString(await (await fetch(href)).text(), 'text/html');
+      // the glance loader, only if fetching takes a moment
+      let loading = null;
+      const wait = setTimeout(() => {
+        loading = document.createElement('div');
+        loading.className = 'sub-loading';
+        loading.innerHTML = iamericGlance(40);
+        document.body.append(loading);
+      }, 300);
+      let doc;
+      try {
+        doc = new DOMParser().parseFromString(await (await fetch(href)).text(), 'text/html');
+      } finally {
+        clearTimeout(wait);
+        loading?.remove();
+      }
       const el = document.createElement('div');
       el.className = instant ? 'subpage instant' : 'subpage';
       el.style.setProperty('--light', color);
       el.append(doc.querySelector('main'));
       document.body.append(el);
+      iamericUpgradeLogos(el);
       fitSubTitle(el);
       el.querySelectorAll('.year').forEach(y => { y.textContent = document.querySelector('.footer .year').textContent; });
       // a sub page with its own behaviour names its module in <main data-page> (about.js)
@@ -404,7 +478,11 @@
     const html = document.documentElement;
 
     // the wordmark intro is pure CSS; drop its state once it has settled
-    if (html.classList.contains('intro')) setTimeout(() => html.classList.remove('intro'), 2400);
+    const introDone = () => setTimeout(() => html.classList.remove('intro'), 2400);
+    if (html.classList.contains('intro')) {
+      if (html.classList.contains('splash')) addEventListener('iameric:splashdone', introDone, { once: true });
+      else introDone();
+    }
   </script>
 </body>
 </html>
