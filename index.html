@@ -181,8 +181,16 @@
     .top, .bar {
       transition: opacity 0.5s var(--ease);
     }
-    .launching .top, .launching .bar {
+    .launching .top, .launching .bar, .launching .widgets {
       opacity: 0;
+    }
+    /* the widgets go at once and step behind the tags, so the zooming tag passes over them */
+    .widgets {
+      transition: opacity 0.5s var(--ease);
+    }
+    .launching .widgets {
+      z-index: 1;
+      transition-duration: 0.15s;
     }
     .launch-fade {
       position: fixed;
