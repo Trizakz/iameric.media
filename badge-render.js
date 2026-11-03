@@ -13,7 +13,7 @@
 
 // the levels, lowest first, with the colour of icon and text
 export const LEVELS = [
-  { name: 'creme', ink: '#17130c' },
+  { name: 'creme', ink: '#ece9f5' }, // light ink on the dark glow plate
   { name: 'holo', ink: '#17130c' },
 ];
 
@@ -86,20 +86,22 @@ function notched(notches, chamfer) {
 
 // each level's colours: the ground, then soft patches as [colour, x, y, radius] in shares of the plate
 const FINISH = [
-  { // cream: warm white falling into a soft sand, split by one big diagonal plane
-    base: '#f2ecdc',
-    fades: [['#fffdf5', 0.2, 0.08, 0.72], ['#f6efdf', 0.85, 0.3, 0.55], ['#e6dcc4', 0.35, 0.8, 0.6], ['#d6c8a8', 0.9, 0.95, 0.6]],
-    occlusion: '#6d5733',
+  { // the first tier (still called cream): a dark plate with a soft lavender glow rising from its bottom edge
+    // (google-blur-glow-ui), a few blurred shapes in the site's --signal
+    base: '#121116',
+    fades: [['#5a43c4', 0.5, 1.1, 0.62], ['#b39dff', 0.5, 1.14, 0.34], ['#1d1a2b', 0.25, 0.12, 0.6], ['#0d0c10', 0.85, 0.25, 0.5]],
+    occlusion: '#000000',
     outline: HEX,
-    plane: 'rgba(120, 95, 50, 0.08)',
+    plane: 'rgba(255, 255, 255, 0.025)',
   },
-  { // holo: pearl white in the middle, the site's lavender --signal creeping in from the edges, lilac iridescent bands flowing across
-    base: '#f8f5ff',
-    fades: [['#9b7bff', 0.98, 0.42, 0.38], ['#c3a8ff', 0.0, 0.38, 0.4], ['#8f6cf0', 0.18, 0.92, 0.36], ['#d8c4ff', 0.88, 0.95, 0.34], ['#ece4ff', 0.5, 0.0, 0.42], ['#ffffff', 0.5, 0.45, 0.42]],
+  { // holo: luminous, a lavender light dome glowing up from the bottom with a bright core, lilac iridescent bands
+    // flowing across (google-blur-glow-ui)
+    base: '#e6defe',
+    fades: [['#ffffff', 0.5, 0.74, 0.44], ['#b39dff', 0.5, 1.04, 0.56], ['#8f6cf0', 0.5, 1.16, 0.42], ['#cdbcff', 0.08, 0.08, 0.5], ['#d6c8ff', 0.92, 0.1, 0.5]],
     iris: ['#f5f0ff', '#c8b4ff', '#ece4ff', '#a98cff', '#faf8ff', '#dccbff', '#e6dcff', '#f5f0ff', '#c8b4ff', '#ece4ff', '#a98cff', '#faf8ff', '#dccbff'],
     occlusion: '#2e2350',
     gloss: 0.6,
-    grooves: [0.9, 0.85],
+    grooves: [0.9], // one frame (two read as busy)
     outline: notched([[1, 0.2, 0.8, 5], [4, 0.2, 0.8, 5]], 0.035), // two, on the right and left sides
   },
 ];

@@ -213,8 +213,9 @@ html:has(> body.subpage .screen.long) {
 }
 .ab-links ul {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr)); /* six links: two even rows */
   gap: 12px;
+  max-width: 900px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -234,7 +235,23 @@ html:has(> body.subpage .screen.long) {
   border: 1px solid var(--line);
   background: radial-gradient(120% 90% at 50% 135%, rgba(179, 157, 255, 0.24), transparent 62%), #131315;
   white-space: normal;
+  font: 500 17px/1.2 "DM Sans", sans-serif;
+  letter-spacing: 0;
+  color: var(--text);
   transition: border-color 0.3s ease-out, background-color 0.3s ease-out;
+}
+/* the platform small and quiet in mono, the name under it as the line you read */
+.ab-links .cn {
+  display: grid;
+  gap: 6px;
+}
+.ab-links .cn-platform {
+  font: 12px/1 var(--mono);
+  letter-spacing: 0.04em;
+  color: color-mix(in srgb, var(--text) 55%, transparent);
+}
+.ab-links .cn-handle {
+  overflow-wrap: anywhere;
 }
 .ab-links a.lk:hover {
   border-color: color-mix(in srgb, var(--signal) 45%, var(--line));
@@ -243,6 +260,7 @@ html:has(> body.subpage .screen.long) {
 .ab-links a.lk .lk-logo {
   width: 26px;
   height: 26px;
+  color: var(--signal);
 }
 /* the brands' own logos, in the link colour, as tall as the letters like the icons in a.lk */
 .lk-logo {
@@ -253,6 +271,9 @@ html:has(> body.subpage .screen.long) {
 
 /* ---- phones: one column ---- */
 @media (max-width: 760px) {
+  .ab-links ul {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
   .ab-hero {
     grid-template-columns: minmax(0, 1fr);
   }
