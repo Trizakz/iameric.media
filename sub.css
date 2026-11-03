@@ -1,0 +1,198 @@
+/* sub pages (placeholders for now) in the home page's dark look. Used two ways: as a page of its own
+   (<body class="subpage">) and as the panel the home page opens over itself once a tag has zoomed in
+   (div.subpage), so going back never reloads the home page. --light is the colour the zoomed screen
+   ended on (now the dark ground itself): the page arrives in it and turns back into it when it closes. */
+.subpage {
+  --bg: #0b0b0c;
+  --panel: #151517;
+  --line: #2c2c30;
+  --text: #e6e4df;
+  --signal: #ff6a2b;
+  --edge: clamp(20px, calc(16vw - 60px), 220px); /* content kept towards the middle */
+  --edge-y: clamp(16px, calc(7vh - 14px), 64px);
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --mono: "DM Mono", ui-monospace, Menlo, Consolas, monospace;
+  --light: var(--bg);
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  margin: 0;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "DM Sans", sans-serif;
+}
+.subpage ::selection {
+  background: var(--signal);
+  color: var(--bg);
+}
+/* the same faint dot grid as the home page, fading out towards the edges */
+.subpage::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, rgba(230, 228, 223, 0.08) 1px, transparent 1.4px);
+  background-size: 22px 22px;
+  -webkit-mask-image: radial-gradient(ellipse at 50% 50%, #000 30%, transparent 78%);
+  mask-image: radial-gradient(ellipse at 50% 50%, #000 30%, transparent 78%);
+  pointer-events: none;
+}
+/* arrival: the flat screen colour the zoom ended on, clearing to the dark page */
+.subpage::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: var(--light);
+  pointer-events: none;
+  animation: sub-clear 0.7s var(--ease) both;
+}
+.subpage.instant::before {
+  animation: none;
+  opacity: 0;
+}
+/* closing: back into the screen colour, then the tag flies back on the home page */
+.subpage.leaving::before {
+  animation: sub-cover 0.25s ease-in both;
+}
+@keyframes sub-clear {
+  to { opacity: 0; }
+}
+@keyframes sub-cover {
+  from { opacity: 0; }
+}
+.subpage .screen {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+  box-sizing: border-box;
+  padding: var(--edge-y) var(--edge);
+  display: flex;
+  flex-direction: column;
+}
+/* the iameric wordmark, exactly where it sits on the home page; it leads back home */
+.subpage .sub-mark {
+  align-self: flex-start;
+  font-family: "Unbounded", var(--mono);
+  font-weight: 600;
+  font-size: clamp(19px, 1.6vw, 27px);
+  line-height: 1;
+  letter-spacing: -0.01em;
+  color: var(--signal);
+  text-decoration: none;
+  border-radius: 4px;
+}
+.subpage .sub-mark:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 4px;
+}
+/* hovering (or focusing) the wordmark swaps it for "<- back", the way the home page's intro
+   brings the wordmark in: a soft edge sweeps from left to right, the word blurs away behind it and
+   "back" sharpens in, dark on a block of the accent colour that closes with the letters (0.1em and
+   0.77em are Unbounded's measures, like the links in links.css). Both sit in one grid cell; the padding gives the blur room inside
+   the mask (a mask clips at the element's box) */
+@property --sweep {
+  syntax: "<percentage>";
+  inherits: true;
+  initial-value: -40%;
+}
+.subpage .sub-mark {
+  display: inline-grid;
+  --sweep: -40%;
+  transition: --sweep 0.7s var(--ease);
+}
+.subpage .sub-mark:hover,
+.subpage .sub-mark:focus-visible {
+  --sweep: 100%;
+}
+.subpage .sub-mark > span {
+  grid-area: 1 / 1;
+  padding: 14px 20px;
+  margin: -14px -20px;
+  transition: filter 0.7s var(--ease);
+}
+.subpage .sub-mark .mark-word {
+  -webkit-mask-image: linear-gradient(90deg, transparent var(--sweep), #000 calc(var(--sweep) + 40%));
+  mask-image: linear-gradient(90deg, transparent var(--sweep), #000 calc(var(--sweep) + 40%));
+}
+/* arrival: the wordmark comes in like the home page's intro, a soft edge sweeping from left to right while
+   the letters sharpen. A second mask layer, intersected with the hover sweep above; it only fills
+   backwards, so once it has run the hover's blur and sweep work as before */
+@property --intro {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 100%;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .subpage .sub-mark .mark-word {
+    -webkit-mask-image: linear-gradient(90deg, transparent var(--sweep), #000 calc(var(--sweep) + 40%)), linear-gradient(90deg, #000 var(--intro), transparent calc(var(--intro) + 40%));
+    mask-image: linear-gradient(90deg, transparent var(--sweep), #000 calc(var(--sweep) + 40%)), linear-gradient(90deg, #000 var(--intro), transparent calc(var(--intro) + 40%));
+    -webkit-mask-composite: source-in;
+    mask-composite: intersect;
+    animation: mark-intro 1.9s var(--ease) 0.5s backwards;
+  }
+}
+@keyframes mark-intro {
+  from { --intro: -40%; filter: blur(8px); }
+}
+.subpage .sub-mark .mark-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15em;
+  padding-inline: calc(20px + 0.2em);
+  color: transparent;
+  background-image: linear-gradient(var(--bg) calc(14px + 0.87em), var(--signal) 0), linear-gradient(var(--signal), var(--signal));
+  background-position: 0 0, 50% calc(14px + 0.1em);
+  background-size: 100% 100%, calc(100% - 40px) 0.77em;
+  background-repeat: no-repeat;
+  -webkit-background-clip: text, border-box;
+  background-clip: text, border-box;
+  filter: blur(8px);
+  -webkit-mask-image: linear-gradient(90deg, #000 var(--sweep), transparent calc(var(--sweep) + 40%));
+  mask-image: linear-gradient(90deg, #000 var(--sweep), transparent calc(var(--sweep) + 40%));
+}
+.subpage .sub-mark .mark-back .material-symbols-outlined {
+  font-size: 1.05em;
+  margin-block: -1em; /* taller than the letters: it must not move them off the block */
+}
+.subpage .sub-mark:hover .mark-word,
+.subpage .sub-mark:focus-visible .mark-word {
+  filter: blur(8px);
+}
+.subpage .sub-mark:hover .mark-back,
+.subpage .sub-mark:focus-visible .mark-back {
+  filter: none;
+}
+.subpage h1 {
+  margin: clamp(28px, 7vh, 72px) 0 0;
+  font-weight: 500;
+  font-size: var(--title, 20vw);
+  line-height: 0.9;
+  letter-spacing: -0.04em;
+  white-space: nowrap;
+  outline: none;
+}
+.subpage .note {
+  margin: auto 0 16px;
+  font: 12px var(--mono);
+  letter-spacing: 0.02em;
+  opacity: 0.62;
+}
+/* a footer in the bottom right corner: copyright and the legal notice */
+.subpage .sub-foot {
+  align-self: flex-end;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 20px;
+  font: 14px/1 "DM Sans", sans-serif;
+}
+.subpage .sub-foot p {
+  margin: 0;
+  color: color-mix(in srgb, var(--text) 62%, transparent);
+}
+@media (prefers-reduced-motion: reduce) {
+  .subpage::before { animation: none; }
+  .subpage::before { opacity: 0; }
+}

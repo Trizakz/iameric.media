@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>legal notice · iameric</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400&family=DM+Sans:opsz,wght@9..40,400;9..40,500&family=Unbounded:wght@600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,1,0&icon_names=arrow_back&display=block" rel="stylesheet">
+  <style>
+    /* the home page's dark look (same tokens as index.html and sub.css), as a normal scrolling page:
+       wordmark top left, a big lowercase title, the text in a calm column, a footer bar like home */
+    :root {
+      --bg: #0b0b0c;
+      --panel: #151517;
+      --line: #2c2c30;
+      --text: #e6e4df;
+      --signal: #ff6a2b;
+      --edge: clamp(20px, calc(16vw - 60px), 220px); /* content kept towards the middle */
+      --edge-y: clamp(16px, calc(7vh - 14px), 64px);
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+      --mono: "DM Mono", ui-monospace, Menlo, Consolas, monospace;
+    }
+    html {
+      scrollbar-color: var(--line) transparent;
+    }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "DM Sans", sans-serif;
+      font-size: 16px;
+      line-height: 1.7;
+      display: flex;
+      flex-direction: column;
+    }
+    ::selection {
+      background: var(--signal);
+      color: var(--bg);
+    }
+    /* the faint dot grid of the home page, fading out towards the edges, fixed while the text scrolls */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background-image: radial-gradient(circle, rgba(230, 228, 223, 0.08) 1px, transparent 1.4px);
+      background-size: 22px 22px;
+      -webkit-mask-image: radial-gradient(ellipse at 50% 50%, #000 30%, transparent 78%);
+      mask-image: radial-gradient(ellipse at 50% 50%, #000 30%, transparent 78%);
+      pointer-events: none;
+    }
+    a {
+      color: var(--signal);
+      text-decoration-line: underline;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 0.25em;
+      text-decoration-color: transparent;
+      transition: text-decoration-color 0.25s ease-out;
+    }
+    a:focus-visible {
+      outline: 2px solid var(--text);
+      outline-offset: 4px;
+      border-radius: 4px;
+    }
+
+    /* the iameric wordmark, where it sits on the home page; it leads back home */
+    .mark {
+      align-self: flex-start;
+      margin: var(--edge-y) var(--edge) 0;
+      font-family: "Unbounded", var(--mono);
+      font-weight: 600;
+      font-size: clamp(19px, 1.6vw, 27px);
+      line-height: 1;
+      letter-spacing: -0.01em;
+      color: var(--signal);
+      text-decoration: none;
+    }
+
+    /* hovering (or focusing) the wordmark swaps it for "<- back", the way the home page's intro
+       brings the wordmark in: a soft edge sweeps from left to right, the word blurs away behind it and
+       "back" sharpens in, dark on a block of the accent colour that closes with the letters (0.1em and
+       0.77em are Unbounded's measures, like the links in links.css). Both sit in one grid cell; the padding gives the blur room inside
+       the mask (a mask clips at the element's box) */
+    @property --sweep {
+      syntax: "<percentage>";
+      inherits: true;
+      initial-value: -40%;
+    }
+    .mark {
+      display: inline-grid;
+      --sweep: -40%;
+      transition: --sweep 0.7s var(--ease);
+    }
+    .mark:hover,
+    .mark:focus-visible {
+      --sweep: 100%;
+    }
+    .mark > span {
+      grid-area: 1 / 1;
+      padding: 14px 20px;
+      margin: -14px -20px;
+      transition: filter 0.7s var(--ease);
+    }
+    .mark .mark-word {
+      -webkit-mask-image: linear-gradient(90deg, transparent var(--sweep), #000 calc(var(--sweep) + 40%));
+      mask-image: linear-gradient(90deg, transparent var(--sweep), #000 calc(var(--sweep) + 40%));
+    }
+    /* arrival: the wordmark comes in like the home page's intro, a soft edge sweeping from left to right while
+       the letters sharpen. A second mask layer, intersected with the hover sweep above; it only fills
+       backwards, so once it has run the hover's blur and sweep work as before */
+    @property --intro {
+      syntax: "<percentage>";
+      inherits: false;
+      initial-value: 100%;
+    }
+    @media (prefers-reduced-motion: no-preference) {
+      .mark .mark-word {
+        -webkit-mask-image: linear-gradient(90deg, transparent var(--sweep), #000 calc(var(--sweep) + 40%)), linear-gradient(90deg, #000 var(--intro), transparent calc(var(--intro) + 40%));
+        mask-image: linear-gradient(90deg, transparent var(--sweep), #000 calc(var(--sweep) + 40%)), linear-gradient(90deg, #000 var(--intro), transparent calc(var(--intro) + 40%));
+        -webkit-mask-composite: source-in;
+        mask-composite: intersect;
+        animation: mark-intro 1.9s var(--ease) 0.5s backwards;
+      }
+    }
+    @keyframes mark-intro {
+      from { --intro: -40%; filter: blur(8px); }
+    }
+    .mark .mark-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.15em;
+      padding-inline: calc(20px + 0.2em);
+      color: transparent;
+      background-image: linear-gradient(var(--bg) calc(14px + 0.87em), var(--signal) 0), linear-gradient(var(--signal), var(--signal));
+      background-position: 0 0, 50% calc(14px + 0.1em);
+      background-size: 100% 100%, calc(100% - 40px) 0.77em;
+      background-repeat: no-repeat;
+      -webkit-background-clip: text, border-box;
+      background-clip: text, border-box;
+      filter: blur(8px);
+      -webkit-mask-image: linear-gradient(90deg, #000 var(--sweep), transparent calc(var(--sweep) + 40%));
+      mask-image: linear-gradient(90deg, #000 var(--sweep), transparent calc(var(--sweep) + 40%));
+    }
+    .mark .mark-back .material-symbols-outlined {
+      font-size: 1.05em;
+      margin-block: -1em; /* taller than the letters: it must not move them off the block */
+    }
+    .mark:hover .mark-word,
+    .mark:focus-visible .mark-word {
+      filter: blur(8px);
+    }
+    .mark:hover .mark-back,
+    .mark:focus-visible .mark-back {
+      filter: none;
+    }
+    main {
+      flex: 1;
+      box-sizing: border-box;
+      width: 100%;
+      max-width: calc(80ch + 2 * var(--edge));
+      padding: clamp(48px, 10vh, 112px) var(--edge) clamp(56px, 10vh, 112px);
+    }
+    h1 {
+      margin: 0 0 clamp(40px, 8vh, 88px);
+      font-weight: 500;
+      font-size: clamp(48px, 8vw, 120px);
+      line-height: 0.9;
+      letter-spacing: -0.04em;
+    }
+    /* each block: a small mono label on the left, the text on the right, a hairline between blocks */
+    section {
+      display: grid;
+      grid-template-columns: minmax(0, 14ch) minmax(0, 1fr);
+      gap: 8px 32px;
+      padding: 28px 0;
+      border-top: 1px solid var(--line);
+    }
+    h2 {
+      margin: 0;
+      padding-top: 0.3em;
+      font: 12px var(--mono);
+      letter-spacing: 0.02em;
+      text-transform: lowercase;
+      color: var(--signal);
+    }
+    p {
+      margin: 0;
+      max-width: 64ch;
+      color: color-mix(in srgb, var(--text) 82%, transparent);
+    }
+    @media (max-width: 640px) {
+      section {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    /* a footer in the bottom right corner: copyright and the legal notice */
+    .bar {
+      align-self: flex-end;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      align-items: center;
+      margin: 0 var(--edge) var(--edge-y);
+      gap: 20px;
+      font: 14px/1 "DM Sans", sans-serif;
+    }
+    .bar p {
+      margin: 0;
+      color: color-mix(in srgb, var(--text) 62%, transparent);
+    }
+  </style>
+  <link rel="stylesheet" href="links.css">
+</head>
+<body>
+  <a class="mark" href="index.html" aria-label="iameric, back to the home page"><span class="mark-word" aria-hidden="true">iameric</span><span class="mark-back" aria-hidden="true"><span class="material-symbols-outlined">arrow_back</span>back</span></a>
+
+  <main>
+    <h1>legal notice</h1>
+
+    <section>
+      <h2>Editor</h2>
+      <p>Eric Leutemann<br>
+        <a class="lk" href="mailto:info@iameric.media">info@iameric.media</a><br>
+        <a class="lk" href="https://www.iameric.media">www.iameric.media</a></p>
+    </section>
+
+    <section>
+      <h2>Contact</h2>
+      <p>Eric Leutemann<br>
+        Venusstraße 2<br>
+        06118 Halle (Saale)</p>
+    </section>
+
+    <section>
+      <h2>Liability for content</h2>
+      <p>As a service provider, we are responsible for our own content on these pages in accordance with general legislation pursuant to Section 7 (1) of the German Telemedia Act (TMG). According to §§ 8 to 10 TMG, however, we are not obligated as a service provider to monitor transmitted or stored third-party information or to investigate circumstances that indicate illegal activity. Obligations to remove or block the use of information under the general laws remain unaffected. However, liability in this regard is only possible from the point in time at which a concrete infringement of the law becomes known. If we become aware of any such infringements, we will remove this content immediately.</p>
+    </section>
+
+    <section>
+      <h2>Liability for links</h2>
+      <p>Our offer contains links to external websites of third parties, on whose contents we have no influence. Therefore, we cannot assume any liability for these external contents. The respective provider or operator of the pages is always responsible for the content of the linked pages. The linked pages were checked for possible legal violations at the time of linking. Illegal contents were not recognizable at the time of linking. However, a permanent control of the contents of the linked pages is not reasonable without concrete evidence of a violation of the law. If we become aware of any infringements, we will remove such links immediately.</p>
+    </section>
+
+    <section>
+      <h2>Copyright</h2>
+      <p>The content and works created by the site operators on these pages are subject to German copyright law. The reproduction, editing, distribution and any kind of exploitation outside the limits of copyright require the written consent of the respective author or creator. Downloads and copies of this site are only permitted for private, non-commercial use. Insofar as the content on this site was not created by the operator, the copyrights of third parties are respected. In particular, third-party content is identified as such. Should you nevertheless become aware of a copyright infringement, please inform us accordingly. If we become aware of any infringements, we will remove such content immediately.</p>
+    </section>
+
+    <section>
+      <h2>Privacy</h2>
+      <p>The operators of these pages take the protection of your personal data very seriously. We treat your personal data confidentially and in accordance with the statutory data protection regulations and this privacy policy. The use of our website is generally possible without providing personal data. Insofar as personal data (for example name, address or e-mail addresses) is collected on our pages, this is always done, as far as possible, on a voluntary basis. This data will not be passed on to third parties without your express consent. We point out that data transmission over the Internet (e.g. communication by e-mail) can have security gaps. A complete protection of data against access by third parties is not possible.</p>
+    </section>
+    <section>
+      <h2>Thanks</h2>
+      <p>Thanks to Lucas and Alex for their critique and suggestions on this website. They helped me make it look a lot better.</p>
+    </section>
+  </main>
+
+  <footer class="bar">
+    <p>© <span class="year">2026</span>, iameric · <span class="version">v1.0</span></p>
+    <a class="lk" href="legal.html" aria-current="page">legal notice</a>
+  </footer>
+
+  <script>
+    // launched in 2026: show "2026" that year, "2026 – <current year>" afterwards
+    const LAUNCH = 2026, thisYear = new Date().getFullYear();
+    document.querySelectorAll('.year').forEach(el => {
+      el.textContent = thisYear > LAUNCH ? `${LAUNCH} – ${thisYear}` : String(LAUNCH);
+    });
+  </script>
+</body>
+</html>

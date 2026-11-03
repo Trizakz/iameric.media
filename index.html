@@ -1,0 +1,438 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="ps1.js"></script>
+  <title>iameric</title>
+  <script>
+    // start the page in its intro state: the wordmark fades in from left to right while the tags boot (tags.js),
+    // then the glass blob appears behind them
+    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentElement.classList.add('intro');
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:opsz,wght@9..40,400;9..40,500&family=Unbounded:wght@600&display=swap" rel="stylesheet">
+  <!-- Material Symbols for the tag icon screens and the side tab, subset to the icons in use (add new names here, alphabetical) -->
+  <link rel="stylesheet" href="sub.css">
+  <link rel="stylesheet" href="about.css">
+  <link rel="stylesheet" href="links.css">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,1,0&icon_names=arrow_back,code,deployed_code,design_services,edit,live_tv,mail,movie_edit,person,photo_camera,play_circle&display=block" rel="stylesheet">
+  <style>
+    /* "graphit": neutral greys from the near-black ground up to a warm off-white text, plus one accent
+       colour, --signal. The 3D tags use the same greys plus a light side part (SCHEMES in tags.js).
+       Variable names are historical: --petrol deep, --mint mid, --red a third grey */
+    :root {
+      --bg: #0b0b0c;
+      --panel: #151517;
+      --line: #2c2c30;
+      --text: #e6e4df;
+      --petrol: #232327;
+      --mint: #45464d;
+      --signal: #ff6a2b;
+      --red: #6a6b73;
+      --edge: clamp(20px, calc(16vw - 60px), 220px); /* content kept towards the middle */
+      --edge-y: clamp(16px, calc(7vh - 14px), 64px);
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+      --mono: "DM Mono", ui-monospace, Menlo, Consolas, monospace;
+    }
+    html, body {
+      margin: 0;
+      height: 100%;
+    }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: "DM Sans", sans-serif;
+      scrollbar-color: var(--line) transparent;
+    }
+    ::selection {
+      background: var(--signal);
+      color: var(--bg);
+    }
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+    a:focus-visible {
+      outline: 2px solid var(--text);
+      outline-offset: 4px;
+      border-radius: 4px;
+    }
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+
+    .stage {
+      position: fixed;
+      inset: 0;
+      overflow: hidden;
+    }
+
+    /* instrument-panel ground: a faint dot grid fading out towards the edges */
+    .stage::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(circle, rgba(230, 228, 223, 0.08) 1px, transparent 1.4px);
+      background-size: 22px 22px;
+      -webkit-mask-image: radial-gradient(ellipse at 50% 50%, #000 30%, transparent 78%);
+      mask-image: radial-gradient(ellipse at 50% 50%, #000 30%, transparent 78%);
+      pointer-events: none;
+    }
+
+    /* wordmark small in the top left corner */
+    .top {
+      position: absolute;
+      left: var(--edge);
+      top: var(--edge-y);
+      z-index: 3;
+    }
+    /* blob and 3D tags share the middle of the page: the tags float in front of the glass */
+    .hero {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      place-items: center;
+    }
+    .hero > * {
+      grid-area: 1 / 1;
+    }
+    .tags {
+      position: relative;
+      z-index: 1;
+      overflow: hidden;
+      width: min(760px, 92vw);
+      height: calc(100% - 2 * (var(--edge-y) + 70px));
+    }
+    /* set in Unbounded, a wide geometric face with soft ends, like a logo printed on the 3D devices;
+       "iameric" has only x-height letters, so all stand at the same height */
+    .wordmark {
+      margin: 0;
+      font-family: "Unbounded", var(--mono);
+      font-weight: 600;
+      font-size: clamp(19px, 1.6vw, 27px);
+      line-height: 1;
+      letter-spacing: -0.01em;
+      color: var(--signal);
+    }
+    /* intro: a soft edge sweeps from left to right across the wordmark, which and sharpens */
+    @property --reveal {
+      syntax: "<percentage>";
+      inherits: false;
+      initial-value: -40%;
+    }
+    .intro .mark {
+      padding: 20px;
+      margin: -20px;
+      -webkit-mask-image: linear-gradient(90deg, #000 var(--reveal), transparent calc(var(--reveal) + 40%));
+      mask-image: linear-gradient(90deg, #000 var(--reveal), transparent calc(var(--reveal) + 40%));
+      animation: reveal 1.9s var(--ease) 0.5s both;
+    }
+    .intro .wordmark {
+      animation: settle 1.9s var(--ease) 0.5s both;
+    }
+    @keyframes reveal {
+      to { --reveal: 100%; }
+    }
+    @keyframes settle {
+      from { filter: blur(8px); }
+    }
+
+    /* glass blob (blob.js) behind the tags: its canvas is a little larger than the old sphere, so the
+       glass has room to change shape */
+    .blob {
+      --s: clamp(220px, 32vw, 560px);
+      position: relative;
+      width: calc(var(--s) * 1.5);
+      aspect-ratio: 1;
+    }
+    @media (prefers-reduced-motion: no-preference) {
+      .blob {
+        animation: blob-in 1.2s var(--ease) 1.9s both;
+      }
+    }
+    /* appears last, once the tags have booted */
+    @keyframes blob-in {
+      from { opacity: 0; scale: 0.85; }
+    }
+    /* PS5-style dust and light shaft (particles.js) over the whole window, between the blob and the tags */
+    .particles {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    /* page change: while a tag zooms in, the page around it fades away; once its screen covers the
+       window, the screen colour fades over everything and the next page (which starts in that colour)
+       loads */
+    .top, .bar, .socials {
+      transition: opacity 0.5s var(--ease);
+    }
+    .launching .top, .launching .bar, .launching .socials {
+      opacity: 0;
+    }
+    .launch-fade {
+      position: fixed;
+      z-index: 20;
+      inset: 0;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.35s ease-out;
+    }
+
+
+    /* copyright and legal notice */
+    .bar {
+      position: absolute;
+      z-index: 3;
+      /* outer radius 18 = link radius 8 + padding 10 */
+      padding: 0;
+      color: var(--text);
+      font: 14px/1 "DM Sans", sans-serif;
+    }
+    /* in the bottom right corner, like the sub pages' footer */
+    .footer {
+      right: var(--edge);
+      bottom: var(--edge-y);
+      align-self: flex-end;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    .footer p {
+      margin: 0;
+      color: color-mix(in srgb, var(--text) 62%, transparent);
+    }
+    /* socials: plain links in the bottom left, on the footer's line, no panel */
+    .socials {
+      position: absolute;
+      z-index: 3;
+      left: var(--edge);
+      bottom: var(--edge-y);
+      display: flex;
+      gap: 20px;
+      font: 14px/1 "DM Sans", sans-serif;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    .socials li {
+      display: flex; /* no fractional line height: text snaps to whole pixels, the link's block would not */
+    }
+
+    /* faint scanlines on the page ground, behind the blob and the 3D tags */
+    #scanlines {
+      position: fixed;
+      z-index: 1;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.06;
+      mix-blend-mode: overlay;
+      background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.9) 0 1px, transparent 1px 3px);
+    }
+
+
+    /* phones and short windows: one scrolling column */
+    @media (max-width: 760px), (max-height: 600px) {
+      .stage {
+        position: relative;
+        min-height: 100%;
+        box-sizing: border-box;
+        padding: var(--edge-y) var(--edge);
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+      .top, .hero, .footer, .socials {
+        position: relative;
+        left: auto;
+        right: auto;
+        top: auto;
+        bottom: auto;
+      }
+      .hero {
+        inset: auto;
+      }
+      .tags {
+        width: 100%;
+        height: 66vh;
+      }
+      .blob {
+        --s: 72vw;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="stage">
+    <!-- inside the stage so it sits on the ground but under the blob and the tags -->
+    <div id="scanlines" aria-hidden="true"></div>
+    <header class="top">
+      <div class="mark"><h1 class="wordmark">iameric</h1></div>
+    </header>
+
+    <main class="hero">
+      <div class="blob" aria-hidden="true"></div>
+      <div class="particles" aria-hidden="true"></div>
+      <div class="tags"></div>
+      <!-- the tags are the visible navigation; these links serve keyboard and screen readers and highlight their tag on focus -->
+      <nav class="sr-only" aria-label="Hauptnavigation">
+        <ul>
+          <li><a href="projekte.html">projects</a></li>
+          <li><a href="about.html">about</a></li>
+          <li><a href="contact.html">contact</a></li>
+        </ul>
+      </nav>
+    </main>
+
+    <ul class="socials" aria-label="socials">
+      <li><a class="lk" href="https://www.youtube.com/@trizakz" target="_blank" rel="noopener" aria-label="YouTube @trizakz"><span class="material-symbols-outlined" aria-hidden="true">play_circle</span>@trizakz</a></li>
+      <li><a class="lk" href="https://www.youtube.com/@ericleutemann" target="_blank" rel="noopener" aria-label="YouTube @ericleutemann"><span class="material-symbols-outlined" aria-hidden="true">play_circle</span>@ericleutemann</a></li>
+    </ul>
+
+    <footer class="bar footer">
+      <p>© <span class="year">2026</span>, iameric · <span class="version">v1.0</span></p>
+      <a class="lk" href="legal.html">legal notice</a>
+    </footer>
+  </div>
+
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+  <script src="sub.js"></script>
+  <script type="module">
+    import { mountTags } from './tags.js';
+    import { mountBlob } from './blob.js';
+    import { mountParticles } from './particles.js';
+
+    const tags = await mountTags(document.querySelector('.tags'), [
+      { title: 'projects', sub: 'video, editing, web', icon: 'deployed_code', href: 'projekte.html', scheme: 'a' },
+      { title: 'about', sub: 'work, interests', icon: 'person', href: 'about.html', scheme: 'b' },
+      { title: 'contact', sub: 'commissions, mail', icon: 'mail', href: 'contact.html', scheme: 'a' },
+    ], { focusBlur: true });
+    const tagBox = document.querySelector('.tags');
+    // the disc behind the glass takes the hovered tag's colour: its keys colour (SCHEMES in tags.js), more
+    // saturated so it still reads as colour through the glass. Projects and contact share scheme a.
+    const blob = await mountBlob(document.querySelector('.blob'), { idle: '#45464d', colors: ['#ff5a14', '#ff8040', '#ff5a14'] });
+    tagBox.addEventListener('tagactive', e => blob.setActive(e.detail));
+    const particles = mountParticles(document.querySelector('.particles'));
+    tagBox.addEventListener('taglaunchstart', () => document.body.classList.add('launching'));
+    // sub pages open over the home page instead of replacing it: after the zoom the page's <main> is
+    // fetched and shown in a full-window panel, and the address changes with pushState. Going back
+    // only closes the panel and plays the zoom backwards; the home page never reloads, so nothing
+    // flickers. If fetching fails (e.g. opened from disk), it falls back to a normal page load.
+    const homeTitle = document.title;
+    let open = null; // { index, color, el }
+    const coverFade = color => {
+      const fade = document.createElement('div');
+      fade.className = 'launch-fade';
+      fade.style.background = color;
+      document.body.append(fade);
+      return fade;
+    };
+    async function openSub({ href, index, color }, instant) {
+      const doc = new DOMParser().parseFromString(await (await fetch(href)).text(), 'text/html');
+      const el = document.createElement('div');
+      el.className = instant ? 'subpage instant' : 'subpage';
+      el.style.setProperty('--light', color);
+      el.append(doc.querySelector('main'));
+      document.body.append(el);
+      fitSubTitle(el);
+      el.querySelectorAll('.year').forEach(y => { y.textContent = document.querySelector('.footer .year').textContent; });
+      // a sub page with its own behaviour names its module in <main data-page> (about.js)
+      const mod = el.querySelector('[data-page]')?.dataset.page;
+      const page = mod ? import(`./${mod}`).then(m => m.mount(el)) : null;
+      document.title = doc.title;
+      el.querySelector('h1').focus({ preventScroll: true });
+      tags.setPaused(true); // nothing to draw behind it
+      blob.setPaused(true);
+      particles.setPaused(true);
+      open = { index, color, el, page };
+    }
+    function closeSub() {
+      const { index, color, el, page } = open;
+      open = null;
+      if (page) page.then(p => p.dispose());
+      el.classList.add('leaving'); // back into the screen colour
+      setTimeout(() => {
+        const fade = coverFade(color);
+        fade.style.opacity = '1';
+        el.remove();
+        document.title = homeTitle;
+        tags.setPaused(false);
+        blob.setPaused(false);
+        particles.setPaused(false);
+        tags.returnFrom(index); // the tag starts covering the window and flies back to its place
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          fade.style.opacity = '0';
+          setTimeout(() => fade.remove(), 400);
+        }));
+        setTimeout(() => document.body.classList.remove('launching'), 500);
+      }, 250);
+    }
+    tagBox.addEventListener('taglaunch', e => {
+      e.preventDefault();
+      const state = { sub: e.detail.href, href: e.detail.href, index: e.detail.index, color: e.detail.color };
+      const fade = coverFade(state.color);
+      requestAnimationFrame(() => { fade.style.opacity = '1'; });
+      setTimeout(async () => {
+        try {
+          await openSub(state);
+          history.pushState(state, '', state.href);
+          fade.remove();
+        } catch {
+          location.href = state.href;
+        }
+      }, 380);
+    });
+    // back (and forward) through the browser history
+    addEventListener('popstate', e => {
+      if (e.state && e.state.sub) {
+        if (!open) {
+          document.body.classList.add('launching');
+          openSub(e.state, true).catch(() => { location.href = e.state.href; });
+        }
+      } else if (open) {
+        closeSub();
+      }
+    });
+    // the sub page's own back link and Escape go back the same way
+    document.addEventListener('click', e => {
+      if (open && e.target.closest('.subpage [data-back]')) {
+        e.preventDefault();
+        history.back();
+      }
+    });
+    addEventListener('keydown', e => { if (open && e.key === 'Escape') history.back(); });
+    document.querySelectorAll('.hero nav a').forEach((a, i) => {
+      a.addEventListener('focus', () => tags.highlight(i));
+      a.addEventListener('blur', () => tags.highlight(-1));
+    });
+  </script>
+  <script>
+    // launched in 2026: show "2026" that year, "2026 – <current year>" afterwards
+    const LAUNCH = 2026, thisYear = new Date().getFullYear();
+    document.querySelectorAll('.year').forEach(el => {
+      el.textContent = thisYear > LAUNCH ? `${LAUNCH} – ${thisYear}` : String(LAUNCH);
+    });
+
+    const html = document.documentElement;
+
+    // the wordmark intro is pure CSS; drop its state once it has settled
+    if (html.classList.contains('intro')) setTimeout(() => html.classList.remove('intro'), 2400);
+  </script>
+</body>
+</html>

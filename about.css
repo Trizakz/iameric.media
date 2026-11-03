@@ -1,0 +1,254 @@
+/* the about page: the only sub page that scrolls. Loaded by about.html and by index.html (the home page
+   shows the about <main> in its overlay). Everything is scoped to .screen.long / .ab-*, so nothing clashes
+   with the home page. The hobbies are badges up beside the title
+   (badge-render.js, data in badges.js). Motion: the badges fade in one
+   after another; the text stands still. */
+.screen.long {
+  --head: clamp(64px, 6.9vw, 100px); /* both headings of this page */
+  --ink: #18181a;
+  --lit: #f2f0ea;
+  height: auto;
+  min-height: 100%;
+  padding-bottom: var(--edge-y);
+}
+/* the panel (overlay div or standalone body) scrolls instead of the screen; the ground stays put */
+.subpage:has(.screen.long) {
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-color: var(--line) transparent;
+  scrollbar-width: thin;
+}
+/* stand-alone: with <html> left at overflow visible, the body's overflow would move to the viewport,
+   which has nothing to scroll (the body is fixed); clipping <html> keeps the scroll on the body */
+html:has(> body.subpage .screen.long) {
+  overflow: hidden;
+}
+.subpage:has(.screen.long)::after,
+.subpage:has(.screen.long)::before {
+  position: fixed;
+}
+.screen.long h1 {
+  font-size: var(--head);
+}
+.screen.long h2,
+.screen.long h3,
+.screen.long p,
+.screen.long figure,
+.screen.long ol {
+  margin: 0;
+}
+.screen.long .material-symbols-outlined {
+  line-height: 1;
+}
+
+/* ---- first screen ---- */
+/* the text on the left, the badges on the right */
+.ab-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); /* the badges get the larger share */
+  align-items: start;
+  --top: clamp(24px, 4vh, 56px);
+  gap: clamp(24px, 2.6vw, 48px);
+  padding: var(--top) 0 clamp(56px, 10vh, 120px);
+}
+.ab-intro {
+  display: grid;
+  gap: 24px;
+}
+.ab-intro p,
+.ab-free-text > p {
+  max-width: 34em;
+  font-size: 17px;
+  line-height: 1.6;
+  color: rgba(230, 228, 223, 0.78);
+  text-align: justify;
+  hyphens: auto; /* without it, justified lines in the narrow column get wide gaps */
+  text-wrap: pretty;
+}
+
+/* .screen.long in front: it has to beat the margin reset for headings above */
+.screen.long .ab-free-text > h2 {
+  margin-bottom: clamp(40px, 9vh, 96px);
+  font-size: var(--head);
+  font-weight: 500;
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+}
+/* ---- off the clock ---- */
+.ab-free {
+  /* pulled up by the title's height, so it starts level with "about" */
+  margin-top: calc(-0.9 * var(--head) - var(--top));
+}
+.screen.long .ab-free-text > h2 {
+  margin-bottom: 0;
+}
+.ab-free-text {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+}
+.ab-edit {
+  color: color-mix(in srgb, var(--text) 62%, transparent);
+  transition: color 0.25s ease-out;
+}
+.ab-edit:hover,
+.ab-edit:focus-visible {
+  color: var(--signal);
+}
+.ab-edit .material-symbols-outlined {
+  font-size: 24px;
+}
+/* the pile: badges placed in % of the box, so it scales as one piece */
+.ab-pile {
+  position: relative;
+  margin-top: 20px;
+  aspect-ratio: var(--pile, 1);
+  width: 100%;
+}
+.ab-badge {
+  --dx: 0px;
+  --dy: 0px;
+  --lift: 1;
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  width: var(--w);
+  height: auto;
+  overflow: visible;
+  user-select: none;
+  -webkit-user-select: none;
+  transform: translate(var(--dx), var(--dy)) rotate(var(--r)) scale(var(--lift));
+  filter: brightness(1) drop-shadow(0 6px 14px rgba(0, 0, 0, var(--shadow, 0.45)));
+  transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.3s ease-out;
+  pointer-events: none; /* only .hit reacts: the plate's rainbow and glow reach far past its outline */
+}
+/* the holo badges' specks (badge-fx.js), reaching a little past the pile */
+.ab-fx {
+  position: absolute;
+  inset: -90px;
+  width: calc(100% + 180px);
+  height: calc(100% + 180px);
+  pointer-events: none;
+  z-index: 60;
+}
+/* holo glows, slowly breathing */
+.ab-badge .iris-hand {
+  translate: var(--ix, 0px) var(--iy, 0px);
+  transition: translate 0.5s var(--ease);
+}
+.ab-badge .iris {
+  mix-blend-mode: multiply;
+  opacity: 0.6;
+  animation: ab-iris 16s ease-in-out infinite alternate;
+}
+@keyframes ab-iris {
+  from { translate: -60px -60px; }
+  to { translate: 60px 60px; }
+}
+.ab-badge .halo {
+  opacity: 0.18;
+  animation: ab-breathe 7s ease-in-out infinite alternate;
+}
+@keyframes ab-breathe {
+  to { opacity: 0.36; }
+}
+.ab-badge .hit {
+  pointer-events: auto;
+}
+.ab-badge .ab-icon {
+  font-feature-settings: "liga";
+}
+/* the white ring round the hovered badge, with a soft glow */
+.ab-badge .ring {
+  opacity: 0;
+  filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.8));
+  transition: opacity 0.25s ease-out;
+}
+.ab-badge:hover .ring {
+  opacity: 1;
+}
+.ab-badge:hover {
+  --lift: 1.03;
+  filter: brightness(1) drop-shadow(0 10px 18px rgba(0, 0, 0, calc(var(--shadow, 0.45) + 0.05)));
+}
+/* the entrance: each badge fades in and rises a few pixels, one after another in reading order. --d is set per
+   badge in about.js. Once they have all landed, .settled gives hovers their quick transition back */
+.ab-js .ab-pile:not(.settled) .ab-badge {
+  transition: opacity 0.6s ease-out var(--d), translate 0.8s var(--ease) var(--d);
+}
+/* !important: a badge's own opacity (badges.js) sits inline on its svg */
+@media (prefers-reduced-motion: no-preference) {
+  .ab-js .ab-pile:not(.in) .ab-badge {
+    opacity: 0 !important;
+    translate: 0 10px;
+  }
+}
+.ab-js .ab-pile.settled .ab-badge {
+  transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.3s ease-out 0.12s;
+}
+/* the hovered badge stays lit, the others step back; they return with a short delay, so crossing the
+   gap to the next badge does not flash the whole pile */
+@media (hover: hover) {
+  .ab-js .ab-pile.settled:has(.ab-badge:hover) .ab-badge:not(:hover) {
+    filter: brightness(0.68) drop-shadow(0 6px 14px rgba(0, 0, 0, var(--shadow, 0.45)));
+    transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.3s ease-out;
+  }
+}
+.screen.long .sub-foot {
+  margin-top: auto;
+}
+
+/* ---- connections: the profile links, in a wrapping row under their own title ---- */
+.ab-links {
+  padding-bottom: clamp(56px, 10vh, 120px);
+}
+.screen.long .ab-links > h2 {
+  margin-bottom: clamp(24px, 4vh, 48px);
+  font-size: var(--head);
+  font-weight: 500;
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+}
+.ab-links ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px 32px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 17px;
+}
+/* the brands' own logos, in the link colour, as tall as the letters like the icons in a.lk */
+.lk-logo {
+  flex: none;
+  width: 0.92em;
+  height: 0.92em;
+}
+
+/* ---- phones: one column ---- */
+@media (max-width: 760px) {
+  .ab-hero {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .ab-hero {
+    padding-top: 28px;
+  }
+  .ab-free {
+    margin-top: 0;
+  }
+  .ab-intro {
+    padding-bottom: 0;
+  }
+  .ab-pile {
+    margin-top: 40px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ab-badge {
+    transition: none;
+  }
+  .ab-badge .halo,
+  .ab-badge .iris {
+    animation: none;
+  }
+}
