@@ -13,8 +13,8 @@
 
 // the levels, lowest first, with the colour of icon and text
 export const LEVELS = [
-  { name: 'creme', ink: '#17130c' }, // one ink for every level: both plates are light
-  { name: 'holo', ink: '#17130c' },
+  { name: 'creme', ink: '#17130c' }, // dark ink on the light pearl plate
+  { name: 'holo', ink: '#ffffff' }, // white on the deep violet gradient
 ];
 
 // every setting a badge can have, with its default. badges.js only needs to store what differs.
@@ -94,10 +94,11 @@ const FINISH = [
     outline: HEX,
     plane: 'rgba(255, 255, 255, 0.18)',
   },
-  { // holo: luminous, a lavender light dome glowing up from the bottom with a bright core, lilac iridescent bands
-    // flowing across (google-blur-glow-ui)
-    base: '#e6defe',
-    fades: [['#ffffff', 0.5, 0.74, 0.44], ['#b39dff', 0.5, 1.04, 0.56], ['#8f6cf0', 0.5, 1.16, 0.42], ['#cdbcff', 0.08, 0.08, 0.5], ['#d6c8ff', 0.92, 0.1, 0.5]],
+  { // holo: the projects' placeholder gradient (sub.css .pj-ph), deep violet at the top into the lavender of
+    // --signal at the bottom, a lavender glow rising from the bottom edge, lilac iridescent bands flowing across
+    base: '#4b35c2',
+    grad: [['#2a1c86', 0], ['#4b35c2', 0.38], ['#7d63e0', 0.72], ['#b39dff', 1]], // top to bottom
+    fades: [['#a58bff', 0.5, 1.04, 0.5]],
     iris: ['#f5f0ff', '#c8b4ff', '#ece4ff', '#a98cff', '#faf8ff', '#dccbff', '#e6dcff', '#f5f0ff', '#c8b4ff', '#ece4ff', '#a98cff', '#faf8ff', '#dccbff'],
     occlusion: '#2e2350',
     gloss: 0.6,
@@ -177,7 +178,8 @@ export function badgeSVG(input, { uid = input.id, cls = 'ab-badge', place = true
     + `<feOffset in="SourceAlpha" dy="1.5" result="down"/><feFlood flood-color="#fff" flood-opacity="0.8"/><feComposite in2="down" operator="in" result="lip"/>`
     + `<feOffset in="SourceAlpha" dy="-0.6"/><feGaussianBlur stdDeviation="1.8" result="up"/><feFlood flood-color="#000" flood-opacity="0.42"/><feComposite in2="up" operator="in" result="rim"/>`
     + `<feMerge><feMergeNode in="rim"/><feMergeNode in="lip"/><feMergeNode in="SourceGraphic"/></feMerge></filter>`;
-  let plate = `<rect width="200" height="200" fill="${l.base}"/>` + fades.map((p, i) => `<rect width="200" height="200" fill="url(#${id}-f${i})"/>`).join('');
+  if (l.grad) defs += `<linearGradient id="${id}-grad" x2="0" y2="1">${l.grad.map(([c, o]) => `<stop offset="${o}" stop-color="${c}"/>`).join('')}</linearGradient>`;
+  let plate = `<rect width="200" height="200" fill="${l.grad ? `url(#${id}-grad)` : l.base}"/>` + fades.map((p, i) => `<rect width="200" height="200" fill="url(#${id}-f${i})"/>`).join('');
   if (l.plane) {
     const y = 88 + rnd() * 24;
     plate += `<path d="M-30 ${f(y + 46)}L230 ${f(y - 46)}V240H-30Z" fill="${l.plane}"/>`;
