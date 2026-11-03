@@ -10,7 +10,7 @@
 // Usage:
 //   import { mountTags } from './tags.js';
 //   const tags = await mountTags(document.querySelector('.tags'), [
-//     { title: 'projects', sub: 'video, editing, web', icon: 'movie', href: 'projekte.html', scheme: 'a' },
+//     { title: 'projects', sub: 'video, editing, web', icon: 'movie', href: 'projects.html', scheme: 'a' },
 //   ]);
 //   tags.highlight(0);          // light up a tag from outside, -1 for none
 //   tags.setSchemes({ a: {...}, b: {...} }); // recolour (same shape as SCHEMES)
@@ -148,7 +148,7 @@ function screenTexture(tag, aod) {
   g.fillText('open', 152, 512);
   g.fillRect(c.width - 400, 462, 3, 68);
   g.textAlign = 'right';
-  g.fillText(`/${tag.title}`, c.width - 92, 512); // the page's name (the file of projects is German: projekte.html)
+  g.fillText(`/${tag.title}`, c.width - 92, 512); // the page's name
   return canvasTexture(c);
 }
 
