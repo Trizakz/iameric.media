@@ -1,5 +1,5 @@
 // The home page's widgets, in the way of the small widgets on a Mac desktop: the time and weather in Halle (Saale),
-// the latest project (from projects.js), what Eric is open for, and the music he is listening to. The markup is in
+// the latest project (from projects.js) and the music Eric is listening to. The markup is in
 // index.html; this fills it in and keeps it current. Styles: widgets.css.
 //
 //   import { mountWidgets } from './widgets.js';
@@ -9,13 +9,15 @@ import { PROJECTS } from './projects.js';
 
 // ---- the settings: change these by hand ----
 
-// the status widget: open is a green dot, closed a grey one; the text is what it says
-export const STATUS = { open: true, text: 'open for commissions' };
-
 // the music widget reads the last track from Last.fm (Spotify can scrobble to it: last.fm/settings/applications).
-// Without a user and an API key (last.fm/api/account/create) it shows the favourite artist instead
+// Without a user and an API key (last.fm/api/account/create) it shows the favourite song instead (the cover is
+// Apple Music's, linked, not copied)
 export const LASTFM = { user: '', key: '' };
-const FAVOURITE = { title: 'Porter Robinson', artist: '' };
+const FAVOURITE = {
+  title: 'Is There Really No Happiness?',
+  artist: 'Porter Robinson',
+  art: 'https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/64/fc/9b/64fc9be4-3a08-0745-f3c5-7fff92620e9a/810090095004_Cover.jpg/300x300bb.jpg',
+};
 
 // where the time and the weather are from (only the city is ever shown)
 const PLACE = { lat: 51.48, lon: 11.97, zone: 'Europe/Berlin' };
@@ -66,10 +68,6 @@ export function mountWidgets(root) {
   sky();
   setInterval(sky, 15 * 60 * 1000);
 
-  // the status
-  $('.w-status').classList.toggle('closed', !STATUS.open);
-  $('.w-status-text').textContent = STATUS.text;
-
   // the latest project: its picture, or the projects page's placeholder
   const latest = [...PROJECTS].sort((a, b) => b.date.localeCompare(a.date))[0];
   if (latest) {
@@ -85,7 +83,7 @@ export function mountWidgets(root) {
   const music = $('.w-music');
   const show = ({ title, artist, art = '', playing = false, link = '' }) => {
     music.classList.toggle('playing', playing);
-    $('.w-music .w-label-text').textContent = playing ? 'now playing' : LASTFM.user ? 'last played' : 'favorite artist';
+    $('.w-music .w-label-text').textContent = playing ? 'now playing' : LASTFM.user ? 'last played' : 'favorite song';
     $('.w-music .w-title').textContent = title;
     $('.w-music .w-artist').textContent = artist;
     $('.w-art').innerHTML = art ? `<img src="${esc(art)}" alt="">` : '<span class="material-symbols-outlined" aria-hidden="true">music_note</span>';

@@ -1,7 +1,6 @@
 /* the home page's widgets (widgets.js), in the way of the small widgets on a Mac desktop: square tiles with large
-   rounded corners and a big number or picture, two on each side of the 3D tags. Each in one of the site's own
-   materials: the holo badges' violet gradient, the pearl plate, a picture edge to edge, the dark ground with its
-   lavender glow. No glass. Hovering a linked one gives it the white ring and the small lift of the badges */
+   rounded corners and a big number or picture, in one column left of the 3D tags. Each in one of the site's own
+   materials: the holo badges' violet gradient, a picture edge to edge, the dark ground with its lavender glow. No glass. Hovering a linked one gives it the white ring and the small lift of the badges */
 .widgets {
   --w: clamp(132px, 10.6vw, 172px);
   --r: calc(var(--w) * 0.15); /* the corner, about as round as a Mac widget's */
@@ -17,11 +16,8 @@
   gap: calc(var(--w) * 0.12);
   translate: 0 -50%;
 }
-.w-col:first-child {
+.w-col {
   left: var(--edge);
-}
-.w-col:last-child {
-  right: var(--edge);
 }
 .w {
   position: relative;
@@ -135,65 +131,7 @@ a.w:focus-visible {
   visibility: hidden;
 }
 
-/* 2 · status: the pearl plate, a green dot that breathes while open */
-.w-status {
-  --ink: #17130c;
-  grid-template-rows: auto 1fr auto;
-  background: radial-gradient(120% 60% at 50% 120%, #fff, transparent 70%), #dcdbe1;
-  color: var(--ink);
-}
-.w-status .w-label {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  color: color-mix(in srgb, var(--ink) 72%, transparent);
-}
-.w-dot {
-  position: relative;
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: #2fbf5b;
-}
-.w-dot::after {
-  content: "";
-  position: absolute;
-  inset: -4px;
-  border-radius: 50%;
-  background: #2fbf5b;
-  opacity: 0;
-}
-.w-status.closed .w-dot {
-  background: #9a98a1;
-}
-@media (prefers-reduced-motion: no-preference) {
-  .w-status:not(.closed) .w-dot::after {
-    animation: w-ping 2.4s ease-out infinite;
-  }
-}
-@keyframes w-ping {
-  from { opacity: 0.45; scale: 0.6; }
-  to { opacity: 0; scale: 1.6; }
-}
-.w-status-text {
-  align-self: center;
-  font: 500 calc(var(--w) * 0.13) / 1.1 "DM Sans", sans-serif;
-  letter-spacing: -0.02em;
-  text-wrap: balance;
-}
-.w-go {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  font-weight: 500;
-  font-size: 12px;
-  color: color-mix(in srgb, var(--ink) 75%, transparent);
-}
-.w-go .material-symbols-outlined {
-  font-size: 14px;
-}
-
-/* 3 · latest project: the picture edge to edge (or the projects page's placeholder), its name over a shade */
+/* 2 · latest project: the picture edge to edge (or the projects page's placeholder), its name over a shade */
 .w-project {
   padding: 0;
   color: #fff;
@@ -256,7 +194,7 @@ a.w:focus-visible {
   text-wrap: balance;
 }
 
-/* 4 · music: the dark ground with the pages' lavender glow, the cover small, bars that move while it plays */
+/* 3 · music: the dark ground with the pages' lavender glow, the cover small, bars that move while it plays */
 .w-music {
   grid-template-rows: auto 1fr auto;
   color: var(--text);
@@ -266,7 +204,7 @@ a.w:focus-visible {
   position: relative;
   display: grid;
   place-items: center;
-  width: calc(var(--w) * 0.36);
+  width: calc(var(--w) * 0.3);
   aspect-ratio: 1;
   border-radius: calc(var(--w) * 0.06);
   overflow: hidden;
@@ -291,12 +229,11 @@ a.w:focus-visible {
 }
 .w-music .w-title {
   font: 500 14px/1.15 "DM Sans", sans-serif;
+  /* up to two lines, so a long title still reads in full */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.w-music .w-title {
-  display: block;
 }
 .w-artist {
   display: block;
@@ -344,16 +281,15 @@ a.w:focus-visible {
   .w {
     animation: w-in 0.8s var(--ease) both;
   }
-  .w-col:first-child .w:nth-child(1) { animation-delay: 0.9s; }
-  .w-col:first-child .w:nth-child(2) { animation-delay: 1.05s; }
-  .w-col:last-child .w:nth-child(1) { animation-delay: 1.2s; }
-  .w-col:last-child .w:nth-child(2) { animation-delay: 1.35s; }
+  .w:nth-child(1) { animation-delay: 0.9s; }
+  .w:nth-child(2) { animation-delay: 1.05s; }
+  .w:nth-child(3) { animation-delay: 1.2s; }
 }
 @keyframes w-in {
   from { opacity: 0; translate: 0 12px; }
 }
 
-/* phones and short windows: the page flows; the widgets sit in a 2 x 2 block under the tags */
+/* phones and short windows: the page flows; the widgets sit two by two under the tags */
 @media (max-width: 760px), (max-height: 600px) {
   .widgets {
     --w: min(172px, calc((100vw - 2 * var(--edge) - 14px) / 2));
