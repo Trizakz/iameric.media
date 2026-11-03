@@ -249,6 +249,10 @@ html:has(> body.subpage .screen.long) {
   padding: 6px;
   list-style: none;
 }
+/* the two YouTube channels on one line, the other profiles on the next */
+.ab-links ul + ul {
+  margin-top: 8px;
+}
 .ab-links a.lk {
   --ink: #17130c; /* the badges' ink */
   position: relative;
