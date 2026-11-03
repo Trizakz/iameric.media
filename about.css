@@ -130,7 +130,6 @@ html:has(> body.subpage .screen.long) {
   height: calc(100% + 180px);
   pointer-events: none;
   z-index: 60;
-  image-rendering: pixelated; /* drawn at a third of the resolution (badge-fx.js) */
 }
 /* holo glows, slowly breathing */
 .ab-badge .iris-hand {
