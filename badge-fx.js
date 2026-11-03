@@ -9,9 +9,9 @@
 
 const HOLO_LEVEL = 2;
 const COLORS = ['#ffffff', '#ffffff', '#ffd6c2', '#ffc2a8', '#ffe6cc'];
-const RATE = 2; // specks per second, per badge
-const BOKEH_RATE = 0.4; // discs per second, per badge
-const HOT = 7; // how many times as many while hovered
+const RATE = 0.5; // specks per second, per badge: few, there are many holo badges
+const BOKEH_RATE = 0.1; // discs per second, per badge
+const HOT = 5; // how many times as many while hovered
 const BOKEH = ['#ffb48a', '#ff9a80', '#ffd59a', '#ffe7cf', '#ff8f5c'];
 
 // one tiny soft dot per colour, drawn once and stamped from then on
@@ -77,7 +77,7 @@ export function mountBadgeFx(pile, badges) {
       age: 0,
       life: bokeh ? 6 + Math.random() * 5 : 4 + Math.random() * 4,
       size: bokeh ? 7 + Math.random() * 13 : 1.2 + Math.random() * 1.6,
-      peak: bokeh ? (hot ? 0.2 : 0.1) + Math.random() * 0.12 : hot ? 0.95 : 0.65,
+      peak: bokeh ? (hot ? 0.16 : 0.06) + Math.random() * 0.08 : hot ? 0.8 : 0.45,
       bokeh,
       seed: Math.random() * 6,
       img: bokeh ? discs[Math.floor(Math.random() * discs.length)] : sprites[Math.floor(Math.random() * sprites.length)],
@@ -111,7 +111,7 @@ export function mountBadgeFx(pile, badges) {
     for (const el of holo) {
       const hot = el.matches(':hover'), k = hot ? HOT : 1;
       // arriving on the badge shakes loose a small cloud at once
-      if (hot && !warm.has(el)) for (let i = 0; i < 12; i++) spawn(el, i < 3, true);
+      if (hot && !warm.has(el)) for (let i = 0; i < 5; i++) spawn(el, i < 1, true);
       warm[hot ? 'add' : 'delete'](el);
       if (Math.random() < RATE * k * dt) spawn(el, false, hot);
       if (Math.random() < BOKEH_RATE * k * dt) spawn(el, true, hot);
@@ -145,8 +145,8 @@ export function mountBadgeFx(pile, badges) {
       for (const el of holo) {
         landings.push(setTimeout(() => {
           el.querySelector('.shine')?.animate({ translate: ['-200px 0', '200px 0'] }, { duration: 1300, easing: 'ease-out' });
-          for (let i = 0; i < 14; i++) spawn(el, false);
-          for (let i = 0; i < 5; i++) spawn(el, true);
+          for (let i = 0; i < 5; i++) spawn(el, false);
+          spawn(el, true);
         }, (parseFloat(el.style.getPropertyValue('--d')) + 0.45) * 1000));
       }
     },
