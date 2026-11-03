@@ -141,21 +141,30 @@
       font-size: clamp(19px, 1.6vw, 27px);
       color: var(--signal);
     }
-    /* intro: a soft edge sweeps from left to right across the wordmark, which and sharpens */
+    /* intro: first the logo builds itself, small (the module below, logo-build.js, MARK_BUILD); then a soft edge
+       sweeps from left to right across the word, which sharpens */
     @property --reveal {
       syntax: "<percentage>";
       inherits: false;
       initial-value: -40%;
     }
-    .intro .mark {
+    .intro .wordmark {
       padding: 20px;
       margin: -20px;
       -webkit-mask-image: linear-gradient(90deg, #000 var(--reveal), transparent calc(var(--reveal) + 40%));
       mask-image: linear-gradient(90deg, #000 var(--reveal), transparent calc(var(--reveal) + 40%));
-      animation: reveal 1.9s var(--ease) 0.5s both;
+      animation: reveal 1.9s var(--ease) 2.2s both, settle 1.9s var(--ease) 2.2s both;
     }
-    .intro .wordmark {
-      animation: settle 1.9s var(--ease) 0.5s both;
+    /* while it builds, the drawn logo stands in for the static one */
+    .intro .mark .mark-logo {
+      visibility: hidden;
+    }
+    .mark-build {
+      flex: none;
+      /* the build's box (6..194) is wider than the logo's own (22..178): 188 / 155.9, centred on the logo's place */
+      width: 1.206em;
+      height: 1.206em;
+      margin: -0.103em;
     }
     @keyframes reveal {
       to { --reveal: 100%; }
@@ -358,6 +367,38 @@
     }
   </script>
   <script type="module" src="splash.js"></script>
+  <script type="module">
+    // the wordmark's intro: the logo builds itself once, small, in its place (the same build as the splash, a little
+    // quicker), then the word sweeps in beside it (CSS, .intro .wordmark). After a splash it waits for it to end
+    import { buildState, drawState } from './logo-build.js';
+    const html = document.documentElement, MARK_BUILD = 2400;
+    function buildMark() {
+      const logo = document.querySelector('.mark .mark-logo');
+      const canvas = document.createElement('canvas');
+      canvas.className = 'mark-build';
+      canvas.setAttribute('aria-hidden', 'true');
+      logo.before(canvas);
+      logo.style.display = 'none';
+      const size = Math.round(canvas.getBoundingClientRect().width * Math.min(devicePixelRatio || 1, 2) * 2);
+      canvas.width = canvas.height = size;
+      const start = performance.now();
+      const frame = now => {
+        const t = Math.min(1, (now - start) / MARK_BUILD);
+        drawState(buildState(t), '.mark-build');
+        if (t < 1) return requestAnimationFrame(frame);
+        // done: back to the static logo, and the GPU context goes back to the page
+        canvas._gl?.gl.getExtension('WEBGL_lose_context')?.loseContext();
+        canvas.remove();
+        logo.style.display = '';
+        logo.style.visibility = 'visible';
+      };
+      requestAnimationFrame(frame);
+    }
+    if (html.classList.contains('intro')) {
+      if (html.classList.contains('splash')) addEventListener('iameric:splashdone', buildMark, { once: true });
+      else buildMark();
+    }
+  </script>
   <script src="sub.js"></script>
   <script type="module">
     import { mountTags } from './tags.js';
@@ -504,7 +545,7 @@
     const html = document.documentElement;
 
     // the wordmark intro is pure CSS; drop its state once it has settled
-    const introDone = () => setTimeout(() => html.classList.remove('intro'), 2400);
+    const introDone = () => setTimeout(() => html.classList.remove('intro'), 4200); // the logo's build, then the word's sweep
     if (html.classList.contains('intro')) {
       if (html.classList.contains('splash')) addEventListener('iameric:splashdone', introDone, { once: true });
       else introDone();
