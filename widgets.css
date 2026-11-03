@@ -1,0 +1,372 @@
+/* the home page's widgets (widgets.js), in the way of the small widgets on a Mac desktop: square tiles with large
+   rounded corners and a big number or picture, two on each side of the 3D tags. Each in one of the site's own
+   materials: the holo badges' violet gradient, the pearl plate, a picture edge to edge, the dark ground with its
+   lavender glow. No glass. Hovering a linked one gives it the white ring and the small lift of the badges */
+.widgets {
+  --w: clamp(132px, 10.6vw, 172px);
+  --r: calc(var(--w) * 0.15); /* the corner, about as round as a Mac widget's */
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+.w-col {
+  position: absolute;
+  top: 50%;
+  display: grid;
+  gap: calc(var(--w) * 0.12);
+  translate: 0 -50%;
+}
+.w-col:first-child {
+  left: var(--edge);
+}
+.w-col:last-child {
+  right: var(--edge);
+}
+.w {
+  position: relative;
+  box-sizing: border-box;
+  width: var(--w);
+  aspect-ratio: 1;
+  display: grid;
+  padding: calc(var(--w) * 0.1);
+  border-radius: var(--r);
+  overflow: hidden;
+  font: 400 13px/1.2 "DM Sans", sans-serif;
+  pointer-events: auto;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.45);
+  transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.w p {
+  margin: 0;
+}
+/* the small label in mono, like the platforms on the connections */
+.w-label {
+  font: 10px/1 var(--mono);
+  letter-spacing: 0.06em;
+  text-transform: lowercase;
+}
+/* links: the white ring round the hovered widget (outside its clip, so on a wrapper of its own) */
+a.w {
+  overflow: visible;
+}
+a.w::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: calc(var(--r) + 6px);
+  border: 2px solid #fff;
+  filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.8));
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease-out;
+}
+a.w[href]:hover,
+a.w[href]:focus-visible {
+  transform: scale(1.04);
+}
+a.w[href]:hover::after,
+a.w[href]:focus-visible::after {
+  opacity: 1;
+}
+a.w:focus-visible {
+  outline: none; /* the ring shows the focus */
+}
+
+/* 1 · time and weather: the holo gradient, white type, the time large */
+.w-clock {
+  grid-template-rows: auto 1fr auto;
+  color: #fff;
+  background:
+    radial-gradient(80% 45% at 50% 108%, rgba(179, 157, 255, 0.7), transparent 70%),
+    linear-gradient(180deg, #2a1c86 0%, #4b35c2 38%, #7d63e0 72%, #b39dff 100%);
+}
+.w-city {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+}
+.w-city .material-symbols-outlined {
+  font-size: 20px;
+  opacity: 0;
+  transition: opacity 0.4s ease-out;
+}
+.w-clock.has-weather .w-city .material-symbols-outlined {
+  opacity: 1;
+}
+.w-time {
+  align-self: center;
+  font: 500 calc(var(--w) * 0.27) / 1 "DM Sans", sans-serif;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+}
+.w-date {
+  margin-top: 4px !important;
+  font: 11px/1 var(--mono);
+  letter-spacing: 0.02em;
+  color: rgba(255, 255, 255, 0.7);
+}
+.w-weather {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  white-space: nowrap;
+}
+.w-temp {
+  font-weight: 500;
+  font-size: 18px;
+}
+.w-cond,
+.w-hl {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.78);
+}
+.w-hl {
+  display: block;
+  margin-top: 3px;
+  font-family: var(--mono);
+  font-size: 10px;
+}
+.w-clock:not(.has-weather) .w-weather,
+.w-clock:not(.has-weather) .w-hl {
+  visibility: hidden;
+}
+
+/* 2 · status: the pearl plate, a green dot that breathes while open */
+.w-status {
+  --ink: #17130c;
+  grid-template-rows: auto 1fr auto;
+  background: radial-gradient(120% 60% at 50% 120%, #fff, transparent 70%), #dcdbe1;
+  color: var(--ink);
+}
+.w-status .w-label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: color-mix(in srgb, var(--ink) 60%, transparent);
+}
+.w-dot {
+  position: relative;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #2fbf5b;
+}
+.w-dot::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  background: #2fbf5b;
+  opacity: 0;
+}
+.w-status.closed .w-dot {
+  background: #9a98a1;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .w-status:not(.closed) .w-dot::after {
+    animation: w-ping 2.4s ease-out infinite;
+  }
+}
+@keyframes w-ping {
+  from { opacity: 0.45; scale: 0.6; }
+  to { opacity: 0; scale: 1.6; }
+}
+.w-status-text {
+  align-self: center;
+  font: 500 calc(var(--w) * 0.13) / 1.1 "DM Sans", sans-serif;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+.w-go {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-weight: 500;
+  font-size: 12px;
+  color: color-mix(in srgb, var(--ink) 75%, transparent);
+}
+.w-go .material-symbols-outlined {
+  font-size: 14px;
+}
+
+/* 3 · latest project: the picture edge to edge (or the projects page's placeholder), its name over a shade */
+.w-project {
+  padding: 0;
+  color: #fff;
+  background: #121116;
+}
+.w-pic {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  overflow: hidden;
+}
+.w-pic img,
+.w-pic i {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: scale 0.6s var(--ease);
+}
+.w-pic i {
+  background:
+    radial-gradient(70% 40% at 50% 104%, rgba(179, 157, 255, 0.7), transparent 70%),
+    linear-gradient(180deg, #2a1c86 0%, #4b35c2 38%, #7d63e0 72%, #b39dff 100%);
+}
+.w-pic i::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 38%;
+  width: 30%;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  background: #fff;
+  opacity: 0.14;
+  -webkit-mask: url(assets/logo.svg) center / contain no-repeat;
+  mask: url(assets/logo.svg) center / contain no-repeat;
+}
+.w-project:hover .w-pic img,
+.w-project:hover .w-pic i {
+  scale: 1.06;
+}
+.w-cap {
+  position: relative;
+  align-self: end;
+  display: grid;
+  gap: 4px;
+  padding: calc(var(--w) * 0.1);
+  padding-top: calc(var(--w) * 0.3);
+  border-radius: 0 0 var(--r) var(--r);
+  background: linear-gradient(180deg, transparent, rgba(11, 11, 12, 0.55));
+}
+.w-cap .w-label,
+.w-cap time {
+  font: 10px/1 var(--mono);
+  color: rgba(255, 255, 255, 0.75);
+}
+.w-cap .w-title {
+  font: 500 14px/1.15 "DM Sans", sans-serif;
+  text-wrap: balance;
+}
+
+/* 4 · music: the dark ground with the pages' lavender glow, the cover small, bars that move while it plays */
+.w-music {
+  grid-template-rows: auto 1fr auto;
+  color: var(--text);
+  background: radial-gradient(110% 60% at 50% 118%, rgba(125, 99, 224, 0.75), transparent 72%), #141318;
+}
+.w-art {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: calc(var(--w) * 0.36);
+  aspect-ratio: 1;
+  border-radius: calc(var(--w) * 0.06);
+  overflow: hidden;
+  background: linear-gradient(180deg, #4b35c2, #b39dff);
+}
+.w-art img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.w-art .material-symbols-outlined {
+  font-size: calc(var(--w) * 0.18);
+  color: rgba(255, 255, 255, 0.85);
+}
+.w-music .w-label {
+  align-self: end;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 5px;
+  color: color-mix(in srgb, var(--text) 62%, transparent);
+}
+.w-music .w-title {
+  font: 500 14px/1.15 "DM Sans", sans-serif;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.w-music .w-title {
+  display: block;
+}
+.w-artist {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  color: color-mix(in srgb, var(--text) 70%, transparent);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.w-artist:empty {
+  display: none;
+}
+/* the bars: three small lavender lines, still unless something is playing */
+.w-eq {
+  display: none;
+  align-items: end;
+  gap: 2px;
+  height: 9px;
+}
+.w-eq i {
+  width: 2px;
+  height: 100%;
+  border-radius: 1px;
+  background: var(--signal);
+  transform-origin: bottom;
+}
+.w-music.playing .w-eq {
+  display: inline-flex;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .w-music.playing .w-eq i {
+    animation: w-eq 0.9s ease-in-out infinite alternate;
+  }
+  .w-eq i:nth-child(2) { animation-delay: -0.3s !important; }
+  .w-eq i:nth-child(3) { animation-delay: -0.6s !important; }
+}
+@keyframes w-eq {
+  from { scale: 1 0.3; }
+  to { scale: 1 1; }
+}
+
+/* the widgets arrive after the tags have booted (the page's intro) */
+@media (prefers-reduced-motion: no-preference) {
+  .w {
+    animation: w-in 0.8s var(--ease) both;
+  }
+  .w-col:first-child .w:nth-child(1) { animation-delay: 0.9s; }
+  .w-col:first-child .w:nth-child(2) { animation-delay: 1.05s; }
+  .w-col:last-child .w:nth-child(1) { animation-delay: 1.2s; }
+  .w-col:last-child .w:nth-child(2) { animation-delay: 1.35s; }
+}
+@keyframes w-in {
+  from { opacity: 0; translate: 0 12px; }
+}
+
+/* phones and short windows: the page flows; the widgets sit in a 2 x 2 block under the tags */
+@media (max-width: 760px), (max-height: 600px) {
+  .widgets {
+    --w: min(172px, calc((100vw - 2 * var(--edge) - 14px) / 2));
+    position: relative;
+    inset: auto;
+    display: grid;
+    grid-template-columns: repeat(2, var(--w));
+    justify-content: center;
+    gap: 14px;
+    pointer-events: auto;
+  }
+  .w-col {
+    position: static;
+    display: contents;
+    translate: none;
+  }
+}
