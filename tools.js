@@ -1,4 +1,4 @@
-// Written by E:/Claude/Programming/tools/publish.js - do not edit by hand. tools-page.js reads it.
+// Written by E:/Claude/Programming/web-tools/publish.js - do not edit by hand. tools-page.js reads it.
 export const TOOLS = [
   {
     "id": "steam-showcase-editor",
