@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="favicon.ico" sizes="48x48">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <title>tools · iameric</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400&family=DM+Sans:opsz,wght@9..40,500&family=Unbounded:wght@600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,1,0&icon_names=arrow_back&display=block" rel="stylesheet">
+  <link rel="stylesheet" href="sub.css">
+  <link rel="stylesheet" href="links.css">
+  <link rel="stylesheet" href="footer.css">
+</head>
+<body class="subpage">
+  <!-- the tools, drawn by tools-page.js from tools.js (written by tools/publish.js), each card opens its tool.
+       The home page loads this <main> into itself; data-page names the module it mounts -->
+  <main class="screen scrolls" data-page="tools-page.js">
+    <a class="sub-mark" href="index.html" data-back aria-label="iameric, back to the home page"><i class="mark-logo" aria-hidden="true"></i><span class="mark-word" aria-hidden="true">iameric</span><span class="mark-back" aria-hidden="true"><span class="material-symbols-outlined">arrow_back</span>back</span></a>
+    <h1 tabindex="-1">tools</h1>
+    <section class="pj" aria-label="tools">
+      <div class="pj-intro" lang="en">
+        <p>Small tools I built for myself and anyone who needs them. They run right in the browser, nothing to install.</p>
+      </div>
+      <ul class="pj-list"></ul>
+    </section>
+    <footer class="sub-foot foot">
+      <img class="foot-code" src="assets/barcode.svg" alt="" width="110" height="22">
+      <p class="foot-col"><span>© <span class="year">2026</span></span><b>iameric</b></p>
+      <p class="foot-col"><span>version</span><b class="version">v1.0</b></p>
+      <p class="foot-col"><span>imprint</span><a class="lk" href="legal.html">legal notice</a></p>
+      <a class="foot-logo" href="index.html" data-back aria-label="iameric, back to the home page"><img src="assets/logo.svg" alt="" width="30" height="30"></a>
+    </footer>
+  </main>
+  <script src="sub.js"></script>
+  <script type="module">
+    import { mount } from './tools-page.js';
+    mount(document.body);
+  </script>
+</body>
+</html>

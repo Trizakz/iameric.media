@@ -615,6 +615,30 @@ html:has(> body.subpage .screen.scrolls) {
   gap: 8px;
   padding: 4px 12px 4px 16px;
 }
+/* tools: the title link covers the whole card */
+.tl-open {
+  color: inherit;
+  text-decoration: none;
+}
+.tl-open::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: 26px;
+}
+.tl-open:focus-visible {
+  outline: none;
+}
+.tl-card:has(.tl-open:focus-visible)::after {
+  opacity: 1;
+}
+.tl-desc {
+  margin: -4px 0 0;
+  font: 400 14px/1.45 "DM Sans", sans-serif;
+  color: color-mix(in srgb, var(--ink) 70%, transparent);
+  text-wrap: pretty;
+}
 .pj-empty {
   margin: 40px 0 0;
   text-align: center;
