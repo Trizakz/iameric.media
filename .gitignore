@@ -13,3 +13,8 @@ PRODUCT.md
 .claude/
 # logo source files (only what a page uses gets uploaded)
 logo/
+# source footage, only the small web versions in assets/ are uploaded
+_media/
+# local only: the tile and band editors behind the red pencils (they save tool-styles.js and category-styles.js, which are uploaded)
+tools-edit.js
+projects-edit.js

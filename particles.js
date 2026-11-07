@@ -41,7 +41,8 @@ const VARIANTS = {
 };
 
 function dust(v) {
-  const COUNT = v.count, COLORS = v.colors.map(c => new THREE.Color(c));
+  // fewer specks on smaller screens: the full count from 1600 px wide, down to 40 % on a phone
+  const COUNT = Math.round(v.count * Math.min(1, Math.max(0.4, innerWidth / 1600))), COLORS = v.colors.map(c => new THREE.Color(c));
   const geo = new THREE.BufferGeometry();
   const pos = new Float32Array(COUNT * 3), seed = new Float32Array(COUNT), col = new Float32Array(COUNT * 3);
   for (let i = 0; i < COUNT; i++) {

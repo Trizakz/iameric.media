@@ -145,7 +145,7 @@
   -webkit-mask-image: linear-gradient(90deg, #000 var(--sweep), transparent calc(var(--sweep) + 40%));
   mask-image: linear-gradient(90deg, #000 var(--sweep), transparent calc(var(--sweep) + 40%));
 }
-.subpage .sub-mark .mark-back .material-symbols-outlined {
+.subpage .sub-mark .mark-back .material-symbols-rounded {
   font-size: 1.05em;
   margin-block: -1em; /* taller than the letters: it must not move them off the block */
 }
@@ -299,7 +299,7 @@ html:has(> body.subpage .screen.scrolls) {
   box-sizing: border-box;
   padding: 5px;
   border-radius: 999px;
-  border: 1.5px solid rgba(255, 255, 255, 0.28);
+  background: #ece5d6;
 }
 .pj-views button {
   display: grid;
@@ -309,12 +309,12 @@ html:has(> body.subpage .screen.scrolls) {
   border: 0;
   border-radius: 999px;
   background: transparent;
-  color: color-mix(in srgb, var(--text) 62%, transparent);
+  color: rgb(23 19 12 / 0.55);
   cursor: pointer;
   transition: background-color 0.2s ease-out, color 0.2s ease-out;
 }
 .pj-views button:hover {
-  color: var(--text);
+  color: #17130c;
 }
 .pj-views button:focus-visible {
   outline: 2px solid var(--text);
@@ -324,10 +324,10 @@ html:has(> body.subpage .screen.scrolls) {
   background: var(--signal);
   color: var(--bg);
 }
-.pj-views .material-symbols-outlined {
+.pj-views .material-symbols-rounded {
   font-size: 20px;
 }
-/* the search bar: a frosted pill, the sort arrow as a filled disc at its end */
+/* the search bar: a cream pill, the sort arrow as a filled disc at its end */
 .pj-search {
   display: flex;
   align-items: center;
@@ -338,16 +338,15 @@ html:has(> body.subpage .screen.scrolls) {
   height: 50px;
   padding: 0 6px 0 18px;
   border-radius: 999px;
-  border: 1.5px solid rgba(255, 255, 255, 0.28);
-  transition: border-color 0.25s ease-out, box-shadow 0.25s ease-out;
+  background: #ece5d6;
+  transition: box-shadow 0.25s ease-out;
 }
 .pj-search:focus-within {
-  border-color: #fff;
-  box-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 0 2px var(--signal), 0 0 14px rgb(179 157 255 / 0.4);
 }
-.pj-search > .material-symbols-outlined {
+.pj-search > .material-symbols-rounded {
   font-size: 20px;
-  color: color-mix(in srgb, var(--text) 62%, transparent);
+  color: rgb(23 19 12 / 0.55);
 }
 .pj-search input {
   flex: 1;
@@ -358,11 +357,11 @@ html:has(> body.subpage .screen.scrolls) {
   outline: 0;
   background: transparent;
   font: 400 16px "DM Sans", sans-serif;
-  color: var(--text);
-  caret-color: var(--signal);
+  color: #17130c;
+  caret-color: #6a4fe0;
 }
 .pj-search input::placeholder {
-  color: color-mix(in srgb, var(--text) 50%, transparent);
+  color: rgb(23 19 12 / 0.52);
 }
 .pj-search input::-webkit-search-cancel-button {
   -webkit-appearance: none;
@@ -389,11 +388,11 @@ html:has(> body.subpage .screen.scrolls) {
   outline-offset: 3px;
 }
 /* the arrow turns over when the order flips, with a small overshoot */
-.pj-sort .material-symbols-outlined {
+.pj-sort .material-symbols-rounded {
   font-size: 22px;
   transition: rotate 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-.pj-sort.flipped .material-symbols-outlined {
+.pj-sort.flipped .material-symbols-rounded {
   rotate: 180deg;
 }
 .pj-chips {
@@ -405,15 +404,15 @@ html:has(> body.subpage .screen.scrolls) {
 .pj-chip {
   padding: 7px 15px;
   border-radius: 999px;
-  border: 1.5px solid rgba(255, 255, 255, 0.28);
-  background: transparent;
+  border: 1.5px solid #ece5d6;
+  background: #ece5d6;
   font: 500 14px/1 "DM Sans", sans-serif;
-  color: var(--text);
+  color: #17130c;
   cursor: pointer;
   transition: border-color 0.2s ease-out, background-color 0.2s ease-out, color 0.2s ease-out;
 }
 .pj-chip:hover {
-  border-color: #fff;
+  background: #f6f1e6;
 }
 .pj-chip:focus-visible {
   outline: 2px solid var(--text);
@@ -424,60 +423,125 @@ html:has(> body.subpage .screen.scrolls) {
   background: var(--signal);
   color: var(--bg);
 }
-/* the cards: a pearl plate, like the about page's connections. The picture is inset, the date sits in a notch cut
-   into its top right corner; below, the title and the categories as tags. .rows lays the same cards out as lines */
+/* the cards. Projects: a frosted glass folder, the project's picture standing straight inside it with its top out of
+   the folder; the date on the back's tab, on the glass the title and the categories stamped in as icons. Tools: a
+   square tile in the tool's colour with a numbered note and the tool's logo. .rows lays the project cards out as lines */
 .pj-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
-  gap: clamp(24px, 2.6vw, 36px);
+  --cols: 5; /* five per row, fewer on smaller screens */
+  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+  gap: clamp(36px, 4vw, 56px) clamp(20px, 2.2vw, 32px);
   margin: clamp(40px, 7vh, 72px) 0 0;
   padding: 12px;
   list-style: none;
 }
-.pj-card {
-  --plate: #dcdbe1;
-  --ink: #17130c; /* the badges' ink */
-  --fillet: 14px; /* the notch's inner curves */
+@media (max-width: 1099px) {
+  .pj-list { --cols: 4; }
+}
+@media (max-width: 859px) {
+  .pj-list { --cols: 3; }
+}
+@media (max-width: 639px) {
+  .pj-list { --cols: 2; }
+}
+@media (max-width: 419px) {
+  .pj-list { --cols: 1; }
+}
+.pj-card,
+.tl-card {
+  --ink: var(--text);
   position: relative;
   display: grid;
   align-content: start;
-  padding: 8px;
-  border-radius: 26px; /* 18 + 8 */
-  background: radial-gradient(120% 50% at 50% 118%, #fff, transparent 70%), var(--plate);
-  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.45);
-  color: var(--ink);
-  transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.3s ease-out 0.12s;
-}
-/* the white ring round the hovered card, with a soft glow */
-.pj-card::after {
-  content: "";
-  position: absolute;
-  inset: -6px;
-  border-radius: 32px;
-  border: 2px solid #fff;
-  filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.8));
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.25s ease-out;
-}
-.pj-card:hover {
-  transform: scale(1.03);
-}
-.pj-card:hover::after {
-  opacity: 1;
+  gap: 20px;
+  transition: filter 0.3s ease-out 0.12s;
 }
 @media (hover: hover) {
-  .pj-list:has(.pj-card:hover) .pj-card:not(:hover) {
-    filter: brightness(0.68);
-    transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.3s ease-out;
+  .pj-list:has(> li:hover) > li:not(:hover) {
+    filter: brightness(0.6);
+    transition: filter 0.3s ease-out;
   }
 }
-.pj-pic {
+.pj-card:hover {
+  z-index: 1; /* the risen picture lies over the neighbours */
+}
+
+/* the folder, 25 : 23, a little wider than tall. Back to front: the back with its tab on the left (its outline is
+   BACK in projects-page.js, set as the mask --pj-back, 250 x 216 like the back's own box) and its lit edge, the date
+   on the tab, the picture, the glass front */
+.pj-folder {
   position: relative;
-  aspect-ratio: 1;
-  border-radius: 18px;
+  isolation: isolate;
+  user-select: none; /* title, date and icons on the folder are part of the object, not text to copy */
+  -webkit-user-select: none;
+  justify-self: center;
+  width: min(100%, 220px);
+  aspect-ratio: 25 / 23;
+}
+/* the folder's soft shadow on the ground */
+.pj-folder::after {
+  content: "";
+  position: absolute;
+  left: 6%;
+  right: 6%;
+  bottom: -7%;
+  height: 14%;
+  z-index: -1;
+  background: radial-gradient(50% 50% at 50% 50%, rgb(0 0 0 / 0.55), transparent 100%);
+  filter: blur(6px);
+}
+.pj-back,
+.pj-edge {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 6%;
+  height: 94%;
+}
+.pj-back {
+  background: linear-gradient(180deg, #2a2930, #17161b 60%);
+  -webkit-mask: var(--pj-back) 0 0 / 100% 100% no-repeat;
+  mask: var(--pj-back) 0 0 / 100% 100% no-repeat;
+}
+.pj-edge {
+  width: 100%;
+  fill: none;
+  stroke: rgb(255 255 255 / 0.1);
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+/* the date, small on the tab */
+.pj-tab {
+  position: absolute;
+  left: 6%;
+  top: 7.6%;
+  font: 500 10px/1 var(--mono);
+  letter-spacing: 0.04em;
+  color: color-mix(in srgb, var(--ink) 70%, transparent);
+}
+/* the picture: a print in an off-white frame, standing straight, only its top out of the folder. On hover it comes
+   out further and, once clear of the glass, lies over the front (z-index switches a moment into the rise; leaving,
+   it slides straight back behind the glass) */
+.pj-pic {
+  position: absolute;
+  z-index: 1;
+  left: 13%;
+  right: 13%;
+  top: 13%;
+  height: 52%;
   overflow: hidden;
+  border: 3px solid #e6e4df;
+  border-radius: 12px;
   background: #121116;
+  box-shadow: 0 12px 26px -10px rgb(0 0 0 / 0.75);
+  transition: translate 0.6s var(--ease), scale 0.6s var(--ease), box-shadow 0.6s var(--ease), z-index 0s;
+}
+.pj-card:hover .pj-pic {
+  z-index: 3;
+  translate: 0 -34%;
+  scale: 1.1;
+  box-shadow: 0 22px 40px -12px rgb(0 0 0 / 0.85);
+  transition: translate 0.6s var(--ease), scale 0.6s var(--ease), box-shadow 0.6s var(--ease), z-index 0s 0.16s;
 }
 .pj-pic img,
 .pj-ph {
@@ -485,16 +549,10 @@ html:has(> body.subpage .screen.scrolls) {
   inset: 0;
   width: 100%;
   height: 100%;
-  transition: scale 0.6s var(--ease);
 }
 .pj-pic img {
   object-fit: cover;
   display: block;
-}
-/* the picture leans in a little under the pointer */
-.pj-card:hover .pj-pic img,
-.pj-card:hover .pj-ph {
-  scale: 1.05;
 }
 /* no picture yet: the same for every project, one gradient from deep violet into the lavender of --signal (no
    white), a soft lavender glow at the bottom, the logo faint in white in the middle */
@@ -513,64 +571,99 @@ html:has(> body.subpage .screen.scrolls) {
   -webkit-mask: url(assets/logo.svg) center / contain no-repeat;
   mask: url(assets/logo.svg) center / contain no-repeat;
 }
-/* the notch: from the card's own corner into the picture's, in the plate's colour, joined to the picture's top
-   and right edges by two concave curves (a square of plate colour with a quarter circle of picture left in it).
-   It reaches over the picture's rounded corner, so nothing of that corner shows */
-.pj-date {
+/* the glass front: a plain rounded pane, frosted, clearer at the top and milkier towards the bottom, so the picture
+   behind it blurs away; a thin light edge, brightest along the top */
+.pj-front {
   position: absolute;
-  z-index: 1;
-  top: 0;
+  z-index: 2;
+  left: 0;
   right: 0;
-  padding: 16px 16px 9px 14px;
-  border-radius: 0 26px 0 16px;
-  background: var(--plate);
-  font: 500 13px/1 var(--mono);
-  letter-spacing: 0.02em;
-  color: var(--ink);
+  bottom: 0;
+  height: 76%;
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgb(230 228 223 / 0.08), rgb(230 228 223 / 0.2) 75%, rgb(230 228 223 / 0.26));
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.3), inset 0 0 0 1px rgb(255 255 255 / 0.12);
+  -webkit-backdrop-filter: blur(14px) saturate(1.4);
+  backdrop-filter: blur(14px) saturate(1.4);
+  transition: background-color 0.4s ease-out;
 }
-.pj-date::before,
-.pj-date::after {
+.pj-card:hover .pj-front {
+  background-color: rgb(179 157 255 / 0.06);
+}
+/* the title, written on the glass in the middle of the folder's body */
+.subpage .pj-name {
+  position: absolute;
+  inset: 10% 9% 22%;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  font: 600 clamp(15px, 1.3vw, 18px)/1.18 "Unbounded", sans-serif;
+  letter-spacing: -0.01em;
+  text-align: center;
+  color: var(--ink);
+  text-shadow: 0 1px 12px rgb(0 0 0 / 0.35);
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+/* the categories: one small coloured band per category, wrapped round the folder's foot at the bottom right (it runs
+   a little past the edge and darkens where it turns under), a soft gradient along it, and the category's icon
+   pressed into it. Colours: --band-<category> on the list (projects-page.js) */
+.pj-stamp {
+  position: absolute;
+  right: 8%;
+  bottom: -4px;
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  margin: 0;
+}
+.pj-band {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  width: 22px;
+  height: 38px;
+  padding-top: 6px;
+  box-sizing: border-box;
+  border-radius: 3px 3px 5px 5px;
+  background: linear-gradient(180deg, color-mix(in oklch, var(--band), #fff 28%), var(--band) 50%, color-mix(in oklch, var(--band), #000 18%));
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.45), 0 2px 4px rgb(0 0 0 / 0.35);
+}
+/* where it turns under the folder's edge */
+.pj-band::after {
   content: "";
   position: absolute;
-  width: var(--fillet);
-  height: var(--fillet);
-  background: radial-gradient(circle at 0 100%, transparent calc(var(--fillet) - 0.5px), var(--plate) var(--fillet));
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 4px;
+  border-radius: 0 0 5px 5px;
+  background: linear-gradient(180deg, rgb(0 0 0 / 0.35), rgb(0 0 0 / 0.15));
 }
-/* each fillet reaches 1px past its edges, into the plate and under the notch, so no hairline of the picture opens
-   between the pieces while the card is scaled on hover; the curve's centre stays on the picture's corner */
-.pj-date::before {
-  top: 7px; /* the picture's top edge is at 8px */
-  right: calc(100% - 1px);
-  width: calc(var(--fillet) + 1px);
-  height: calc(var(--fillet) + 1px);
+.pj-band .material-symbols-rounded {
+  font-size: 15px;
+  color: color-mix(in oklch, var(--band), #140c2c 55%);
+  text-shadow: 0 1px 0 rgb(255 255 255 / 0.4), 0 -1px 0 rgb(0 0 0 / 0.15);
 }
-.pj-date::after {
-  top: calc(100% - 1px);
-  right: 7px; /* the picture's right edge is at 8px */
-  width: calc(var(--fillet) + 1px);
-  height: calc(var(--fillet) + 1px);
-}
+/* title, date and tags beside the small folder: rows only */
 .pj-info {
-  display: grid;
-  gap: 12px;
-  padding: 16px 10px 10px 12px;
+  display: none;
 }
-.subpage .pj-name {
+.pj-row-name {
   margin: 0;
   font: 500 20px/1.2 "DM Sans", sans-serif;
   letter-spacing: -0.01em;
   color: var(--ink);
-  text-wrap: balance;
 }
-/* the date beside the title, for rows only (the notch is too large on the small picture) */
 .pj-when {
-  display: none;
   font: 13px/1 var(--mono);
   color: color-mix(in srgb, var(--ink) 65%, transparent);
 }
 .pj-cats {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 6px;
   margin: 0;
   padding: 0;
@@ -582,40 +675,164 @@ html:has(> body.subpage .screen.scrolls) {
   gap: 5px;
   padding: 5px 11px 5px 8px;
   border-radius: 999px;
-  background: rgba(23, 19, 12, 0.08);
+  border: 1px solid rgb(230 228 223 / 0.08);
+  background: rgb(230 228 223 / 0.06);
   font: 500 12px/1 "DM Sans", sans-serif;
-  color: color-mix(in srgb, var(--ink) 75%, transparent);
+  color: color-mix(in srgb, var(--ink) 80%, transparent);
 }
-.pj-cats .material-symbols-outlined {
+.pj-cats .material-symbols-rounded {
   font-size: 15px;
 }
-/* rows: the picture small on the left, title, date and tags beside it */
+/* rows: the folder small on the left, title, date and tags beside it */
 .pj-list.rows {
   grid-template-columns: minmax(0, 1fr);
-  gap: 24px;
+  gap: 22px;
 }
 .pj-list.rows .pj-card {
-  grid-template-columns: 140px minmax(0, 1fr);
+  grid-template-columns: 130px minmax(0, 1fr);
   align-items: center;
-  gap: 8px;
+  gap: 28px;
 }
-.pj-list.rows .pj-card:hover {
-  transform: scale(1.01);
-}
-.pj-list.rows .pj-pic {
-  aspect-ratio: 4 / 3;
-}
-.pj-list.rows .pj-date {
+/* on the small folder only the picture and the stamps; the title stays there for screen readers */
+.pj-list.rows .pj-tab {
   display: none;
 }
-.pj-list.rows .pj-when {
-  display: block;
+.pj-list.rows .pj-name {
+  clip-path: inset(50%);
+  opacity: 0;
+}
+.pj-list.rows .pj-band {
+  width: 15px;
+  height: 26px;
+  padding-top: 4px;
+}
+.pj-list.rows .pj-band .material-symbols-rounded {
+  font-size: 11px;
 }
 .pj-list.rows .pj-info {
+  display: grid;
+  justify-items: start;
   gap: 8px;
-  padding: 4px 12px 4px 16px;
+  text-align: left;
 }
-/* tools: the title link covers the whole card */
+.pj-list.rows .pj-cats {
+  justify-content: flex-start;
+}
+
+/* the tools: a square tile in the tool's colour (--tile: tool-styles.js, set with the pencil on tools.html), a cream
+   note set into it with the number in Unbounded, the title and the description, and the tool's logo as an app icon
+   over the note's top right corner. Nested corners: tile 22 = note 12 + its inset 10 */
+.tl-tile {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 22px;
+  background: linear-gradient(160deg, color-mix(in oklch, var(--tile), #fff 22%), var(--tile) 62%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.5), 0 16px 30px -14px rgb(0 0 0 / 0.7);
+  transition: translate 0.5s var(--ease), box-shadow 0.5s var(--ease);
+}
+.tl-card:hover .tl-tile {
+  translate: 0 -5px;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.5), 0 26px 40px -16px rgb(0 0 0 / 0.8);
+}
+.tl-card:has(.tl-open:focus-visible) .tl-tile {
+  outline: 2px solid var(--text);
+  outline-offset: 4px;
+}
+.tl-note {
+  position: absolute;
+  left: 6%;
+  right: 6%;
+  top: 17%;
+  bottom: 6%;
+  display: block;
+  box-sizing: border-box;
+  padding: 7% 7% 24%; /* room at the foot for the number's band */
+  overflow: hidden;
+  border-radius: 12px;
+  background: #f6f3ec;
+  box-shadow: 0 6px 14px -8px rgb(0 0 0 / 0.35);
+  color: #17130c;
+}
+/* the tool's version, small in the bottom right corner of the note */
+.tl-ver {
+  position: absolute;
+  z-index: 1;
+  right: 11%;
+  bottom: 10%;
+  font: 500 11px/1 var(--mono);
+  letter-spacing: 0.02em;
+  color: rgb(23 19 12 / 0.55);
+}
+/* the number's band round the tile's foot: the same band as round the project folders (.pj-band), in the "tool"
+   category's colour (--band-tool, tools-page.js), running past the edge and darker where it turns under */
+.tl-band {
+  position: absolute;
+  z-index: 1;
+  left: 11%;
+  bottom: -5px;
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  width: 17%;
+  height: 27%;
+  padding-top: 5%;
+  box-sizing: border-box;
+  border-radius: 3px 3px 6px 6px;
+  background: linear-gradient(180deg, color-mix(in oklch, var(--band-tool), #fff 28%), var(--band-tool) 50%, color-mix(in oklch, var(--band-tool), #000 18%));
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.45), 0 2px 4px rgb(0 0 0 / 0.35);
+}
+.tl-band::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 5px;
+  border-radius: 0 0 6px 6px;
+  background: linear-gradient(180deg, rgb(0 0 0 / 0.35), rgb(0 0 0 / 0.15));
+}
+.tl-num {
+  font: 500 clamp(13px, 1.2vw, 20px)/1 var(--mono);
+  letter-spacing: -0.02em;
+  color: color-mix(in oklch, var(--band-tool), #140c2c 60%);
+  text-shadow: 0 1px 0 rgb(255 255 255 / 0.4), 0 -1px 0 rgb(0 0 0 / 0.15);
+}
+.subpage .tl-name {
+  margin: 0;
+  font: 600 clamp(13px, 1vw, 16px)/1.15 "DM Sans", sans-serif;
+  letter-spacing: -0.01em;
+  color: #17130c;
+  text-wrap: balance;
+}
+.tl-logo {
+  position: absolute;
+  z-index: 1;
+  top: 5%;
+  right: 4%;
+  display: grid;
+  place-items: center;
+  width: 25%;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 8px 16px -8px rgb(0 0 0 / 0.45);
+  transition: rotate 0.6s var(--ease), scale 0.6s var(--ease);
+}
+.tl-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.tl-logo .material-symbols-rounded {
+  font-size: clamp(22px, 2vw, 30px);
+  color: color-mix(in oklch, var(--tile) 55%, #140c2c);
+}
+.tl-card:hover .tl-logo {
+  rotate: 6deg;
+  scale: 1.06;
+}
+/* the title link covers the whole card */
 .tl-open {
   color: inherit;
   text-decoration: none;
@@ -625,19 +842,133 @@ html:has(> body.subpage .screen.scrolls) {
   position: absolute;
   inset: 0;
   z-index: 2;
-  border-radius: 26px;
 }
 .tl-open:focus-visible {
   outline: none;
 }
-.tl-card:has(.tl-open:focus-visible)::after {
-  opacity: 1;
+/* the whole description: tools-page.js (fitNotes) sets its size so it fills the note without spilling over */
+/* a float the size of the logo's corner, so the title's first line wraps round the logo instead of under it */
+.tl-note::before {
+  content: "";
+  float: right;
+  width: 25%;
+  padding-top: 10.5%;
 }
 .tl-desc {
-  margin: -4px 0 0;
-  font: 400 14px/1.45 "DM Sans", sans-serif;
-  color: color-mix(in srgb, var(--ink) 70%, transparent);
+  margin: 2px 0 0;
+  font: 400 13px/1.25 "DM Sans", sans-serif;
+  color: rgb(23 19 12 / 0.7);
   text-wrap: pretty;
+}
+/* the admin pencils, only while working on the site locally (they never reach the published site): strawberry
+   red with a glow, so it is plain what visitors will not see */
+/* the pencil sits at the foot of the title, as on the about page; its panel is tools-edit.js */
+.tl-edit {
+  margin-left: 0.25em;
+  padding: 0;
+  border: 0;
+  background: none;
+  vertical-align: baseline;
+  font-size: 28px;
+  line-height: 1;
+  color: #ff3b5c;
+  filter: drop-shadow(0 0 6px rgb(255 59 92 / 0.75));
+  cursor: pointer;
+  transition: color 0.25s ease-out, filter 0.25s ease-out;
+}
+.tl-edit:hover,
+.tl-edit:focus-visible {
+  color: #ff7088;
+  filter: drop-shadow(0 0 10px rgb(255 59 92 / 0.95));
+}
+.tl-edit .material-symbols-rounded {
+  font-size: 28px;
+}
+.tl-editor {
+  width: min(92vw, 560px);
+  padding: 22px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--panel);
+  color: var(--text);
+  font: 14px/1.4 "DM Sans", sans-serif;
+}
+.tl-editor::backdrop {
+  background: rgb(0 0 0 / 0.55);
+}
+.tl-editor h2 {
+  margin: 0 0 14px;
+  font: 600 18px/1.2 "Unbounded", sans-serif;
+}
+.te-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto auto auto;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-top: 1px solid var(--line);
+}
+.te-row.te-cat {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+.te-row input[type="color"] {
+  width: 38px;
+  height: 30px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: none;
+}
+.te-logo {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  overflow: hidden;
+  border-radius: 9px;
+  background: #fff;
+}
+.te-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.te-logo .material-symbols-rounded {
+  font-size: 20px;
+  color: #6a6b73;
+}
+.tl-editor button,
+.te-pick {
+  padding: 7px 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #1f1f23;
+  font: 500 13px/1 "DM Sans", sans-serif;
+  color: var(--text);
+  cursor: pointer;
+}
+.tl-editor button:hover,
+.te-pick:hover {
+  border-color: var(--signal);
+}
+.tl-editor .te-save {
+  border-color: var(--signal);
+  background: var(--signal);
+  color: var(--bg);
+}
+.te-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+.te-note {
+  flex: 1 1 100%;
+  margin: 0 0 4px;
+  font: 12px/1.4 var(--mono);
+  color: color-mix(in srgb, var(--text) 60%, transparent);
 }
 .pj-empty {
   margin: 40px 0 0;
@@ -653,17 +984,22 @@ html:has(> body.subpage .screen.scrolls) {
     gap: 8px;
   }
   .pj-list.rows .pj-card {
-    grid-template-columns: 96px minmax(0, 1fr);
+    grid-template-columns: 104px minmax(0, 1fr);
+    gap: 18px;
   }
-  .subpage .pj-list.rows .pj-name {
+  .pj-list.rows .pj-row-name {
     font-size: 15px;
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .pj-sort .material-symbols-outlined,
+  .pj-sort .material-symbols-rounded,
   .pj-card,
-  .pj-pic img,
-  .pj-ph {
+  .tl-card,
+  .pj-pic,
+  .pj-card:hover .pj-pic,
+  .pj-front,
+  .tl-tile,
+  .tl-logo {
     transition: none;
   }
 }

@@ -17,6 +17,8 @@ export const CATEGORIES = {
   video: { label: 'Video', icon: 'videocam' },
   graphics: { label: 'Graphics', icon: 'palette' },
   web: { label: 'Web', icon: 'language' },
+  // the tools (tools.js) join the projects with this category; projects-page.js adds them, so they are not listed below
+  tool: { label: 'Tool', icon: 'deployed_code' },
 };
 
 export const PROJECTS = [

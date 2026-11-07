@@ -85,12 +85,12 @@ a.w:focus-visible {
   gap: 6px;
   font-weight: 500;
 }
-.w-city .material-symbols-outlined {
+.w-city .material-symbols-rounded {
   font-size: 20px;
   opacity: 0;
   transition: opacity 0.4s ease-out;
 }
-.w-clock.has-weather .w-city .material-symbols-outlined {
+.w-clock.has-weather .w-city .material-symbols-rounded {
   opacity: 1;
 }
 .w-time {
@@ -210,7 +210,7 @@ a.w:focus-visible {
   height: 100%;
   object-fit: cover;
 }
-.w-art .material-symbols-outlined {
+.w-art .material-symbols-rounded {
   font-size: calc(var(--w) * 0.18);
   color: rgba(255, 255, 255, 0.85);
 }

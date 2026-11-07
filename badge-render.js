@@ -118,7 +118,7 @@ function content(b, ink, id) {
   const size = b.icon ? b.iconSize : 0, textH = b.fontSize + (lines.length - 1) * lh;
   const total = size + (size ? b.gap : 0) + textH, top = C - total / 2, y = top + total - textH + b.fontSize / 2;
   const icon = b.icon
-    ? `<text x="${f(cx)}" y="${f(top + size / 2)}" class="ab-icon" filter="url(#${id}-press)" text-anchor="middle" dominant-baseline="central" fill="${ink}" font-family="Material Symbols Outlined" font-size="${size}" style="font-variation-settings:'wght' ${b.iconWeight},'GRAD' ${b.iconGrade},'opsz' 48"${b.iconRot ? ` transform="rotate(${b.iconRot} ${f(cx)} ${f(top + size / 2)})"` : ''}>${esc(b.icon)}</text>`
+    ? `<text x="${f(cx)}" y="${f(top + size / 2)}" class="ab-icon" filter="url(#${id}-press)" text-anchor="middle" dominant-baseline="central" fill="${ink}" font-family="Material Symbols Rounded" font-size="${size}" style="font-variation-settings:'wght' ${b.iconWeight},'GRAD' ${b.iconGrade},'opsz' 48"${b.iconRot ? ` transform="rotate(${b.iconRot} ${f(cx)} ${f(top + size / 2)})"` : ''}>${esc(b.icon)}</text>`
     : '';
   const text = `<text y="${f(y)}" text-anchor="middle" dominant-baseline="central" fill="${ink}" font-family='${FONTS[b.font]?.css || FONTS['DM Sans'].css}' font-weight="${b.weight}" font-size="${b.fontSize}" letter-spacing="${b.tracking / 100}em">${lines.map((l, i) => `<tspan x="${f(cx)}" dy="${i ? f(lh) : 0}">${esc(l)}</tspan>`).join('')}</text>`;
   return icon + text;
@@ -238,7 +238,7 @@ export function ensureFonts(doc, badges, { allIcons = false } = {}) {
     head.append(l);
   }
   const names = new Set(badges.map(b => b.icon).filter(Boolean));
-  doc.querySelectorAll('.material-symbols-outlined').forEach(el => names.add(el.textContent.trim()));
+  doc.querySelectorAll('.material-symbols-rounded').forEach(el => names.add(el.textContent.trim()));
   // also every icon the page's own icon links load: some are only drawn on canvas (the home page's 3D
   // tags draw person, mail, ... on their screens), so they are not in the DOM, and a subset without
   // them would win and turn those icons into their plain names
@@ -252,7 +252,7 @@ export function ensureFonts(doc, badges, { allIcons = false } = {}) {
   const l = doc.createElement('link');
   l.rel = 'stylesheet';
   l.dataset.badgeIcons = key;
-  l.href = `https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,1,-50..200${allIcons ? '' : `&icon_names=${key}`}&display=block`;
+  l.href = `https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,1,-50..200${allIcons ? '' : `&icon_names=${key}`}&display=block`;
   head.append(l);
   if (old) l.addEventListener('load', () => old.remove());
 }

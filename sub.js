@@ -17,9 +17,9 @@ if (document.body.classList.contains('subpage')) {
   });
   document.fonts.ready.then(() => fitSubTitle(document.body));
   addEventListener('resize', () => fitSubTitle(document.body));
-  // the wordmark's logo builds itself on every load, as on the home page
+  // the wordmark's logo goes round its loop once on every load
   const logo = document.querySelector('.sub-mark .mark-logo');
-  if (logo && !matchMedia('(prefers-reduced-motion: reduce)').matches) import('./logo-build.js').then(m => m.buildMark(logo));
+  if (logo && !matchMedia('(prefers-reduced-motion: reduce)').matches) import('./logo-build.js').then(m => m.loopMark(logo));
   // a few specks floating up through the glow
   import('./glow-dust.js').then(m => m.mountDust(document.body));
 }

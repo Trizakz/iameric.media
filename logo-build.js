@@ -1,10 +1,11 @@
 // The logo's build and orbit, one signed distance field drawn with WebGL (see FRAG), as approved in
-// logo/animation/logo-loop-final.html. Used by splash.js (the home page's splash) and by the wordmark's intro on
-// every page (the logo builds itself, small, beside the word).
+// logo/animation/logo-loop-final.html. Used by splash.js (the old home page's splash) and by the wordmark on
+// every sub page (the logo, small beside the word, goes round its loop once).
 //
 //   drawState(buildState(t), 'canvas.x');   // the build at t (0..1, over BUILD ms) into every matching canvas
 //   drawState(loopState(ms), 'canvas.x');   // the build once, then the orbit; ms since the start
 //   buildMark(logoEl);                      // the wordmark's logo builds itself once, in its place
+//   loopMark(logoEl);                       // the wordmark's logo goes round the loop once, in its place (no build)
 //   (each canvas takes its colour from its CSS color)
 
   const RING = { x: 141.55, y: 141.55, r: 36.4 }, HOLE = { x: 134.27, y: 134.27, r: 16.74 };
@@ -224,23 +225,23 @@
       },
     };
   }
-  // the loop: the build, once; then the logo rests a moment, the moons go half way round (so the eye and the dot
-  // swap places), and the whole logo turns half way clockwise, which puts them back: every round lands upright.
-  // Every move eases in and out
-  const HOLD = 500, ORBIT = 1800, TURN = 1400, CYCLE = HOLD + ORBIT + TURN;
+  // the loop: the build, once; then the logo rests a moment and the moons go once all the way round their orbit,
+  // back to where they started: every round lands on the resting logo. The logo itself does not turn. Eases in and out
+  const HOLD = 500, ORBIT = 3200, CYCLE = HOLD + ORBIT;
   function loopState(ms) {
     if (ms < BUILD) return buildState(ms / BUILD);
     const c = (ms - BUILD) % CYCLE;
-    const theta = c < HOLD ? 0 : Math.PI * easeInOut(Math.min(1, (c - HOLD) / ORBIT));
-    const st = orbitState(theta);
-    st.rot = c < HOLD + ORBIT ? 0 : 180 * easeInOut((c - HOLD - ORBIT) / TURN);
-    return st;
+    return orbitState(c < HOLD ? 0 : 2 * Math.PI * easeInOut(Math.min(1, (c - HOLD) / ORBIT)));
   }
 
-  // the wordmark's intro: the logo builds itself once, small, in its place (the same build as the splash, a little
-  // quicker), on a canvas standing in for the static logo (.mark-build in sub.css)
+  // the wordmark's logo animated once, small, in its place, on a canvas standing in for the static logo (.mark-build
+  // in sub.css). buildMark: the build (as in the splash, a little quicker; the old home page, _home-3d.html).
+  // loopMark: the loop once without the build before it (the moons' full orbit), so it starts and
+  // ends as the resting logo (every sub page)
   const MARK_BUILD = 2400;
-  function buildMark(logo) {
+  const buildMark = logo => animateMark(logo, MARK_BUILD, t => buildState(t));
+  const loopMark = logo => animateMark(logo, CYCLE, t => loopState(BUILD + t * CYCLE));
+  function animateMark(logo, ms, stateAt) {
     const canvas = document.createElement('canvas');
     canvas.className = 'mark-build';
     canvas.setAttribute('aria-hidden', 'true');
@@ -250,8 +251,8 @@
     canvas.width = canvas.height = size;
     const start = performance.now();
     const frame = now => {
-      const t = Math.min(1, (now - start) / MARK_BUILD);
-      drawState(buildState(t), '.mark-build');
+      const t = Math.min(1, (now - start) / ms);
+      drawState(stateAt(t), '.mark-build');
       if (t < 1) return requestAnimationFrame(frame);
       // done: back to the static logo, and the GPU context goes back to the page
       canvas._gl?.gl.getExtension('WEBGL_lose_context')?.loseContext();
@@ -262,4 +263,4 @@
     requestAnimationFrame(frame);
   }
 
-export { BUILD, CYCLE, HOLD, buildState, orbitState, loopState, drawState, buildMark };
+export { BUILD, CYCLE, HOLD, buildState, orbitState, loopState, drawState, buildMark, loopMark };

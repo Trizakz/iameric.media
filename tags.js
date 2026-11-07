@@ -194,7 +194,7 @@ function iconScreen(tag, color) {
       g.clearRect(0, 0, c.width, c.height);
       g.fillStyle = g.strokeStyle = color;
       g.textBaseline = 'middle';
-      g.font = '120px "Material Symbols Outlined"';
+      g.font = '120px "Material Symbols Rounded"';
       g.fillText(tag.icon || '', 26, c.height / 2 + 4);
       g.font = '400 74px "DM Mono", monospace';
       g.fillText(time, 166, c.height / 2 + 4);
@@ -818,7 +818,7 @@ export async function mountTags(container, tags, { focusBlur = false, returnTo =
   await Promise.all([
     document.fonts.load('500 150px "DM Sans"'),
     document.fonts.load('400 64px "DM Mono"'),
-    document.fonts.load('96px "Material Symbols Outlined"', 'mail'),
+    document.fonts.load('96px "Material Symbols Rounded"', 'mail'),
   ]);
 
   const renderer = new THREE.WebGLRenderer({ alpha: true });

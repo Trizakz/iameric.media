@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400&family=DM+Sans:opsz,wght@9..40,400;9..40,500&family=Unbounded:wght@600&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,1,0&icon_names=arrow_back&display=block" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0&icon_names=arrow_back&display=block" rel="stylesheet">
   <style>
     /* the home page's dark look (same tokens as index.html and sub.css), as a normal scrolling page:
        wordmark top left, a big lowercase title, the text in a calm column, a footer bar like home */
@@ -25,12 +25,18 @@
       --ease: cubic-bezier(0.22, 1, 0.36, 1);
       --mono: "DM Mono", ui-monospace, Menlo, Consolas, monospace;
     }
+    /* the page scrolls inside the body, like the sub pages, so the window never gets a scrollbar and the menu
+       (nav.css) stays exactly where it is on every other page */
     html {
+      height: 100%;
+      overflow: hidden;
       scrollbar-color: var(--line) transparent;
     }
     body {
       margin: 0;
-      min-height: 100vh;
+      height: 100%;
+      box-sizing: border-box;
+      overflow-y: auto;
       background: var(--bg);
       color: var(--text);
       font-family: "DM Sans", sans-serif;
@@ -146,7 +152,7 @@
       -webkit-mask-image: linear-gradient(90deg, #000 var(--sweep), transparent calc(var(--sweep) + 40%));
       mask-image: linear-gradient(90deg, #000 var(--sweep), transparent calc(var(--sweep) + 40%));
     }
-    .mark .mark-back .material-symbols-outlined {
+    .mark .mark-back .material-symbols-rounded {
       font-size: 1.05em;
       margin-block: -1em; /* taller than the letters: it must not move them off the block */
     }
@@ -198,9 +204,12 @@
   </style>
   <link rel="stylesheet" href="links.css">
   <link rel="stylesheet" href="footer.css">
+  <link rel="stylesheet" href="nav.css">
 </head>
 <body>
-  <a class="mark" href="index.html" aria-label="iameric, back to the home page"><i class="mark-logo" aria-hidden="true"></i><span class="mark-word" aria-hidden="true">iameric</span><span class="mark-back" aria-hidden="true"><span class="material-symbols-outlined">arrow_back</span>back</span></a>
+  <!-- the menu bar, the same on every page (nav.css, nav.js) -->
+  <nav class="site-nav" aria-label="menu"><div class="nav-links"><a href="projects.html"><span class="nav-roll"><span>projects</span></span></a><a href="tools.html"><span class="nav-roll"><span>tools</span></span></a><a href="about.html"><span class="nav-roll"><span>about</span></span></a></div><a class="nav-cta" href="contact.html">get in touch<span class="nav-arrow" aria-hidden="true"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 10.5l7-7M5 3.5h5.5V9"/></svg><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 10.5l7-7M5 3.5h5.5V9"/></svg></span></a></nav>
+  <a class="mark" href="index.html" aria-label="iameric, back to the home page"><i class="mark-logo" aria-hidden="true"></i><span class="mark-word" aria-hidden="true">iameric</span><span class="mark-back" aria-hidden="true"><span class="material-symbols-rounded">arrow_back</span>back</span></a>
 
   <main>
     <h1>legal notice</h1>
@@ -259,5 +268,6 @@
       el.textContent = thisYear > LAUNCH ? `${LAUNCH} – ${thisYear}` : String(LAUNCH);
     });
   </script>
+  <script src="nav.js"></script>
 </body>
 </html>

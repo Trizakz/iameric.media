@@ -86,7 +86,7 @@ export function mountWidgets(root) {
     $('.w-music .w-label-text').textContent = playing ? 'now playing' : LASTFM.user ? 'last played' : 'favorite song';
     $('.w-music .w-title').textContent = title;
     $('.w-music .w-artist').textContent = artist;
-    $('.w-art').innerHTML = art ? `<img src="${esc(art)}" alt="">` : '<span class="material-symbols-outlined" aria-hidden="true">music_note</span>';
+    $('.w-art').innerHTML = art ? `<img src="${esc(art)}" alt="">` : '<span class="material-symbols-rounded" aria-hidden="true">music_note</span>';
     if (link) music.href = link;
   };
   show(FAVOURITE);

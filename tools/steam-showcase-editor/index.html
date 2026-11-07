@@ -185,7 +185,7 @@ a { color: var(--accent-hover); text-underline-offset: 3px; }
 code { font-family: var(--font-mono); font-size: 12px; }
 
 /* Export result */
-dialog { width: min(420px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); padding: var(--s4); border: 1px solid var(--line-strong); border-radius: 8px;
+dialog { width: min(420px, calc(100vw - 32px)); margin-top: max(16px, 6dvh); max-height: calc(94dvh - 16px); padding: var(--s4); border: 1px solid var(--line-strong); border-radius: 8px;
   background: var(--chrome); color: var(--fg); box-shadow: 0 30px 90px rgba(0,0,0,.6); }
 dialog[open] { display: flex; flex-direction: column; gap: var(--s3); }
 dialog::backdrop { background: rgba(0,0,0,.6); }
@@ -211,7 +211,13 @@ dialog p { margin: 0; }
 .seg label:hover { color: var(--fg); }
 .seg label:has(input:checked) { background: var(--accent-soft); color: var(--fg); box-shadow: inset 0 -2px var(--accent); }
 .seg label:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: -2px; }
-.size-note { font-size: 13px; }
+.size-note { font-size: 13px; min-height: 1.4em; }
+/* Upload to Steam */
+.steam-steps { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: var(--s2); color: var(--muted); font-size: 13px; }
+.steam-steps b { color: var(--fg); font-weight: 600; }
+.snippet { display: flex; gap: 6px; align-items: stretch; margin-top: 6px; }
+.snippet code { flex: 1; min-width: 0; padding: 6px 8px; background: var(--field); border: 1px solid var(--line-strong); border-radius: 4px; font-size: 11.5px; color: var(--fg); overflow-wrap: anywhere; }
+.steam-foot { margin: 0; font-size: 13px; color: var(--muted); }
 .size-note.ok { color: #7fd99a; }
 .size-note.bad { color: var(--danger); }
 .code-box { font-family: var(--font-mono); font-size: 11.5px; word-break: break-all; }
@@ -241,7 +247,6 @@ dialog p { margin: 0; }
 .howto h2 { font-size: 24px; line-height: 1.2; letter-spacing: -0.01em; margin: 0 0 var(--s2); text-wrap: balance; }
 .lede { margin: 0; color: var(--muted); max-width: 60ch; font-size: 16px; }
 #startEditing { min-height: 36px; padding-inline: 16px; margin-right: var(--s6); }
-.howto-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(220px, 280px); gap: var(--s6); align-items: start; }
 .steps { margin: 0; padding-left: 22px; display: flex; flex-direction: column; gap: var(--s5); }
 .steps > li::marker { font-family: var(--font-mono); color: var(--accent); }
 .howto h3 { font-size: 15px; margin: 0 0 var(--s1); }
@@ -250,13 +255,6 @@ dialog p { margin: 0; }
 .kinds { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: var(--s1) var(--s4); margin: 0; max-width: 68ch; }
 .kinds dt { color: var(--fg); font-weight: 600; }
 .kinds dd { margin: 0; color: var(--muted); }
-.profile-map { position: sticky; top: var(--s4); margin: 0; display: flex; flex-direction: column; gap: var(--s3); }
-.profile-map svg { width: 100%; height: auto; display: block; }
-.pm-page { fill: #151517; stroke: var(--line); }
-.pm-slot { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 1; }
-.pm-bar { fill: var(--line-strong); } .pm-bar.dim { fill: var(--line); }
-.pm-file { font-family: var(--font-mono); font-size: 9px; font-weight: 500; fill: var(--accent); }
-.profile-map figcaption { font-size: 13px; color: var(--muted); }
 .more { margin-top: var(--s6); padding-top: var(--s4); border-top: 1px solid var(--line); }
 .more summary { list-style: none; display: flex; align-items: center; gap: 6px; cursor: pointer; font-weight: 600; width: max-content; border-radius: 4px; }
 .more summary::-webkit-details-marker { display: none; }
@@ -269,8 +267,6 @@ dialog p { margin: 0; }
 .howto .keys { font-size: 14px; max-width: 80ch; }
 @media (max-width: 760px) {
   .howto { padding: var(--s4); }
-  .howto-grid { grid-template-columns: minmax(0, 1fr); }
-  .profile-map { position: static; max-width: 280px; }
   .kinds { grid-template-columns: minmax(0, 1fr); gap: 2px; }
   .kinds dd { margin-bottom: var(--s2); }
 }
@@ -316,23 +312,47 @@ dialog p { margin: 0; }
 @media (max-width: 760px) { #startEditing { margin-right: 0; } }
 @media (prefers-reduced-motion: reduce) { button, .chev { transition: none; } .anim-group::before, .anim-head .msr { animation: none; } }
 
-/* Branding: iameric's logo builds itself once, full screen, when the tool opens (same splash as the website's first load) */
-.splash { position: fixed; z-index: 100; inset: 0; display: grid; place-items: center; background: #0b0b0c; overflow: hidden; color: #e6e4df; cursor: pointer;
-  transition: opacity .9s cubic-bezier(.22, 1, .36, 1); }
-.splash.out { opacity: 0; pointer-events: none; }
-/* square on both axes: the stage's canvas rule (width/height 100%) would otherwise stretch it */
-.splash canvas { --size: min(20vmin, 120px); width: var(--size); height: var(--size); opacity: .92;
-  transition: transform .9s cubic-bezier(.22, 1, .36, 1); }
-.splash.out canvas { transform: scale(.94); }
+/* the website rail (only when the editor runs on iameric.media, see the script at the end): a slim bar on the left
+   with the way back to the home page and to all tools */
+.rail { position: fixed; z-index: 60; left: 0; top: 0; bottom: 0; width: 56px; display: flex; flex-direction: column; align-items: center;
+  gap: var(--s2); padding: calc(env(safe-area-inset-top, 0px) + 12px) 0 12px; background: var(--chrome); border-right: 1px solid var(--line); }
+.rail a { position: relative; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 10px; color: var(--muted); text-decoration: none;
+  transition: background-color .2s, color .2s; }
+.rail a .msr { font-size: 22px; transition: transform .45s cubic-bezier(.16, 1, .3, 1); }
+.rail a:hover, .rail a:focus-visible { background: var(--raised); color: var(--fg); }
+.rail a:hover .msr { transform: scale(1.12); }
+.rail a:active .msr { transform: scale(.92); }
+/* the label slides out to the right on hover */
+.rail a::after { content: attr(data-label); position: absolute; left: calc(100% + 10px); top: 50%; translate: -6px -50%; opacity: 0; pointer-events: none;
+  background: var(--accent); color: var(--accent-ink); font: 600 12px/1 var(--font-ui); padding: 6px 8px; border-radius: 6px; white-space: nowrap;
+  transition: opacity .2s, translate .35s cubic-bezier(.16, 1, .3, 1); }
+.rail a:hover::after, .rail a:focus-visible::after { opacity: 1; translate: 0 -50%; }
+.rail-line { width: 24px; height: 1px; background: var(--line); }
+/* the social links at the rail's foot; Ko-fi lights in its own red on hover */
+.rail-foot { margin-top: auto; display: flex; flex-direction: column; align-items: center; gap: var(--s2); }
+.rail-logo { width: 18px; height: 18px; fill: currentColor; transition: transform .45s cubic-bezier(.16, 1, .3, 1); }
+.rail a:hover .rail-logo { transform: scale(1.12); }
+.rail a:active .rail-logo { transform: scale(.92); }
+.rail .rail-kofi:hover, .rail .rail-kofi:focus-visible { color: #ff5e5b; }
+body.has-rail { padding-left: calc(56px + max(16px, env(safe-area-inset-left, 0px))); }
 </style>
 
-<div class="splash" id="splash" aria-hidden="true"><canvas></canvas></div>
+<nav class="rail" id="rail" aria-label="iameric" hidden>
+  <a href="../../index.html" data-label="home" aria-label="iameric home"><span class="msr" aria-hidden="true">home</span></a>
+  <span class="rail-line" aria-hidden="true"></span>
+  <a href="../../tools.html" data-label="all tools" aria-label="all tools"><span class="msr" aria-hidden="true">deployed_code</span></a>
+  <!-- at the foot: where to find me, and Ko-fi to support the tools (logos: Simple Icons, CC0) -->
+  <div class="rail-foot">
+    <a href="https://x.com/trizakz" target="_blank" rel="noopener" data-label="x @trizakz" aria-label="X @trizakz"><svg class="rail-logo" viewBox="0 0 24 24" aria-hidden="true"><path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z"/></svg></a>
+    <a class="rail-kofi" href="https://ko-fi.com/ericleutemann" target="_blank" rel="noopener" data-label="support on ko-fi" aria-label="support me on Ko-fi"><svg class="rail-logo" viewBox="0 0 24 24" aria-hidden="true"><path d="M23.881 8.948c-.773-4.085-4.859-4.593-4.859-4.593H.723c-.604 0-.679.798-.679.798s-.082 7.324-.022 11.822c.164 2.424 2.586 2.672 2.586 2.672s8.267-.023 11.966-.049c2.438-.426 2.683-2.566 2.658-3.734 4.352.24 7.422-2.831 6.649-6.916zm-11.062 3.511c-1.246 1.453-4.011 3.976-4.011 3.976s-.121.119-.31.023c-.076-.057-.108-.09-.108-.09-.443-.441-3.368-3.049-4.034-3.954-.709-.965-1.041-2.7-.091-3.71.951-1.01 3.005-1.086 4.363.407 0 0 1.565-1.782 3.468-.963 1.904.82 1.832 3.011.723 4.311zm6.173.478c-.928.116-1.682.028-1.682.028V7.284h1.77s1.971.551 1.971 2.638c0 1.913-.985 2.667-2.059 3.015z"/></svg></a>
+  </div>
+</nav>
 
 <header class="bar">
   <div class="brand">
     <svg class="logo" viewBox="14.05 14.05 171.9 171.9" aria-hidden="true"><path d="M39.52 58.45a18.93 18.93 0 1 0 37.86 0a18.93 18.93 0 1 0 -37.86 0Z"/><path d="M105.15 58.45A36.4 36.4 0 1 1 141.55 94.85A46.7 46.7 0 0 0 94.85 141.55A36.4 36.4 0 1 1 58.45 105.15A46.7 46.7 0 0 0 105.15 58.45Z"/><path fill-rule="evenodd" d="M105.15 141.55a36.4 36.4 0 1 0 72.8 0a36.4 36.4 0 1 0 -72.8 0ZM117.53 134.27a16.74 16.74 0 1 0 33.49 0a16.74 16.74 0 1 0 -33.49 0Z"/></svg>
     <h1>Steam Showcase Editor</h1>
-    <span class="version">v0.36</span>
+    <span class="version">v0.51</span>
     <span class="meta">by Eric Leutemann</span>
   </div>
   <div class="export" role="group" aria-label="Help, import and export">
@@ -358,7 +378,6 @@ dialog p { margin: 0; }
     </div>
     <button class="primary" id="startEditing">Start designing<span class="msr" aria-hidden="true">arrow_forward</span></button>
   </div>
-  <div class="howto-grid">
     <ol class="steps">
       <li><h3>Get your files</h3>
         <p>Download your background from <a href="https://steam.design/" target="_blank" rel="noopener">steam.design</a> as a ZIP and unzip it.</p></li>
@@ -372,22 +391,8 @@ dialog p { margin: 0; }
       <li><h3>Design</h3>
         <p><b>Style</b> sets theme and colors, <b>Widgets</b> adds things, <b>Edit</b> changes the selected one.</p></li>
       <li><h3>Export</h3>
-        <p>Pick PNG, JPG or GIF (max 5 MB per file) and save. On Steam, upload it as artwork and choose it under Edit Profile → Featured Showcase.</p></li>
+        <p>Pick PNG, JPG or GIF (max 5 MB per file) and save. The export window has more detailed steps for uploading to Steam.</p></li>
     </ol>
-    <figure class="profile-map">
-      <svg viewBox="0 0 220 236" role="img" aria-label="Where the files go on a Steam profile: the avatar at the top left, the Artwork Showcase's two pictures side by side below it.">
-        <rect class="pm-page" x="0.5" y="0.5" width="219" height="235" rx="6"/>
-        <rect class="pm-slot" x="14" y="14" width="40" height="40" rx="3"/>
-        <rect class="pm-bar" x="64" y="22" width="70" height="7" rx="3.5"/><rect class="pm-bar dim" x="64" y="35" width="44" height="5" rx="2.5"/>
-        <rect class="pm-slot" x="14" y="68" width="152" height="152" rx="3"/>
-        <rect class="pm-slot" x="169" y="68" width="30" height="152" rx="3"/>
-        <text class="pm-file" x="34" y="37" text-anchor="middle">Avatar</text>
-        <text class="pm-file" x="90" y="148" text-anchor="middle">Artwork_Middle</text>
-        <text class="pm-file" x="184" y="144" text-anchor="middle" transform="rotate(-90 184 144)">Right_Top</text>
-      </svg>
-      <figcaption>Where the files go on your profile.</figcaption>
-    </figure>
-  </div>
   <details class="more">
     <summary><span class="msr chev" aria-hidden="true">chevron_right</span>Shortcuts and tips</summary>
     <dl class="keys">
@@ -395,7 +400,8 @@ dialog p { margin: 0; }
       <dt><kbd>←</kbd> <kbd>→</kbd> <kbd>↑</kbd> <kbd>↓</kbd></dt><dd>Nudge 1 px, with <kbd>Shift</kbd> 10 px.</dd>
       <dt><kbd>Delete</kbd></dt><dd>Remove the selected widget.</dd>
       <dt><kbd>Ctrl</kbd> + <kbd>]</kbd> / <kbd>[</kbd></dt><dd>Bring forward, send backward (<kbd>Shift</kbd>: to front, to back).</dd>
-      <dt>Wheel</dt><dd>Scale images and icons; <kbd>Shift</kbd> + wheel rotates.</dd>
+      <dt>Edge handles</dt><dd>Drag to set a text widget's width, and the profile card's height.</dd>
+    <dt>Wheel</dt><dd>Scale images and icons; <kbd>Shift</kbd> + wheel rotates.</dd>
       <dt>Layout code</dt><dd>Export gives you a code; paste it into Import to rebuild the design later.</dd>
     </dl>
   </details>
@@ -502,6 +508,10 @@ dialog p { margin: 0; }
       <div class="group">
         <div class="row"><button class="primary" id="save" disabled><span class="msr" aria-hidden="true">download</span>Save…</button></div>
       </div>
+      <details class="more" id="steamSteps">
+        <summary><span class="msr chev" aria-hidden="true">chevron_right</span>Upload to Steam</summary>
+        <div class="more-body" id="steamBody"></div>
+      </details>
       <details class="more">
         <summary><span class="msr chev" aria-hidden="true">chevron_right</span>Layout code</summary>
         <div class="more-body">
@@ -628,7 +638,7 @@ function rr(c, x, y, w, h, r) {
   c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r);
   c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath();
 }
-// MIR: the widget being drawn is mirrored (sides swapped), pictures included. Text and icons then flip back about their own
+// MIR: the widget being drawn is mirrored (sides swapped). Text, icons and pictures then flip back about their own
 // anchor, so they stay readable; left-aligned text becomes right-aligned.
 let MIR = false;
 function unmirror(c, x) { c.save(); c.translate(2 * x, 0); c.scale(-1, 1); }
@@ -663,9 +673,15 @@ function wrap(c, s, maxW) {
   if (cur) lines.push(cur);
   return lines;
 }
+// A widget's picture keeps its own orientation when the widget is mirrored (MIR flips it back) and has its own
+// mirror toggles (PICFLIP, from p.imx / p.imy), both about the picture's centre.
+let PICFLIP = null;
 function cover(c, img, x, y, w, h) {
   const iw = img.naturalWidth || img.width, ih = img.naturalHeight || img.height, r = Math.max(w / iw, h / ih), sw = w / r, sh = h / r;
+  const fx = (MIR ? -1 : 1) * (PICFLIP ? PICFLIP[0] : 1), fy = PICFLIP ? PICFLIP[1] : 1, flip = fx < 0 || fy < 0;
+  if (flip) { c.save(); c.translate(x + w / 2, y + h / 2); c.scale(fx, fy); c.translate(-(x + w / 2), -(y + h / 2)); }
   c.drawImage(img, (iw - sw) / 2, (ih - sh) / 2, sw, sh, x, y, w, h);
+  if (flip) c.restore();
 }
 // Material Symbols glyph, centred on (x, y) by its measured ink box.
 function msIcon(c, name, x, y, size, col) {
@@ -766,15 +782,15 @@ const featureSize = (p, song) => {
   const tx = song && p.vinyl ? 102 : 84, eq = song && p.eq ? 34 : 0;
   return { w: grow(250, tx + 14 + Math.max(textW(p.title, 700, 16), textW(p.detail, 500, 12), textW(String(p.kicker).toUpperCase(), 700, 9.5, 1.4) + eq)), h: 84 };
 };
-const profileR = h => Math.max(12, Math.min(29, h / 2 - 13));
+const profileR = h => Math.max(12, Math.min(50, h / 2 - 13));
 const CORNER_OPTS = [['dot', 'Online dot'], ['icon', 'Icon'], ['none', 'Nothing']];
 
 /* ---------- widget types ---------- */
 // details: the widget has small built-in motions that "Animate details" switches on.
 const TYPES = {
   profile: {
-    label: 'Profile', h: 84, image: 'Profile picture', details: 'Pulsing online dot', resizable: true,
-    def: { name: '', status: '', corner: 'dot', cicon: 'star', ph: 84 },
+    label: 'Profile', h: 84, image: 'Profile picture', details: 'Pulsing online dot', resizable: true, resizableH: true,
+    def: { name: '', status: '', corner: 'none', cicon: 'star', ph: 84 },
     fieldsFor: p => [['name', 'Name', 'text', 'Your name'], ['status', 'Line 2', 'text', 'e.g. Online'],
       ['corner', 'Picture corner', 'select', CORNER_OPTS], ...(p.corner === 'icon' ? [['cicon', 'Corner icon', 'icon']] : [])],
     size(p) {
@@ -974,6 +990,9 @@ function dims(w) {
 }
 // the two side handles of a selected resizable widget, in canvas coordinates
 function widthHandles(w) { const d = dims(w), y = w.y + d.h / 2; return { left: [w.x, y], right: [w.x + d.w, y] }; }
+// top and bottom handles of a widget whose height can be dragged (the profile card, 52 to 140 px; it starts at 84)
+function heightHandles(w) { const d = dims(w), x = w.x + d.w / 2; return { top: [x, w.y], bottom: [x, w.y + d.h] }; }
+const PH_MIN = 52, PH_MAX = 140;
 
 /* ---------- rendering ---------- */
 // Images and icons can be scaled at their corners and rotated (w.r) about their centre.
@@ -1153,8 +1172,9 @@ function drawSurface(c, x, y, ww, hh, R, s, S, t, ph, anim, id) {
   if (pulse) { c.lineWidth = 2; c.strokeStyle = `rgba(255,255,255,${.5 * pulse})`; rr(c, x + .75, y + .75, ww - 1.5, hh - 1.5, R - .75); c.stroke(); }
 }
 // p.mx mirrors a widget left to right (images also take p.my, top to bottom). An image simply flips; any other widget
-// swaps its sides, pictures included, while its text and icons stay readable (see MIR).
+// swaps its sides while its text, icons and pictures stay as they are (see MIR); pictures have their own toggles.
 function mirrorContent(c, w, bw, bh) {
+  PICFLIP = w.type === 'image' ? null : [w.p.imx ? -1 : 1, w.p.imy ? -1 : 1];
   if (w.p.mx) { c.translate(bw, 0); c.scale(-1, 1); MIR = w.type !== 'image'; }
   if (w.p.my && w.type === 'image') { c.translate(0, bh); c.scale(1, -1); }
 }
@@ -1183,7 +1203,7 @@ function drawWidget(c, w, S, ui, t) {
   if (ui && w.type === 'image' && !w.img) imagePlaceholder(c, d.bw, d.bh, s);
   mirrorContent(c, w, d.bw, d.bh);
   T.draw.call(T, c, w.p, d.bw, d.bh, moving ? t : null, w.img); c.restore();
-  INK = null; MIR = false;
+  INK = null; MIR = false; PICFLIP = null;
 
   if (ui && state.sel === w && !transformable(w)) {
     c.save(); c.setLineDash([6, 5]); c.lineWidth = 1.5; c.strokeStyle = 'rgba(255,255,255,.95)';
@@ -1219,6 +1239,7 @@ function render(c, S, ui, t = null) {
     const hw = widthHandles(state.sel);
     c.save(); c.fillStyle = '#fff'; c.strokeStyle = '#b39dff'; c.lineWidth = 2;
     [hw.left, hw.right].forEach(([x, y]) => { rr(c, x - 4, y - 12, 8, 24, 4); c.fill(); c.stroke(); });
+    if (TYPES[state.sel.type].resizableH) { const hh = heightHandles(state.sel); [hh.top, hh.bottom].forEach(([x, y]) => { rr(c, x - 12, y - 4, 24, 8, 4); c.fill(); c.stroke(); }); }
     c.restore();
   }
   c.save(); c.strokeStyle = 'rgba(179,157,255,.95)'; c.lineWidth = 1;
@@ -1377,7 +1398,7 @@ function renderSlots() {
   const box = $('slots'); box.innerHTML = '';
   MODES[state.mode].slots.forEach(sl => {
     const has = !!state.bg[sl.key], row = document.createElement('div'); row.className = 'asset';
-    row.innerHTML = `<img alt=""><div class="slot-meta"><div class="file">${sl.base}.png</div><div class="mono">${sl.w} × ${sl.h}</div></div><button type="button"${has ? '' : ' class="primary"'}>${has ? 'Replace' : 'Upload'}</button>`;
+    row.innerHTML = `<img alt=""><div class="slot-meta"><div class="file">${sl.base}.png</div><div class="mono">${sl.w} × ${sl.h}</div></div><button type="button"${has ? '' : ' class="primary"'}>${has ? 'Replace' : 'Upload'}</button>${has ? '<button type="button" data-remove>Remove</button>' : ''}`;
     if (has) row.querySelector('img').src = state.bg[sl.key];
     row.querySelector('button').onclick = () => pickFile(async f => {
       $('slotError').textContent = '';
@@ -1387,6 +1408,13 @@ function renderSlots() {
         buildBackground(); syncGlobal(); syncReady(); changed();
       } catch (e) { $('slotError').textContent = e.message; }
     });
+    // removing a background file: the slot is empty again (the editor goes back to Layout until it is filled)
+    const rm = row.querySelector('[data-remove]');
+    if (rm) rm.onclick = () => {
+      $('slotError').textContent = '';
+      delete state.bg[sl.key]; delete imgs.slots[sl.key];
+      buildBackground(); syncGlobal(); syncReady(); changed();
+    };
     box.appendChild(row);
   });
 }
@@ -1578,7 +1606,7 @@ function inkBox(w) {
   if (w._ink && w._ink.key === key) return w._ink.box;
   const c = document.createElement('canvas'); c.width = Math.ceil(d.bw); c.height = Math.ceil(d.bh);
   const x = c.getContext('2d', { willReadFrequently: true });
-  INK = inkFor(w.p.tcolor, w.p); mirrorContent(x, w, d.bw, d.bh); T.draw.call(T, x, w.p, d.bw, d.bh, null, w.img); INK = null; MIR = false;
+  INK = inkFor(w.p.tcolor, w.p); mirrorContent(x, w, d.bw, d.bh); T.draw.call(T, x, w.p, d.bw, d.bh, null, w.img); INK = null; MIR = false; PICFLIP = null;
   let box = null;
   try {
     const a = x.getImageData(0, 0, c.width, c.height).data;
@@ -1618,6 +1646,10 @@ function handleAt(px, py) {
   const s = state.sel;
   if (s && TYPES[s.type].resizable) {
     const hw = widthHandles(s), near = ([x, y]) => Math.abs(px - x) <= 9 && Math.abs(py - y) <= 16;
+    if (TYPES[s.type].resizableH) {
+      const hh = heightHandles(s), nearH = ([x, y]) => Math.abs(px - x) <= 16 && Math.abs(py - y) <= 9;
+      if (nearH(hh.top)) return 'h-top'; if (nearH(hh.bottom)) return 'h-bottom';
+    }
     return near(hw.left) ? 'w-left' : near(hw.right) ? 'w-right' : null;
   }
   if (!transformable(s)) return null;
@@ -1628,13 +1660,19 @@ cv.addEventListener('pointerdown', e => {
   if (!isReady()) {
     // an empty slot on the canvas opens its upload
     const [px] = toLocal(e), sl = MODES[state.mode].slots, i = sl.findIndex(o => px >= o.x && px <= o.x + o.w);
-    if (i >= 0 && !imgs.slots[sl[i].key]) document.querySelectorAll('#slots button')[i]?.click();
+    if (i >= 0 && !imgs.slots[sl[i].key]) document.querySelectorAll('#slots .asset')[i]?.querySelector('button')?.click();
     return;
   }
   const [px, py] = toLocal(e), hdl = handleAt(px, py);
   if (hdl === 'w-left' || hdl === 'w-right') {
     const w = state.sel;
     drag = { mode: 'width', w, left: hdl === 'w-left', right0: w.x + dims(w).w, moved: false };
+    cv.setPointerCapture(e.pointerId); cv.classList.add('dragging');
+    return;
+  }
+  if (hdl === 'h-top' || hdl === 'h-bottom') {
+    const w = state.sel;
+    drag = { mode: 'height', w, top: hdl === 'h-top', bottom0: w.y + dims(w).h, moved: false };
     cv.setPointerCapture(e.pointerId); cv.classList.add('dragging');
     return;
   }
@@ -1657,7 +1695,7 @@ cv.addEventListener('pointermove', e => {
   const [px, py] = toLocal(e);
   if (!drag) {
     const hdl = handleAt(px, py);
-    cv.style.cursor = hdl === 'rotate' ? 'alias' : hdl === 'scale' ? 'nwse-resize' : hdl ? 'ew-resize' : '';
+    cv.style.cursor = hdl === 'rotate' ? 'alias' : hdl === 'scale' ? 'nwse-resize' : hdl?.startsWith('h-') ? 'ns-resize' : hdl ? 'ew-resize' : '';
     return;
   }
   if (drag.mode === 'width') {
@@ -1665,6 +1703,12 @@ cv.addEventListener('pointermove', e => {
     const w = drag.w, s = w.s;
     const bw = Math.round(Math.min(CW_MAX, Math.max(CW_MIN, (drag.left ? drag.right0 - px : px - w.x) / s)));
     w.cw = bw; if (drag.left) w.x = Math.round(drag.right0 - bw * s);
+    drag.moved = true; draw(); return;
+  }
+  if (drag.mode === 'height') {
+    // the opposite edge stays where it is; height in the widget's own units (before its scale)
+    const w = drag.w, bh = Math.round(Math.min(PH_MAX, Math.max(PH_MIN, (drag.top ? drag.bottom0 - py : py - w.y) / w.s)));
+    w.p.ph = bh; if (drag.top) w.y = Math.round(drag.bottom0 - bh * w.s);
     drag.moved = true; draw(); return;
   }
   if (drag.mode === 'rotate') {
@@ -1749,7 +1793,7 @@ Object.keys(TYPES).filter(k => TYPES[k].adder !== false).forEach(k => {
   $('adders').appendChild(b);
 }
 // How to use: a pop-up from the "?" in the header. On every start a small hint points there, until the guide is
-// opened, the hint is dismissed, or 14 s after the logo splash.
+// opened, the hint is dismissed, or 14 s after the start.
 let hintTimer = 0;
 function hideHint() { clearTimeout(hintTimer); $('helpHint').hidden = true; $('openHelp').classList.remove('calling'); }
 function openHelp() { hideHint(); $('howtoDlg').showModal(); $('howtoDlg').scrollTop = 0; }
@@ -1758,11 +1802,10 @@ $('helpHintGo').onclick = openHelp;
 $('helpHintClose').onclick = hideHint;
 $('closeHelp').onclick = $('startEditing').onclick = () => $('howtoDlg').close();
 $('howtoDlg').addEventListener('click', e => { if (e.target === $('howtoDlg')) $('howtoDlg').close(); });
-window.addEventListener('splashdone', () => {
-  if ($('howtoDlg').open) return;
+if (!$('howtoDlg').open) {
   $('helpHint').hidden = false; $('openHelp').classList.add('calling');
   hintTimer = setTimeout(hideHint, 14000);
-}, { once: true });
+}
 function removeSel() {
   if (!state.sel) return;
   state.widgets.splice(state.widgets.indexOf(state.sel), 1); select(null); changed();
@@ -1914,12 +1957,14 @@ function select(s) {
       } catch (e) { mediaError(e); }
     });
     if (rm) rm.onclick = () => { s.img = null; s.imgSrc = null; select(s); changed(); };
-    if (s.type === 'image') {
+    // mirror toggles: an image widget flips as a whole; a profile picture or cover flips on its own
+    if (s.type === 'image' || s.img) {
+      const [kx, ky] = s.type === 'image' ? ['mx', 'my'] : ['imx', 'imy'];
       const flip = (key, label, cls) => {
         const b = iconButton('flip', label, () => { s.p[key] = !s.p[key]; select(s); changed(); }, cls);
         b.setAttribute('aria-pressed', !!s.p[key]); return b;
       };
-      r.append(flip('mx', 'Mirror horizontally', ''), flip('my', 'Mirror vertically', 'flip-v'));
+      r.append(flip(kx, 'Mirror picture horizontally', ''), flip(ky, 'Mirror picture vertically', 'flip-v'));
     }
     selBody.appendChild(group(T.image, r));
   }
@@ -1931,7 +1976,6 @@ function select(s) {
   const sizeNodes = [slider('wscale', 'Scale', xf ? 10 : state.mode === 'avatar' ? 25 : 70, xf ? 600 : 160, Math.round(s.s * 100), scaleBy, pct, 100)];
   if (xf) sizeNodes.push(
     slider('wrot', 'Rotation', -180, 180, Math.round((s.r || 0) * 180 / Math.PI), v => { s.r = v * Math.PI / 180; changed(); }, v => v + '°', 0));
-  if (s.type === 'profile') sizeNodes.push(slider('wph', 'Height', 52, 84, s.p.ph || 84, v => { s.p.ph = v; changed(); }, v => v + ' px', 84));
   if (T.resizable && s.cw) {
     const fitRow = document.createElement('div'); fitRow.className = 'row';
     const fitBtn = document.createElement('button'); fitBtn.type = 'button'; fitBtn.textContent = 'Fit width to text';
@@ -1941,7 +1985,8 @@ function select(s) {
   }
   if (s.type !== 'image' && s.type !== 'icon') sizeNodes.push(fieldEl(s, 'mx', 'Mirror horizontally', 'check'));
   selBody.appendChild(group('Size', ...sizeNodes));
-  selBody.appendChild(animationGroup(s, T));
+  // a still mode (the profile picture) only exports PNG or JPG, so its widgets have no animation to set
+  if (!MODES[state.mode].still) selBody.appendChild(animationGroup(s, T));
 }
 
 // Theme buttons and the five palette colour inputs.
@@ -2127,6 +2172,34 @@ function syncExportFields() {
   if (M.still && gif.checked) document.querySelector('input[value=png]').checked = true;
   [...$('scale').options].forEach(o => { const k = +o.value; o.textContent = `${k}× · ${M.slots.map(sl => sl.w * k).join(' + ')} × ${M.h * k}`; });
   const f = fmt(); $('jpgOpts').hidden = f !== 'jpg'; $('gifOpts').hidden = f !== 'gif';
+  renderSteamSteps();
+}
+// How the saved files get onto the profile, after the Steam guide "How to Upload Long Images for Showcases" by ASH:
+// artworks go through Steam's artwork upload with one line in the browser console; the avatar is a plain upload.
+const STEAM_UPLOAD = 'https://steamcommunity.com/sharedfiles/edititem/767/3/';
+const STEAM_GUIDE = 'https://steamcommunity.com/sharedfiles/filedetails/?id=748624905';
+const STEAM_CODE = "$J('#image_width').val(1000).attr('id',''),$J('#image_height').val(1).attr('id','');";
+function renderSteamSteps() {
+  const M = MODES[state.mode], files = M.slots.map(sl => `<span class="file">${sl.base}.${fmt()}</span>`);
+  if (state.mode === 'avatar') {
+    $('steamBody').innerHTML = `<ol class="steam-steps"><li>On your Steam profile, open <b>Edit Profile → Avatar</b>.</li><li>Click <b>Upload your avatar</b>, choose ${files[0]} and save.</li></ol>`;
+    return;
+  }
+  const showcase = state.mode === 'artwork' ? 'Artwork Showcase' : 'Featured Artwork Showcase';
+  $('steamBody').innerHTML = `<ol class="steam-steps">
+    <li>Open <a href="${STEAM_UPLOAD}" target="_blank" rel="noopener">Steam's artwork upload</a> in Chrome or Firefox and choose ${files.length > 1 ? `${files[0]} under <b>Choose File</b>. Do steps 1 to 4 again for ${files[1]}.` : `${files[0]} under <b>Choose File</b>.`}</li>
+    <li>Open the console: <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>J</kbd> in Chrome, <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>K</kbd> in Firefox. In Firefox, type <b>allow pasting</b> once first.</li>
+    <li>Paste this line and press <kbd>Enter</kbd>:<div class="snippet"><code id="steamCode"></code><button type="button" class="icon-btn" id="copySteamCode" aria-label="Copy code"><span class="msr" aria-hidden="true">content_copy</span></button></div></li>
+    <li>Add a title, tick <b>I certify that I created this artwork</b> and click <b>Save and Continue</b>.</li>
+    <li>In <b>Edit Profile → Featured Showcase</b>, pick <b>${showcase}</b> and select your artwork${files.length > 1 ? 's' : ''}. In the picker ${files.length > 1 ? 'they look' : 'it looks'} like a thin black line; that is normal.</li>
+  </ol>
+  <p class="steam-foot">You need Steam level 10 for a showcase. <a href="${STEAM_GUIDE}" target="_blank" rel="noopener">Full guide on Steam</a></p>`;
+  $('steamCode').textContent = STEAM_CODE;
+  $('copySteamCode').onclick = async () => {
+    const b = $('copySteamCode');
+    try { await navigator.clipboard.writeText(STEAM_CODE); } catch (e) { const r = document.createRange(); r.selectNodeContents($('steamCode')); getSelection().removeAllRanges(); getSelection().addRange(r); document.execCommand('copy'); }
+    b.firstChild.textContent = 'check'; setTimeout(() => { b.firstChild.textContent = 'content_copy'; }, 1500);
+  };
 }
 async function renderExport() {
   const job = ++exp.job, f = fmt(), S = +$('scale').value, stale = () => job !== exp.job, slots = MODES[state.mode].slots;
@@ -2170,7 +2243,9 @@ async function renderExport() {
 function queueExport() { exp.job++; clearTimeout(exp.timer); exp.timer = setTimeout(renderExport, 200); }
 $('openExport').onclick = () => {
   exp.wasPlaying = playing; setPlaying(false);
-  syncExportFields(); $('outs').replaceChildren(); $('exportDlg').showModal(); queueExport();
+  syncExportFields(); $('outs').replaceChildren(); $('outs').style.aspectRatio = W / H;
+  $('info').style.minHeight = `calc(${MODES[state.mode].slots.length * 2} * 1.4em)`;
+  $('steamSteps').open = false; $('exportDlg').showModal(); queueExport();
   $('layoutCode').value = ''; layoutCode().then(c => { $('layoutCode').value = c; }, () => { $('layoutCode').value = 'This browser cannot create layout codes.'; });
 };
 $('exportDlg').addEventListener('close', () => { exp.job++; clearTimeout(exp.timer); setPlaying(exp.wasPlaying); });
@@ -2185,7 +2260,7 @@ $('fps').onchange = e => { state.fps = +e.target.value; changed(); queueExport()
 // Inside the claude.ai artifact viewer, files can only leave through its downloads capability (it asks the viewer to confirm).
 let artifactDownloads = null;
 if (window.claude?.use) window.claude.use('downloads').then(d => { artifactDownloads = d; }, () => {});
-const saved = msg => { $('sizeNote').className = 'size-note ok'; $('sizeNote').textContent = msg; };
+const saved = msg => { $('sizeNote').className = 'size-note ok'; $('sizeNote').textContent = msg; $('steamSteps').open = true; $('steamSteps').scrollIntoView({ block: 'nearest', behavior: 'smooth' }); };
 // Save: in the artifact viewer through its downloads; otherwise one file with "Save as", several files into a chosen
 // folder, and where the browser has neither, as plain downloads.
 $('save').onclick = async () => {
@@ -2213,6 +2288,7 @@ $('save').onclick = async () => {
     }
   } catch (e) { if (e.name === 'AbortError') return; }
   for (const fl of files) { const a = document.createElement('a'); a.href = fl.url; a.download = fl.name; document.body.appendChild(a); a.click(); a.remove(); }
+  $('steamSteps').open = true;
 };
 
 /* ---------- layout code ---------- */
@@ -2260,298 +2336,13 @@ loadImg(DEF_CHR).then(async c => {
   Promise.all(fonts).then(() => { buildBackground(); draw(); }, draw);
 });
 </script>
-<script type="module">
-// iameric logo build, inlined at build time from the website's logo-build.js
-// The logo's build and orbit, one signed distance field drawn with WebGL (see FRAG), as approved in
-// logo/animation/logo-loop-final.html. Used by splash.js (the home page's splash) and by the wordmark's intro on
-// every page (the logo builds itself, small, beside the word).
-//
-//   drawState(buildState(t), 'canvas.x');   // the build at t (0..1, over BUILD ms) into every matching canvas
-//   drawState(loopState(ms), 'canvas.x');   // the build once, then the orbit; ms since the start
-//   buildMark(logoEl);                      // the wordmark's logo builds itself once, in its place
-//   (each canvas takes its colour from its CSS color)
-
-  const RING = { x: 141.55, y: 141.55, r: 36.4 }, HOLE = { x: 134.27, y: 134.27, r: 16.74 };
-  const TL = { x: 58.45, y: 58.45 }, TR = { x: 141.55, y: 58.45 }, BL = { x: 58.45, y: 141.55 }, MID = { x: 100, y: 100 };
-  const DOT_R = 18.93, BIG = 36.4, NECK = 26, LOOP = 4200;
-  // ---- the build: one drop -> a cell division into the stroke's two drops (still joined) while the ring buds off
-  // and tears away -> the eye opens -> a little drop squeezes out of the eye, flows through the stroke and settles
-  // as the i dot. The whole shape turns into place the whole time and ends as the sharp logo
-  const BUILD = 3800;
-  const clamp01 = k => Math.min(1, Math.max(0, k));
-  const easeOut = k => 1 - Math.pow(1 - k, 3);
-  const easeInOut = k => (k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2);
-  const back = k => { const c = 1.6; return 1 + (c + 1) * Math.pow(k - 1, 3) + c * Math.pow(k - 1, 2); }; // overshoots a little, then settles
-  const seg = (t, a, b, e = easeInOut) => e(clamp01((t - a) / (b - a)));
-  const inOut5 = k => (k < 0.5 ? 16 * k ** 5 : 1 - Math.pow(-2 * k + 2, 5) / 2); // soft at both ends, quick in the middle
-  const out5 = k => 1 - Math.pow(1 - k, 5); // a long, soft landing
-  const smooth = k => k * k * (3 - 2 * k);
-  // a CSS-style cubic-bezier easing (x1, y1, x2, y2), solved for x by a few Newton steps
-  const bezier = (x1, y1, x2, y2) => k => {
-    const B = (a, b, u) => 3 * a * u * (1 - u) ** 2 + 3 * b * u * u * (1 - u) + u ** 3;
-    let u = k;
-    for (let n = 0; n < 8; n++) {
-      const x = B(x1, x2, u) - k, dx = 3 * x1 * (1 - u) ** 2 + 6 * (x2 - x1) * u * (1 - u) + 3 * (1 - x2) * u * u;
-      if (Math.abs(dx) < 1e-6) break;
-      u = clamp01(u - x / dx);
-    }
-    return B(y1, y2, u);
-  };
-  const longOut = bezier(0.45, 0, 0.1, 1); // a soft start, then a long, slow arrival
-  const L = (a, b, k) => a + (b - a) * k, LP = (p, q, k) => ({ x: L(p.x, q.x, k), y: L(p.y, q.y, k) });
-  const s_ = TR.x - TL.x; // the grid spacing (83.1)
-  const BR = { x: RING.x, y: RING.y }, HOLE_OFF = Math.hypot(HOLE.x - RING.x, HOLE.y - RING.y);
-  function buildState(t) {
-    // every move of every blob eases in and out (no springs, no overshoot, no hard stops)
-    const io = (a, b) => seg(t, a, b, easeInOut);
-    // 1. one drop grows and pulls apart into the stroke's two joined circles; the turn already eases in meanwhile
-    const pop = io(0, 0.1);
-    const apart = io(0.03, 0.22);
-    const top = { ...LP(MID, TR, apart), r: L(30, BIG, apart) * pop };
-    const bottom = { ...LP(MID, BL, apart), r: L(30, BIG, apart) * pop };
-    const shaped = io(0.26, 0.42); // soft waist -> the logo's stroke, while it turns
-    // 2. half a turn clockwise (-180 -> 0: the stroke looks the same either way, so the logo lands upright)
-    const rot = 180 * (seg(t, 0.05, 0.66, longOut) - 1); // eases in while the stroke forms, then a long, slow ease out
-    // 3. as the turn slows down, the eyeball keeps going: it slides out of the top circle, straight down, small at
-    // first and growing as it goes, pulling a liquid neck behind it that thins and tears once it is clear
-    const FLING = 0.24; // while it is still turning: the eyeball slides out as the turn begins to slow
-    const fly = seg(t, FLING, 0.7, longOut);
-    const ring = { ...LP(TR, BR, fly), r: t < FLING ? 0 : L(7, BIG, seg(t, FLING, 0.7, longOut)) };
-    // ring and stroke stay joined by the liquid until the little drop shoots through: only then does the gap open
-    const kRing = t < FLING ? 0 : 32 * io(FLING, 0.32) * (1 - io(0.74, 0.88));
-    // 4. the eye opens
-    const open = io(0.58, 0.7);
-    // 5. a little drop forms in the eye, then travels through the ring and the stroke's middle to the top left
-    // the shot: slow out of the eye, quick through the middle, a soft landing (a strong ease in and out)
-    const born = io(0.64, 0.71), shoot = seg(t, 0.7, 1, longOut);
-    const dot = { ...LP(BR, TL, shoot), r: t < 0.64 ? 0 : L(8, DOT_R, seg(t, 0.72, 1, longOut)) * born }; // small in the eye, grows on the way
-    const kDot = t < 0.64 ? 0 : 22 * (1 - io(0.84, 1));
-    // the eye looks at the drop as it travels
-    const ang0 = Math.atan2(dot.y - ring.y, dot.x - ring.x), off = HOLE_OFF * seg(t, 0.72, 1, longOut);
-    const hole = { x: ring.x + off * Math.cos(ang0), y: ring.y + off * Math.sin(ang0), r: HOLE.r * open };
-    return { top, bottom, ring, hole, dot, rot, lift: 0, shaped, kRing, kDot };
-  }
-  // the renderer: a signed distance field (after Inigo Quilez's 2D distance functions and smooth minimum).
-  // Each part is a distance to its edge; the stroke is the tube between its two drops, pushed away by the dot
-  // and the ring; a smooth minimum melts parts into a neck wherever they come within K of each other and
-  // leaves them alone further apart, so the logo at rest (gaps of 10.3) comes out exactly
-  const K = 9;
-  const FRAG = `precision highp float;
-    uniform vec2 uRes; uniform vec3 uA, uB, uD, uE, uH, uColor; uniform float uRot, uLift, uKR, uKD, uShaped;
-    uniform float uOrbit, uGap, uAlpha, uW; uniform vec3 uOrder, uN, uH2;
-    float circ(vec2 p, vec3 c) { return length(p - c.xy) - c.z; }
-    float tube(vec2 p, vec3 a, vec3 b) {
-      vec2 pa = p - a.xy, ba = b.xy - a.xy; float l = dot(ba, ba);
-      float h = l < 1e-4 ? 0.0 : clamp(dot(pa, ba) / l, 0.0, 1.0);
-      return length(pa - ba * h) - mix(a.z, b.z, h);
-    }
-    // the logo's join: the quadrilateral between the points where each drop faces the dot and the ring
-    // (the tangent points of the logo's construction), as the largest of its four edge distances
-    float edge(vec2 p, vec2 a, vec2 b, vec2 inside) {
-      vec2 n = normalize(vec2(b.y - a.y, a.x - b.x));
-      if (dot(inside - a, n) > 0.0) n = -n;
-      return dot(p - a, n);
-    }
-    float join(vec2 p, vec3 a, vec3 b, vec2 d, vec2 e) {
-      vec2 p1 = a.xy + a.z * normalize(d - a.xy), p2 = a.xy + a.z * normalize(e - a.xy);
-      vec2 p3 = b.xy + b.z * normalize(e - b.xy), p4 = b.xy + b.z * normalize(d - b.xy);
-      vec2 m = (p1 + p2 + p3 + p4) * 0.25;
-      return max(max(edge(p, p1, p2, m), edge(p, p2, p3, m)), max(edge(p, p3, p4, m), edge(p, p4, p1, m)));
-    }
-    float smin(float a, float b, float k) { float h = max(k - abs(a - b), 0.0) / k; return min(a, b) - h * h * k * 0.25; }
-    // the smooth counterpart of cutting: the liquid is pressed in with a soft, rounded edge instead of cut off
-    float smax(float a, float b, float k) { return k <= 0.01 ? max(a, b) : -smin(-a, -b, k); }
-    void main() {
-      // pixel -> the logo's units (the 6..194 box), turned and lifted like the whole shape
-      vec2 p = vec2(gl_FragCoord.x, uRes.y - gl_FragCoord.y) / uRes * 188.0 + 6.0;
-      p -= vec2(100.0, 100.0 + uLift);
-      float c = cos(-uRot), s = sin(-uRot);
-      p = vec2(c * p.x - s * p.y, s * p.x + c * p.y) + 100.0;
-      // the stroke carries the logo's own shape, wherever its two drops are: the square they span on their
-      // diagonal gives the other two corners, and around those the flanks curve (a module plus the gap, s - r)
-      float d0 = length(uB.xy - uA.xy);
-      vec2 u = (uB.xy - uA.xy) / max(d0, 1e-3), nn = vec2(-u.y, u.x), mid = (uA.xy + uB.xy) * 0.5;
-      float side = d0 * 0.70710678, push = side - uA.z;
-      vec2 c1 = mid + nn * d0 * 0.5, c2 = mid - nn * d0 * 0.5; // where the dot and the ring sit in the logo
-      float shaped = min(join(p, uA, uB, c1, c2), min(circ(p, uA), circ(p, uB)));
-      shaped = max(shaped, max(push - length(p - c1), push - length(p - c2)));
-      float soft = smin(circ(p, uA), circ(p, uB), 95.0);
-      float stroke = mix(soft, shaped, uShaped);
-      // dot and ring are free; each joins the rest only through its own liquid blend
-      // each pair has its own blend, so the drop can melt into the stroke and out of the ring without
-      // gluing the ring back onto the stroke
-      float ring = uH.z > 2.0 ? smax(circ(p, uE), -circ(p, uH), 2.0) : circ(p, uE);
-      float dot_ = circ(p, uD);
-      float d = stroke;
-      if (uE.z > 0.01) d = min(d, uKR > 0.02 ? smin(stroke, ring, uKR) : min(stroke, ring));
-      if (uD.z > 0.01) {
-        d = min(d, uKD > 0.02 ? smin(stroke, dot_, uKD) : dot_);
-        if (uE.z > 0.01) d = min(d, uKD > 0.02 ? smin(ring, dot_, min(uKD, 5.0)) : dot_); // a light blend: the eye stays open around the drop
-      }
-      if (uOrbit > 0.5) {
-        // the eye as a real ball: a sphere with a round opening on its surface (around the direction uN, of angular
-        // radius uAlpha). Its outline stays a circle from every side; the opening travels over the ball, narrows
-        // towards its edge and disappears behind it. uW blends from the logo's flat hole (uH2) at rest
-        vec2 v = (p - uE.xy) / uE.z;
-        float rr = dot(v, v);
-        float opening = 1e3;
-        if (rr < 1.0) {
-          vec3 sp = vec3(v, sqrt(1.0 - rr)); // the visible surface point (x right, y down, z towards you)
-          opening = (acos(clamp(dot(sp, uN), -1.0, 1.0)) - uAlpha) * uE.z;
-        }
-        float flat_ = length(p - uH2.xy) - uH2.z;
-        float pupil = mix(flat_, opening, uW);
-        float ball = circ(p, uE);
-        // back to front: each layer cuts a gap into what lies behind it, then covers it. The eye covers with its
-        // whole ball and then paints its opening dark (a pupil on its surface, not a hole to look through)
-        d = 1e3;
-        for (int i = 0; i < 3; i++) {
-          float id = i == 0 ? uOrder.x : (i == 1 ? uOrder.y : uOrder.z);
-          float L = id < 0.5 ? stroke : (id < 1.5 ? ball : dot_);
-          d = i == 0 ? L : min(max(d, uGap - L), L);
-          if (id > 0.5 && id < 1.5) d = max(d, -pupil);
-        }
-      }
-      float px = 188.0 / uRes.x; // logo units per pixel: one pixel of soft edge
-      float a = clamp(0.5 - d / px, 0.0, 1.0);
-      gl_FragColor = vec4(uColor * a, a);
-    }`;
-  function glFor(canvas) {
-    if (canvas._gl) return canvas._gl;
-    const gl = canvas.getContext('webgl', { premultipliedAlpha: true, alpha: true });
-    const sh = (type, src) => { const o = gl.createShader(type); gl.shaderSource(o, src); gl.compileShader(o); if (!gl.getShaderParameter(o, gl.COMPILE_STATUS)) throw gl.getShaderInfoLog(o); return o; };
-    const prog = gl.createProgram();
-    gl.attachShader(prog, sh(gl.VERTEX_SHADER, 'attribute vec2 q; void main() { gl_Position = vec4(q, 0.0, 1.0); }'));
-    gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, FRAG));
-    gl.linkProgram(prog);
-    gl.useProgram(prog);
-    gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
-    const loc = gl.getAttribLocation(prog, 'q');
-    gl.enableVertexAttribArray(loc);
-    gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
-    const u = n => gl.getUniformLocation(prog, n);
-    const col = getComputedStyle(canvas).color.match(/[\d.]+/g).slice(0, 3).map(v => v / 255);
-    return (canvas._gl = { gl, u, col });
-  }
-  function drawState(st, sel) {
-    for (const canvas of document.querySelectorAll(sel)) {
-      const { gl, u, col } = glFor(canvas);
-      gl.viewport(0, 0, canvas.width, canvas.height);
-      gl.clearColor(0, 0, 0, 0);
-      gl.clear(gl.COLOR_BUFFER_BIT);
-      gl.uniform2f(u('uRes'), canvas.width, canvas.height);
-      const v3 = (n, c) => gl.uniform3f(u(n), c.x, c.y, Math.max(0, c.r));
-      v3('uA', st.top); v3('uB', st.bottom); v3('uD', st.dot); v3('uE', st.ring); v3('uH', st.hole);
-      gl.uniform3f(u('uColor'), col[0], col[1], col[2]);
-      gl.uniform1f(u('uRot'), st.rot * Math.PI / 180); gl.uniform1f(u('uLift'), st.lift); gl.uniform1f(u('uKR'), st.kRing); gl.uniform1f(u('uKD'), st.kDot); gl.uniform1f(u('uShaped'), st.shaped);
-      const o = st.orbit;
-      gl.uniform1f(u('uOrbit'), o ? 1 : 0);
-      if (o) {
-        gl.uniform1f(u('uGap'), o.gap); gl.uniform1f(u('uAlpha'), o.alpha); gl.uniform1f(u('uW'), o.w);
-        gl.uniform3f(u('uN'), o.n[0], o.n[1], o.n[2]); gl.uniform3f(u('uH2'), o.flat.x, o.flat.y, o.flat.r);
-        gl.uniform3f(u('uOrder'), o.order[0], o.order[1], o.order[2]);
-      }
-      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-    }
-  }
-  // ---- the orbit: the logo stays; the eye and the dot circle the stroke's thin middle like two moons. They sit
-  // opposite each other across the stroke, both ORB from its middle, so they share one orbit around the stroke's
-  // axis, half a turn apart. Depth shows as perspective (nearer is bigger), the ring tilts as a disc (edge on when it
-  // passes the middle), and whatever is in front cuts a gap into what lies behind, like the gaps of the logo
-  const AXIS = { x: -Math.SQRT1_2, y: Math.SQRT1_2 }, PERP = { x: Math.SQRT1_2, y: Math.SQRT1_2 }; // along the stroke, and across it towards the ring
-  const ORB = Math.hypot(BR.x - MID.x, BR.y - MID.y), FOCAL = 240, GAP_3D = 6;
-  // the eye's opening on the ball: tilted BETA from facing you towards the stroke (that gives the logo's offset
-  // hole), ALPHA wide (that gives the logo's hole size)
-  const BETA = Math.asin(HOLE_OFF / BIG), ALPHA = Math.asin(HOLE.r / BIG);
-  function orbitState(theta) {
-    const body = (phase, r) => {
-      const c = Math.cos(phase), z = ORB * Math.sin(phase), k = FOCAL / (FOCAL - z);
-      return { x: MID.x + PERP.x * ORB * c * k, y: MID.y + PERP.y * ORB * c * k, r: r * k, z, c, k };
-    };
-    const ring = body(theta, BIG), dot = body(theta + Math.PI, DOT_R);
-    // the eye keeps looking at you, tilted a little towards the stroke's axis (as in the logo): an eye that follows
-    // you as it passes. out = from the axis to the ball
-    const c = Math.cos(theta), sn = Math.sin(theta);
-    const out = [PERP.x * c, PERP.y * c, sn];
-    const raw = [0, 0, 1].map((z, i) => z * Math.cos(BETA) - out[i] * Math.sin(BETA)), len = Math.hypot(...raw);
-    const n = raw.map(v => v / len);
-    // layers back to front: 0 the stroke (depth 0), 1 the ring, 2 the dot
-    const order = [[0, 0], [1, ring.z], [2, dot.z]].sort((a, b) => a[1] - b[1]).map(e => e[0]);
-    return {
-      top: { ...TR, r: BIG }, bottom: { ...BL, r: BIG }, ring, dot, hole: { x: ring.x, y: ring.y, r: HOLE.r * ring.k },
-      rot: 0, lift: 0, shaped: 1, kRing: 0, kDot: 0,
-      orbit: {
-        gap: GAP_3D, order, n, alpha: ALPHA,
-        w: sn * sn, // 0 where the balls rest (on either side), 1 a quarter round: the logo's flat hole -> the ball's opening
-        flat: { x: ring.x - PERP.x * Math.sign(c || 1) * HOLE_OFF * ring.k, y: ring.y - PERP.y * Math.sign(c || 1) * HOLE_OFF * ring.k, r: HOLE.r * ring.k },
-      },
-    };
-  }
-  // the loop: the build, once; then the logo rests a moment, the moons go half way round (so the eye and the dot
-  // swap places), and the whole logo turns half way clockwise, which puts them back: every round lands upright.
-  // Every move eases in and out
-  const HOLD = 500, ORBIT = 1800, TURN = 1400, CYCLE = HOLD + ORBIT + TURN;
-  function loopState(ms) {
-    if (ms < BUILD) return buildState(ms / BUILD);
-    const c = (ms - BUILD) % CYCLE;
-    const theta = c < HOLD ? 0 : Math.PI * easeInOut(Math.min(1, (c - HOLD) / ORBIT));
-    const st = orbitState(theta);
-    st.rot = c < HOLD + ORBIT ? 0 : 180 * easeInOut((c - HOLD - ORBIT) / TURN);
-    return st;
-  }
-
-  // the wordmark's intro: the logo builds itself once, small, in its place (the same build as the splash, a little
-  // quicker), on a canvas standing in for the static logo (.mark-build in sub.css)
-  const MARK_BUILD = 2400;
-  function buildMark(logo) {
-    const canvas = document.createElement('canvas');
-    canvas.className = 'mark-build';
-    canvas.setAttribute('aria-hidden', 'true');
-    logo.before(canvas);
-    logo.style.display = 'none';
-    const size = Math.round(canvas.getBoundingClientRect().width * Math.min(devicePixelRatio || 1, 2) * 2);
-    canvas.width = canvas.height = size;
-    const start = performance.now();
-    const frame = now => {
-      const t = Math.min(1, (now - start) / MARK_BUILD);
-      drawState(buildState(t), '.mark-build');
-      if (t < 1) return requestAnimationFrame(frame);
-      // done: back to the static logo, and the GPU context goes back to the page
-      canvas._gl?.gl.getExtension('WEBGL_lose_context')?.loseContext();
-      canvas.remove();
-      logo.style.display = '';
-      logo.style.visibility = 'visible';
-    };
-    requestAnimationFrame(frame);
-  }
-
-
-
-// Branding: the logo builds itself once, full screen, every time the tool opens (as on iameric's first load).
-// A click or a key skips it.
-const splash = document.getElementById('splash');
-// the editor waits for this to show its startup hint
-const splashDone = () => window.dispatchEvent(new Event('splashdone'));
-if (matchMedia('(prefers-reduced-motion: reduce)').matches) { splash.remove(); splashDone(); }
-else {
-  const canvas = splash.querySelector('canvas');
-  canvas.width = canvas.height = Math.max(64, Math.round(canvas.getBoundingClientRect().width * Math.min(devicePixelRatio || 1, 2)));
-  const start = performance.now();
-  let raf = 0, ending = false;
-  const end = () => {
-    if (ending) return;
-    ending = true; splash.classList.add('out'); splashDone();
-    setTimeout(() => { cancelAnimationFrame(raf); canvas._gl?.gl.getExtension('WEBGL_lose_context')?.loseContext(); splash.remove(); }, 900);
-  };
-  splash.addEventListener('click', end);
-  addEventListener('keydown', end, { once: true });
-  const frame = now => {
-    const ms = now - start;
-    try { drawState(buildState(Math.min(1, ms / BUILD)), '#splash canvas'); } catch (e) { return end(); }
-    if (ms > BUILD + 450) end();
-    if (!ending) raf = requestAnimationFrame(frame);
-  };
-  raf = requestAnimationFrame(frame);
-}
+<script>
+// The website rail (.rail): shown only when the editor runs on the website (its page lives under /tools/), since the
+// links lead back to the site.
+(() => {
+  const rail = document.getElementById('rail');
+  if (!/\/tools\/[^/]+\/?(index\.html)?$/.test(location.pathname)) return;
+  rail.hidden = false;
+  document.body.classList.add('has-rail');
+})();
 </script>

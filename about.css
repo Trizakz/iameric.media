@@ -37,7 +37,7 @@ html:has(> body.subpage .screen.long) {
 .screen.long ol {
   margin: 0;
 }
-.screen.long .material-symbols-outlined {
+.screen.long .material-symbols-rounded {
   line-height: 1;
 }
 
@@ -87,15 +87,19 @@ html:has(> body.subpage .screen.long) {
   align-items: baseline;
   gap: 16px;
 }
+/* the admin pencils, only while working on the site locally (they never reach the published site): strawberry
+   red with a glow, so it is plain what visitors will not see */
 .ab-edit {
-  color: color-mix(in srgb, var(--text) 62%, transparent);
-  transition: color 0.25s ease-out;
+  color: #ff3b5c;
+  filter: drop-shadow(0 0 6px rgb(255 59 92 / 0.75));
+  transition: color 0.25s ease-out, filter 0.25s ease-out;
 }
 .ab-edit:hover,
 .ab-edit:focus-visible {
-  color: var(--signal);
+  color: #ff7088;
+  filter: drop-shadow(0 0 10px rgb(255 59 92 / 0.95));
 }
-.ab-edit .material-symbols-outlined {
+.ab-edit .material-symbols-rounded {
   font-size: 24px;
 }
 /* the key to the tiers: a small blank plate of each, in front of its words */
@@ -293,7 +297,7 @@ html:has(> body.subpage .screen.long) {
   opacity: 1;
 }
 @media (hover: hover) {
-  .ab-links ul:has(a.lk:hover) a.lk:not(:hover) {
+  .ab-links:has(a.lk:hover) a.lk:not(:hover) {
     filter: brightness(0.68);
     transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.3s ease-out;
   }

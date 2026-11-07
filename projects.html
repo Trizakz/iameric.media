@@ -10,16 +10,19 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400&family=DM+Sans:opsz,wght@9..40,500&family=Unbounded:wght@600&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,1,0&icon_names=arrow_back,arrow_downward,camera,grid_view,language,palette,search,videocam,view_agenda&display=block" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0&icon_names=arrow_back,arrow_downward,camera,deployed_code,edit,grid_view,language,palette,search,videocam,view_agenda&display=block" rel="stylesheet">
   <link rel="stylesheet" href="sub.css">
   <link rel="stylesheet" href="links.css">
   <link rel="stylesheet" href="footer.css">
+  <link rel="stylesheet" href="nav.css">
 </head>
 <body class="subpage">
+  <!-- the menu bar, the same on every page (nav.css, nav.js) -->
+  <nav class="site-nav" aria-label="menu"><div class="nav-links"><a href="projects.html" aria-current="page"><span class="nav-roll"><span>projects</span></span></a><a href="tools.html"><span class="nav-roll"><span>tools</span></span></a><a href="about.html"><span class="nav-roll"><span>about</span></span></a></div><a class="nav-cta" href="contact.html">get in touch<span class="nav-arrow" aria-hidden="true"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 10.5l7-7M5 3.5h5.5V9"/></svg><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 10.5l7-7M5 3.5h5.5V9"/></svg></span></a></nav>
   <!-- the projects, drawn by projects-page.js from projects.js: search, category chips, sorted by date. The home page
        loads this <main> into itself; data-page names the module it mounts -->
   <main class="screen scrolls" data-page="projects-page.js">
-    <a class="sub-mark" href="index.html" data-back aria-label="iameric, back to the home page"><i class="mark-logo" aria-hidden="true"></i><span class="mark-word" aria-hidden="true">iameric</span><span class="mark-back" aria-hidden="true"><span class="material-symbols-outlined">arrow_back</span>back</span></a>
+    <a class="sub-mark" href="index.html" data-back aria-label="iameric, back to the home page"><i class="mark-logo" aria-hidden="true"></i><span class="mark-word" aria-hidden="true">iameric</span><span class="mark-back" aria-hidden="true"><span class="material-symbols-rounded">arrow_back</span>back</span></a>
     <h1 tabindex="-1">projects</h1>
     <section class="pj" aria-label="projects">
       <div class="pj-intro" lang="en">
@@ -29,13 +32,13 @@
       <div class="pj-tools">
         <div class="pj-find">
           <label class="pj-search">
-            <span class="material-symbols-outlined" aria-hidden="true">search</span>
+            <span class="material-symbols-rounded" aria-hidden="true">search</span>
             <input type="search" placeholder="search projects" aria-label="search projects" autocomplete="off" spellcheck="false">
-            <button type="button" class="pj-sort" aria-label="sorted newest first, show oldest first"><span class="material-symbols-outlined" aria-hidden="true">arrow_downward</span></button>
+            <button type="button" class="pj-sort" aria-label="sorted newest first, show oldest first"><span class="material-symbols-rounded" aria-hidden="true">arrow_downward</span></button>
           </label>
           <div class="pj-views" role="group" aria-label="view">
-            <button type="button" data-view="grid" aria-pressed="true" aria-label="grid" title="grid"><span class="material-symbols-outlined" aria-hidden="true">grid_view</span></button>
-            <button type="button" data-view="rows" aria-pressed="false" aria-label="rows" title="rows"><span class="material-symbols-outlined" aria-hidden="true">view_agenda</span></button>
+            <button type="button" data-view="grid" aria-pressed="true" aria-label="grid" title="grid"><span class="material-symbols-rounded" aria-hidden="true">grid_view</span></button>
+            <button type="button" data-view="rows" aria-pressed="false" aria-label="rows" title="rows"><span class="material-symbols-rounded" aria-hidden="true">view_agenda</span></button>
           </div>
         </div>
         <div class="pj-chips" role="group" aria-label="category"></div>
@@ -56,5 +59,6 @@
     import { mount } from './projects-page.js';
     mount(document.body);
   </script>
+  <script src="nav.js"></script>
 </body>
 </html>

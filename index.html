@@ -7,58 +7,40 @@
   <link rel="icon" href="favicon.ico" sizes="48x48">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <title>iameric</title>
-  <script>
-    // start the page in its intro state: the wordmark's logo builds itself while the tags boot (tags.js),
-    // then the glass blob appears behind them
-    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      document.documentElement.classList.add('intro');
-      // the logo splash (splash.js), once per visit
-      try {
-        if (!sessionStorage.getItem('iameric-splash')) {
-          sessionStorage.setItem('iameric-splash', '1');
-          document.documentElement.classList.add('splash');
-        }
-      } catch {}
-    }
-  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:opsz,wght@9..40,400;9..40,500&family=Unbounded:wght@600&display=swap" rel="stylesheet">
-  <!-- Material Symbols for the tag icon screens and the side tab, subset to the icons in use (add new names here, alphabetical) -->
+  <!-- Unbounded as a variable font (200..900): the big word changes weight with the pointer (home-type.js) -->
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:opsz,wght@9..40,400;9..40,500&family=Unbounded:wght@200..900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="sub.css">
-  <link rel="stylesheet" href="about.css">
   <link rel="stylesheet" href="links.css">
-  <link rel="stylesheet" href="widgets.css">
   <link rel="stylesheet" href="footer.css">
-  <script src="logo.js" defer></script>
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,1,0&icon_names=arrow_back,arrow_downward,camera,clear_day,clear_night,cloud,code,deployed_code,design_services,edit,foggy,grid_view,language,live_tv,mail,movie_edit,music_note,palette,partly_cloudy_day,partly_cloudy_night,person,photo_camera,play_circle,rainy,search,thunderstorm,videocam,view_agenda,weather_snowy&display=block" rel="stylesheet">
+  <link rel="stylesheet" href="nav.css">
   <style>
     /* "graphit": neutral greys from the near-black ground up to a warm off-white text, plus one accent
-       colour, --signal. The 3D tags use the same greys plus a light side part (SCHEMES in tags.js).
-       Variable names are historical: --petrol deep, --mint mid, --red a third grey */
+       colour, --signal. */
     :root {
       --bg: #0b0b0c;
       --panel: #151517;
       --line: #2c2c30;
       --text: #e6e4df;
-      --petrol: #232327;
-      --mint: #45464d;
       --signal: #b39dff;
-      --red: #6a6b73;
       --edge: clamp(20px, calc(16vw - 60px), 220px); /* content kept towards the middle */
       --edge-y: clamp(16px, calc(7vh - 14px), 64px);
+      --gap: clamp(24px, 3vw, 56px); /* between the left block and the video */
       --ease: cubic-bezier(0.22, 1, 0.36, 1);
+      --expo: cubic-bezier(0.16, 1, 0.3, 1);
       --mono: "DM Mono", ui-monospace, Menlo, Consolas, monospace;
     }
+    /* one screen, never scrolling, on phones too */
     html, body {
       margin: 0;
       height: 100%;
+      overflow: hidden;
     }
     body {
       background: var(--bg);
       color: var(--text);
       font-family: "DM Sans", sans-serif;
-      scrollbar-color: var(--line) transparent;
     }
     ::selection {
       background: var(--signal);
@@ -73,23 +55,25 @@
       outline-offset: 4px;
       border-radius: 4px;
     }
-    .sr-only {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      overflow: hidden;
-      clip-path: inset(50%);
-      white-space: nowrap;
-    }
 
+    /* on a computer: a block on the left third (wordmark, footer; widgets later) on the plain ground with its dot grid,
+       and the video on the right two thirds with the big word along its bottom */
     .stage {
-      position: fixed;
-      inset: 0;
-      overflow: hidden;
+      position: relative;
+      height: 100%;
+      display: grid;
+      grid-template-columns: calc(100% / 3) minmax(0, 1fr);
     }
-
-    /* instrument-panel ground: a faint dot grid fading out towards the edges */
-    .stage::before {
+    .side {
+      position: relative;
+      box-sizing: border-box;
+      min-height: 0;
+      padding: var(--edge-y) var(--gap) clamp(16px, 3.4vh, 40px) var(--edge);
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr) auto;
+    }
+    /* instrument-panel ground: a faint dot grid fading out towards the block's edges (only here, not on the video) */
+    .side::before {
       content: "";
       position: absolute;
       inset: 0;
@@ -99,34 +83,64 @@
       mask-image: radial-gradient(ellipse at 50% 50%, #000 30%, transparent 78%);
       pointer-events: none;
     }
-
-    /* wordmark small in the top left corner */
-    .top {
-      position: absolute;
-      left: var(--edge);
-      top: var(--edge-y);
-      z-index: 3;
+    .side > * {
+      position: relative;
     }
-    /* blob and 3D tags share the middle of the page: the tags float in front of the glass */
-    .hero {
+    /* the grey column lies over the light shaft and dust (.particles), so they only show over the video */
+    @media (min-width: 761px) {
+      .side {
+        background: var(--bg);
+      }
+    }
+    .home {
+      position: relative;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 0 var(--edge) clamp(10px, 3vh, 36px) var(--gap);
+    }
+
+    /* the video: a soft loop of Eric's "Nostalgia-Inspired Edit" (0–29.4 s at half speed with interpolated frames,
+       54 s without the flickering concert, 26.92–31.72 s of _media/work/slow2x.mp4, cut with ffmpeg; darkened and lavender-tinted in the file itself, 640 x 640, no
+       blur in the file; assets/home-bg.*). The strong
+       blur happens here in the browser: blurred video compresses into visible blocks, a CSS blur stays perfectly
+       smooth. The video is larger than its frame, so the blur's soft edges stay outside; a fine grain on top keeps
+       the gradients from banding. The still frame stands in until it plays, and for reduced motion */
+    .bg {
+      position: fixed;
+      inset: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    @media (min-width: 761px) {
+      .bg {
+        left: calc(100% / 3);
+      }
+    }
+    .bg-video {
+      position: absolute;
+      inset: -8%;
+      width: 116%;
+      height: 116%;
+      object-fit: cover;
+      filter: blur(14px);
+    }
+    /* PS5-style light shaft and dust (particles.js) over the whole window, above the video, under the content */
+    .particles {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+    }
+    .bg::after {
+      content: "";
       position: absolute;
       inset: 0;
-      z-index: 2;
-      display: grid;
-      grid-template-columns: minmax(0, 1fr);
-      place-items: center;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.5 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      opacity: 0.06;
     }
-    .hero > * {
-      grid-area: 1 / 1;
-    }
-    .tags {
-      position: relative;
-      z-index: 1;
-      overflow: hidden;
-      width: min(760px, 92vw);
-      height: calc(100% - 2 * (var(--edge-y) + 70px));
-    }
-    /* set in Unbounded, a wide geometric face with soft ends, like a logo printed on the 3D devices;
+
+    /* the wordmark small in the top left corner, set in Unbounded, a wide geometric face with soft ends;
        "iameric" has only x-height letters, so all stand at the same height */
     .wordmark {
       margin: 0;
@@ -137,7 +151,7 @@
       letter-spacing: -0.01em;
       color: var(--signal);
     }
-    /* the logo (links.css) before the wordmark, at the wordmark's size */
+    /* the logo (links.css) before the wordmark, at the wordmark's size; it goes round its loop once on load */
     .mark {
       display: flex;
       align-items: center;
@@ -145,394 +159,151 @@
       font-size: clamp(19px, 1.6vw, 27px);
       color: var(--signal);
     }
-    /* intro: the logo builds itself, small (logo-build.js, buildMark); while it builds, the drawn logo stands in
-       for the static one */
-    .intro .mark .mark-logo {
-      visibility: hidden;
-    }
 
-    /* glass blob (blob.js) behind the tags: its canvas is a little larger than the old sphere, so the
-       glass has room to change shape */
-    .blob {
-      --s: clamp(220px, 32vw, 560px);
-      position: relative;
-      width: calc(var(--s) * 1.5);
-      aspect-ratio: 1;
-    }
-    @media (prefers-reduced-motion: no-preference) {
-      .blob {
-        animation: blob-in 1.2s var(--ease) 1.9s both;
-      }
-    }
-    /* appears last, once the tags have booted */
-    @keyframes blob-in {
-      from { opacity: 0; scale: 0.85; }
-    }
-    /* PS5-style dust and light shaft (particles.js) over the whole window, between the blob and the tags */
-    .particles {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-    }
-
-    /* page change: while a tag zooms in, the page around it fades away; once its screen covers the
-       window, the screen colour fades over everything and the next page (which starts in that colour)
-       loads */
-    .top, .bar {
-      transition: opacity 0.5s var(--ease);
-    }
-    .launching .top, .launching .bar, .launching .widgets {
-      opacity: 0;
-    }
-    /* the widgets go at once and step behind the tags, so the zooming tag passes over them */
-    .widgets {
-      transition: opacity 0.5s var(--ease);
-    }
-    .launching .widgets {
-      z-index: 1;
-      transition-duration: 0.15s;
-    }
-    .launch-fade {
-      position: fixed;
-      z-index: 20;
-      inset: 0;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.35s ease-out;
-    }
-
-
-    /* copyright and legal notice */
-    .bar {
-      position: absolute;
-      z-index: 3;
-      /* outer radius 18 = link radius 8 + padding 10 */
-      padding: 0;
+    /* the footer, condensed into the block: label/value pairs in a row under the barcode */
+    .footer {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-start;
+      gap: 14px 22px;
       color: var(--text);
       font: 14px/1 "DM Sans", sans-serif;
     }
-    /* along the bottom edge, like the sub pages' footer (footer.css) */
-    .footer {
-      left: var(--edge);
-      right: var(--edge);
-      bottom: var(--edge-y);
+    .footer .foot-code {
+      flex-basis: 100%;
+      max-width: 110px;
     }
-
-
-
-    /* the logo splash (splash.js): over everything on the first visit; the page's own intro waits under it */
-    .splash-screen {
-      position: fixed;
-      z-index: 100;
-      inset: 0;
-      display: grid;
-      place-items: center;
-      background: var(--bg);
-      overflow: hidden;
-      color: var(--text);
-      cursor: pointer;
-      transition: opacity 0.6s var(--ease);
-    }
-    .splash-screen.out {
-      opacity: 0;
-    }
-    /* a soft lavender horizon behind the logo, slowly breathing (google-blur-glow-ui) */
-    .splash-screen::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background:
-        radial-gradient(50% 24% at 50% 104%, rgba(238, 232, 255, 0.4), transparent 70%),
-        radial-gradient(78% 42% at 46% 110%, rgba(179, 157, 255, 0.34), transparent 72%),
-        radial-gradient(120% 64% at 58% 120%, rgba(86, 58, 186, 0.34), transparent 76%);
-      animation: splash-breathe 4s ease-in-out infinite alternate;
-    }
-    .splash-screen canvas {
-      position: relative;
-    }
-    @keyframes splash-breathe {
-      from { opacity: 0.65; transform: translateY(2%); }
-      to { opacity: 1; transform: none; }
-    }
-    .splash-screen canvas {
-      width: min(44vmin, 260px);
-      aspect-ratio: 1;
-    }
-    html:not(.splash) .splash-screen {
+    .footer .foot-logo {
       display: none;
     }
-    html.splash .stage,
-    html.splash .stage *,
-    html.splash .stage *::before,
-    html.splash .stage *::after {
-      animation-play-state: paused !important;
-    }
-    /* a small loader while a sub page is fetched (only if that takes a moment), the logo's glance (logo.js) */
-    .sub-loading {
-      position: fixed;
-      z-index: 40;
-      inset: 0;
-      display: grid;
-      place-items: center;
-      color: var(--text);
-      pointer-events: none;
-      animation: sub-loading-in 0.3s ease-out both;
-    }
-    @keyframes sub-loading-in {
-      from { opacity: 0; }
+    @media (min-width: 761px) {
+      .side .footer {
+        grid-row: 3; /* the bottom of the block, under the (for now empty) middle */
+        display: grid;
+        grid-template-columns: repeat(3, auto);
+        justify-content: start;
+        gap: 14px clamp(14px, 1.4vw, 22px);
+      }
+      .side .footer .foot-code {
+        grid-column: 1 / -1;
+      }
     }
 
-    /* phones and short windows: one scrolling column */
-    @media (max-width: 760px), (max-height: 600px) {
+    .giant {
+      display: flex;
+      margin: 0;
+      font-family: "Unbounded", var(--mono);
+      font-weight: 600;
+      line-height: 0.92;
+      letter-spacing: -0.02em;
+      white-space: nowrap;
+      user-select: none; /* it is a thing to play with, not text to copy */
+      -webkit-user-select: none;
+      /* the letters rise out of their line: nothing shows below it */
+      clip-path: inset(-0.5em -0.3em 0 -0.3em);
+    }
+    /* the letters near the pointer (--k, home-type.js) light up in the accent: a bright lavender, wrapped in soft
+       lavender blur, tight close to the letter and wide further out */
+    .g-l {
+      --k: 0;
+      position: relative;
+      z-index: 1;
+      flex: none;
+      display: inline-block;
+      text-align: center;
+      color: color-mix(in oklch, var(--text), #c9b8ff calc(var(--k) * 100%));
+      text-shadow:
+        0 0 calc(var(--k) * 0.06em) rgb(201 184 255 / calc(var(--k) * 0.9)),
+        0 0 calc(var(--k) * 0.2em) rgb(179 157 255 / calc(var(--k) * 0.75)),
+        0 0 calc(var(--k) * 0.55em) rgb(179 157 255 / calc(var(--k) * 0.55)),
+        0 0 calc(var(--k) * 1.1em) rgb(140 110 240 / calc(var(--k) * 0.35));
+    }
+    /* once the letters have risen, nothing clips their glow any more */
+    .giant.live {
+      clip-path: none;
+    }
+    /* on load: the letters rise one after another and settle from thin to their weight */
+    @media (prefers-reduced-motion: no-preference) {
+      .giant:not(.live) .g-l {
+        animation: g-rise 1.25s var(--expo) calc(0.25s + var(--i) * 0.07s) both;
+      }
+    }
+    @keyframes g-rise {
+      from { translate: 0 105%; font-weight: 200; }
+    }
+
+    /* phones: one column over the full video (no dot grid): wordmark, the big word, the footer */
+    @media (max-width: 760px) {
       .stage {
-        position: relative;
-        min-height: 100%;
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: auto minmax(0, 1fr) auto auto;
+        padding: calc(var(--edge-y) + 52px) var(--edge) var(--edge-y);
         box-sizing: border-box;
-        padding: var(--edge-y) var(--edge);
-        display: flex;
-        flex-direction: column;
-        gap: 16px;
       }
-      .top, .hero, .footer {
-        position: relative;
-        left: auto;
-        right: auto;
-        top: auto;
-        bottom: auto;
+      .side {
+        display: contents;
       }
-      .hero {
-        inset: auto;
+      .side::before {
+        display: none;
       }
-      .tags {
-        width: 100%;
-        height: 66vh;
-      }
-      .blob {
-        --s: 72vw;
-      }
+      .top { grid-row: 1; }
+      .home { grid-row: 3; padding: 0 0 18px; }
+      .footer { grid-row: 4; }
     }
   </style>
 </head>
 <body>
-  <div class="splash-screen" aria-hidden="true"><canvas></canvas></div>
+  <!-- the menu, the same on every page (nav.css, nav.js) -->
+  <nav class="site-nav" aria-label="menu"><div class="nav-links"><a href="projects.html"><span class="nav-roll"><span>projects</span></span></a><a href="tools.html"><span class="nav-roll"><span>tools</span></span></a><a href="about.html"><span class="nav-roll"><span>about</span></span></a></div><a class="nav-cta" href="contact.html">get in touch<span class="nav-arrow" aria-hidden="true"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 10.5l7-7M5 3.5h5.5V9"/></svg><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 10.5l7-7M5 3.5h5.5V9"/></svg></span></a></nav>
+  <div class="bg" aria-hidden="true">
+    <video class="bg-video" autoplay muted loop playsinline preload="auto" poster="assets/home-bg.webp">
+      <source src="assets/home-bg.webm" type="video/webm">
+      <source src="assets/home-bg.mp4" type="video/mp4">
+    </video>
+  </div>
+  <div class="particles" aria-hidden="true"></div>
   <div class="stage">
-    <!-- inside the stage so it sits on the ground but under the blob and the tags -->
-    <header class="top">
-      <div class="mark"><i class="mark-logo" aria-hidden="true"></i><h1 class="wordmark">iameric</h1></div>
-    </header>
+    <aside class="side">
+      <header class="top">
+        <div class="mark"><i class="mark-logo" aria-hidden="true"></i><p class="wordmark">iameric</p></div>
+      </header>
 
-    <main class="hero">
-      <div class="blob" aria-hidden="true"></div>
-      <div class="particles" aria-hidden="true"></div>
-      <div class="tags"></div>
-      <!-- the tags are the visible navigation; these links serve keyboard and screen readers and highlight their tag on focus -->
-      <nav class="sr-only" aria-label="Hauptnavigation">
-        <ul>
-          <li><a href="projects.html">projects</a></li>
-          <li><a href="about.html">about</a></li>
-          <li><a href="contact.html">contact</a></li>
-        </ul>
-      </nav>
-    </main>
-
-    <!-- widgets, like the small ones on a Mac desktop: filled in and kept current by widgets.js (its settings at the top) -->
-    <aside class="widgets" aria-label="widgets">
-      <div class="w-col">
-        <section class="w w-clock" aria-label="time and weather in Halle (Saale)">
-          <p class="w-city">Halle (Saale)<span class="material-symbols-outlined w-wicon" aria-hidden="true">cloud</span></p>
-          <div>
-            <p class="w-time">--:--</p>
-            <p class="w-date"></p>
-          </div>
-          <div>
-            <p class="w-weather"><b class="w-temp"></b><span class="w-cond"></span></p>
-            <p class="w-hl"></p>
-          </div>
-        </section>
-        <div class="w w-project">
-          <span class="w-pic" aria-hidden="true"></span>
-          <span class="w-cap"><span class="w-label">latest project</span><b class="w-title"></b><time></time></span>
-        </div>
-        <a class="w w-music" target="_blank" rel="noopener">
-          <span class="w-art"></span>
-          <span class="w-label"><span class="w-eq" aria-hidden="true"><i></i><i></i><i></i></span><span class="w-label-text"></span></span>
-          <span><b class="w-title"></b><span class="w-artist"></span></span>
-        </a>
-      </div>
+      <footer class="footer foot">
+        <img class="foot-code" src="assets/barcode.svg" alt="" width="110" height="22">
+        <p class="foot-col"><span>© <span class="year">2026</span></span><b>iameric</b></p>
+        <p class="foot-col"><span>version</span><b class="version">v1.0</b></p>
+        <p class="foot-col"><span>imprint</span><a class="lk" href="legal.html">legal notice</a></p>
+        <img class="foot-logo" src="assets/logo.svg" alt="" width="30" height="30">
+      </footer>
     </aside>
 
-    <footer class="bar footer foot">
-      <img class="foot-code" src="assets/barcode.svg" alt="" width="110" height="22">
-      <p class="foot-col"><span>© <span class="year">2026</span></span><b>iameric</b></p>
-      <p class="foot-col"><span>version</span><b class="version">v1.0</b></p>
-      <p class="foot-col"><span>imprint</span><a class="lk" href="legal.html">legal notice</a></p>
-      <img class="foot-logo" src="assets/logo.svg" alt="" width="30" height="30">
-    </footer>
+    <main class="home">
+      <h1 class="giant">iameric</h1>
+    </main>
   </div>
 
   <script type="importmap">
     {
       "imports": {
-        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
-        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
       }
     }
   </script>
-  <script type="module" src="splash.js"></script>
   <script type="module">
-    // the wordmark's intro: the logo builds itself once (logo-build.js). After a splash it waits for it to end
-    import { buildMark } from './logo-build.js';
-    const html = document.documentElement;
-    const buildHomeMark = () => buildMark(document.querySelector('.mark .mark-logo'));
-    if (html.classList.contains('intro')) {
-      if (html.classList.contains('splash')) addEventListener('iameric:splashdone', buildHomeMark, { once: true });
-      else buildHomeMark();
+    import { mountGiant } from './home-type.js';
+    import { loopMark } from './logo-build.js';
+    // reduced motion: the still frame only
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      const v = document.querySelector('.bg-video');
+      v.removeAttribute('autoplay');
+      v.pause();
     }
-  </script>
-  <script src="sub.js"></script>
-  <script type="module">
-    import { mountTags } from './tags.js';
-    import { mountBlob } from './blob.js';
-    import { mountParticles } from './particles.js';
-    import { buildMark } from './logo-build.js';
-    import { mountDust } from './glow-dust.js';
-    import { mountWidgets } from './widgets.js';
-    mountWidgets(document.querySelector('.widgets'));
+    mountGiant(document.querySelector('.giant'));
+    // the light shaft and the dust load on their own (three.js is large), so the word never waits for them
+    import('./particles.js').then(m => m.mountParticles(document.querySelector('.particles')));
+    // the wordmark's logo goes round its loop once, as on the sub pages
+    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) loopMark(document.querySelector('.mark .mark-logo'));
 
-    const tags = await mountTags(document.querySelector('.tags'), [
-      { title: 'projects', sub: 'video, editing, web', icon: 'deployed_code', href: 'projects.html', scheme: 'a' },
-      { title: 'about', sub: 'work, interests', icon: 'person', href: 'about.html', scheme: 'b' },
-      { title: 'contact', sub: 'commissions, mail', icon: 'mail', href: 'contact.html', scheme: 'a' },
-    ], { focusBlur: true });
-    // during the logo splash each scene waits paused from the moment it is mounted, before drawing a single frame,
-    // so the tags' boot intro (and the blob's and the dust's fade-in) play in full once the splash is gone
-    const splash = document.documentElement.classList.contains('splash');
-    const waitForSplash = scene => {
-      if (!splash) return;
-      scene.setPaused(true);
-      addEventListener('iameric:splashdone', () => scene.setPaused(false), { once: true });
-    };
-    waitForSplash(tags);
-    const tagBox = document.querySelector('.tags');
-    // the disc behind the glass takes the hovered tag's colour: its keys colour (SCHEMES in tags.js), more
-    // saturated so it still reads as colour through the glass. Projects and contact share scheme a.
-    const blob = await mountBlob(document.querySelector('.blob'), { idle: '#45464d', colors: ['#9a7bff', '#b9a2ff', '#9a7bff'] });
-    waitForSplash(blob);
-    tagBox.addEventListener('tagactive', e => blob.setActive(e.detail));
-    const particles = mountParticles(document.querySelector('.particles'));
-    waitForSplash(particles);
-    tagBox.addEventListener('taglaunchstart', () => document.body.classList.add('launching'));
-    dispatchEvent(new Event('iameric:ready'));
-    // sub pages open over the home page instead of replacing it: after the zoom the page's <main> is
-    // fetched and shown in a full-window panel, and the address changes with pushState. Going back
-    // only closes the panel and plays the zoom backwards; the home page never reloads, so nothing
-    // flickers. If fetching fails (e.g. opened from disk), it falls back to a normal page load.
-    const homeTitle = document.title;
-    let open = null; // { index, color, el }
-    const coverFade = color => {
-      const fade = document.createElement('div');
-      fade.className = 'launch-fade';
-      fade.style.background = color;
-      document.body.append(fade);
-      return fade;
-    };
-    async function openSub({ href, index, color }, instant) {
-      // the glance loader, only if fetching takes a moment
-      let loading = null;
-      const wait = setTimeout(() => {
-        loading = document.createElement('div');
-        loading.className = 'sub-loading';
-        loading.innerHTML = iamericGlance(40);
-        document.body.append(loading);
-      }, 300);
-      let doc;
-      try {
-        doc = new DOMParser().parseFromString(await (await fetch(href)).text(), 'text/html');
-      } finally {
-        clearTimeout(wait);
-        loading?.remove();
-      }
-      const el = document.createElement('div');
-      el.className = instant ? 'subpage instant' : 'subpage';
-      el.style.setProperty('--light', color);
-      el.append(doc.querySelector('main'));
-      document.body.append(el);
-      fitSubTitle(el);
-      // the sub page's wordmark: its logo builds itself, as on a page of its own (sub.js); sub.css keeps it hidden till then
-      const markLogo = el.querySelector('.sub-mark .mark-logo');
-      if (markLogo && !matchMedia('(prefers-reduced-motion: reduce)').matches) buildMark(markLogo);
-      const dust = mountDust(el); // a few specks floating up through its glow
-      el.querySelectorAll('.year').forEach(y => { y.textContent = document.querySelector('.footer .year').textContent; });
-      // a sub page with its own behaviour names its module in <main data-page> (about.js)
-      const mod = el.querySelector('[data-page]')?.dataset.page;
-      const page = mod ? import(`./${mod}`).then(m => m.mount(el)) : null;
-      document.title = doc.title;
-      el.querySelector('h1').focus({ preventScroll: true });
-      tags.setPaused(true); // nothing to draw behind it
-      blob.setPaused(true);
-      particles.setPaused(true);
-      open = { index, color, el, page, dust };
-    }
-    function closeSub() {
-      const { index, color, el, page, dust } = open;
-      open = null;
-      dust.dispose();
-      if (page) page.then(p => p.dispose());
-      el.classList.add('leaving'); // back into the screen colour
-      setTimeout(() => {
-        const fade = coverFade(color);
-        fade.style.opacity = '1';
-        el.remove();
-        document.title = homeTitle;
-        tags.setPaused(false);
-        blob.setPaused(false);
-        particles.setPaused(false);
-        tags.returnFrom(index); // the tag starts covering the window and flies back to its place
-        requestAnimationFrame(() => requestAnimationFrame(() => {
-          fade.style.opacity = '0';
-          setTimeout(() => fade.remove(), 400);
-        }));
-        setTimeout(() => document.body.classList.remove('launching'), 500);
-      }, 250);
-    }
-    tagBox.addEventListener('taglaunch', e => {
-      e.preventDefault();
-      const state = { sub: e.detail.href, href: e.detail.href, index: e.detail.index, color: e.detail.color };
-      const fade = coverFade(state.color);
-      requestAnimationFrame(() => { fade.style.opacity = '1'; });
-      setTimeout(async () => {
-        try {
-          await openSub(state);
-          history.pushState(state, '', state.href);
-          fade.remove();
-        } catch {
-          location.href = state.href;
-        }
-      }, 380);
-    });
-    // back (and forward) through the browser history
-    addEventListener('popstate', e => {
-      if (e.state && e.state.sub) {
-        if (!open) {
-          document.body.classList.add('launching');
-          openSub(e.state, true).catch(() => { location.href = e.state.href; });
-        }
-      } else if (open) {
-        closeSub();
-      }
-    });
-    // the sub page's own back link and Escape go back the same way
-    document.addEventListener('click', e => {
-      if (open && e.target.closest('.subpage [data-back]')) {
-        e.preventDefault();
-        history.back();
-      }
-    });
-    addEventListener('keydown', e => { if (open && e.key === 'Escape') history.back(); });
-    document.querySelectorAll('.hero nav a').forEach((a, i) => {
-      a.addEventListener('focus', () => tags.highlight(i));
-      a.addEventListener('blur', () => tags.highlight(-1));
-    });
   </script>
   <script>
     // launched in 2026: show "2026" that year, "2026 – <current year>" afterwards
@@ -540,15 +311,7 @@
     document.querySelectorAll('.year').forEach(el => {
       el.textContent = thisYear > LAUNCH ? `${LAUNCH} – ${thisYear}` : String(LAUNCH);
     });
-
-    const html = document.documentElement;
-
-    // drop the wordmark's intro state once the logo has built
-    const introDone = () => setTimeout(() => html.classList.remove('intro'), 2400);
-    if (html.classList.contains('intro')) {
-      if (html.classList.contains('splash')) addEventListener('iameric:splashdone', introDone, { once: true });
-      else introDone();
-    }
   </script>
+  <script src="nav.js"></script>
 </body>
 </html>
