@@ -107,7 +107,8 @@ button.danger.confirm { background: var(--danger); border-color: var(--danger); 
 .icon-btn { width: 30px; height: 30px; min-height: 30px; padding: 0; display: inline-grid; place-items: center; }
 .icon-btn[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
 .flip-v .msr { transform: rotate(90deg); }
-input[type=text], select { width: 100%; min-height: 30px; background: var(--field); border: 1px solid var(--line-strong); border-radius: 4px; padding: 4px 8px; }
+input[type=number] { font: inherit; color: var(--fg); }
+input[type=text], input[type=number], select { width: 100%; min-height: 30px; background: var(--field); border: 1px solid var(--line-strong); border-radius: 4px; padding: 4px 8px; }
 input[type=text]:hover, select:hover { border-color: #666; }
 input[type=text]::placeholder { color: #767676; }
 input[type=range] { width: 100%; accent-color: var(--accent); margin: 0; }
@@ -277,9 +278,14 @@ dialog p { margin: 0; }
 .mode .mono { margin-left: auto; }
 .mode:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); }
 .slots { display: flex; flex-direction: column; gap: var(--s3); }
+.height-field { margin-top: var(--s3); }
+.height-row { display: flex; align-items: center; gap: var(--s2); }
+.height-row input { width: 110px; }
+#showHNote { font-size: 12px; color: var(--muted); }
 .slot-meta { min-width: 0; margin-right: auto; }
 /* Free crop for images and GIFs */
-#imgCrop { width: min(520px, calc(100vw - 32px)); }
+#imgCrop, #bgPick { width: min(520px, calc(100vw - 32px)); }
+#bpNote { margin: 0; }
 .ic-stage { position: relative; align-self: center; overflow: hidden; touch-action: none; user-select: none; background: #111; }
 .ic-stage canvas { display: block; cursor: default; }
 .ic-box { position: absolute; outline: 2px solid #fff; box-shadow: 0 0 0 9999px rgba(0,0,0,.6); cursor: move; }
@@ -362,7 +368,7 @@ body.has-rail { padding-left: calc(56px + max(16px, env(safe-area-inset-left, 0p
   <div class="brand">
     <svg class="logo" viewBox="14.05 14.05 171.9 171.9" aria-hidden="true"><path d="M39.52 58.45a18.93 18.93 0 1 0 37.86 0a18.93 18.93 0 1 0 -37.86 0Z"/><path d="M105.15 58.45A36.4 36.4 0 1 1 141.55 94.85A46.7 46.7 0 0 0 94.85 141.55A36.4 36.4 0 1 1 58.45 105.15A46.7 46.7 0 0 0 105.15 58.45Z"/><path fill-rule="evenodd" d="M105.15 141.55a36.4 36.4 0 1 0 72.8 0a36.4 36.4 0 1 0 -72.8 0ZM117.53 134.27a16.74 16.74 0 1 0 33.49 0a16.74 16.74 0 1 0 -33.49 0Z"/></svg>
     <h1>Steam Showcase Editor</h1>
-    <span class="version">v0.53</span>
+    <span class="version">v0.55</span>
     <span class="meta">by Eric Leutemann</span>
   </div>
   <div class="export" role="group" aria-label="Help, import and export">
@@ -467,6 +473,10 @@ body.has-rail { padding-left: calc(56px + max(16px, env(safe-area-inset-left, 0p
       <div class="group">
         <h3 class="label">Showcase</h3>
         <div class="modes" id="modes" role="radiogroup" aria-label="Showcase"></div>
+        <div class="field height-field" id="heightField">
+          <div class="field-head"><label for="showH">Height</label><output id="showHNote"></output></div>
+          <div class="height-row"><input type="number" id="showH" min="100" max="4000" step="1" inputmode="numeric"><span class="mono">px</span></div>
+        </div>
       </div>
       <div class="group">
         <h3 class="label">Background</h3>
@@ -537,6 +547,13 @@ body.has-rail { padding-left: calc(56px + max(16px, env(safe-area-inset-left, 0p
   <div class="dlg-head"><h2 id="icTitle">Crop image</h2></div>
   <div class="ic-stage"><canvas></canvas><div class="ic-box"><i data-h="nw"></i><i data-h="ne"></i><i data-h="sw"></i><i data-h="se"></i></div></div>
   <div class="row"><button class="primary" id="icApply">Apply</button><button id="icFull">Whole image</button><button id="icCancel">Cancel</button></div>
+</dialog>
+
+<dialog id="bgPick" aria-labelledby="bpTitle">
+  <div class="dlg-head"><h2 id="bpTitle">Choose the area</h2></div>
+  <p class="hint" id="bpNote"></p>
+  <div class="ic-stage"><canvas></canvas><div class="ic-box bp-box"></div></div>
+  <div class="row"><button class="primary" id="bpApply">Use this area</button><button id="bpCancel">Cancel</button></div>
 </dialog>
 
 <dialog id="importDlg" aria-labelledby="importTitle">
@@ -991,7 +1008,12 @@ function characterWidget(x = 262, y = 90, height = CH0) {
 // every showcase starts empty
 function defaultsFor() { uid = 0; return []; }
 const state = { widgets: [], sel: null, guides: [],
-  frost: .06, blur: 16, dur: 6, fps: 12, theme: 'ember', palette: [...PALETTES.Sunset], mode: 'featured', bg: {} };
+  frost: .06, blur: 16, dur: 6, fps: 12, theme: 'ember', palette: [...PALETTES.Sunset], mode: 'featured', bg: {}, h: 824 };
+// The Featured and Artwork Showcases are always 630 wide, but their height can be anything (it follows the files from
+// steam.design, or the Height field); the profile picture is always 184 x 184.
+const H_MIN = 100, H_MAX = 4000;
+const clampH = h => Math.round(Math.min(H_MAX, Math.max(H_MIN, h)));
+const defaultH = m => (m === 'avatar' ? 184 : 824);
 // cw: a width the user dragged at the widget's edges; without it, text widgets size themselves to their text.
 const CW_MIN = 120, CW_MAX = 600;
 function dims(w) {
@@ -1278,7 +1300,7 @@ function save() {
 }
 async function restore() {
   let m = null; try { m = localStorage.getItem(MODE_KEY); } catch (e) {}
-  state.mode = MODES[m] ? m : 'featured'; applyGeometry(); state.widgets = defaultsFor(state.mode);
+  state.mode = MODES[m] ? m : 'featured'; state.h = defaultH(state.mode); applyGeometry(); state.widgets = defaultsFor(state.mode);
   let o = null;
   try { o = JSON.parse(localStorage.getItem(modeKey(state.mode))); } catch (e) {}
   if (o && Array.isArray(o.widgets)) await applySnapshot(o); else buildBackground();
@@ -1287,7 +1309,7 @@ async function restore() {
 async function setMode(m) {
   if (m === state.mode || !MODES[m]) return;
   clearTimeout(saveTimer); save();
-  state.mode = m; state.bg = {}; imgs.slots = {}; state.sel = null;
+  state.mode = m; state.bg = {}; imgs.slots = {}; state.sel = null; state.h = defaultH(m);
   applyGeometry(); state.widgets = defaultsFor(m);
   let o = null;
   try { o = JSON.parse(localStorage.getItem(modeKey(m))); } catch (e) {}
@@ -1296,10 +1318,17 @@ async function setMode(m) {
 }
 function applyGeometry() {
   const M = MODES[state.mode], last = M.slots[M.slots.length - 1];
+  if (!M.still) { M.h = state.h; M.slots.forEach(sl => { sl.h = state.h; }); } // every file of a showcase has its height
   W = last.x + last.w; H = M.h; SCREEN = M.screen;
   cv.width = W * SCREEN; cv.height = H * SCREEN;
   const st = document.querySelector('.stage').style; st.setProperty('--ar', W / H); st.setProperty('--maxw', M.view + 'px');
   imgVersion++;
+}
+function setHeight(h) {
+  if (MODES[state.mode].still) return;
+  h = clampH(h);
+  if (h === state.h) return;
+  state.h = h; applyGeometry(); buildBackground(); syncGlobal(); syncReady(); changed();
 }
 // The canvas background: each slot's uploaded file at its place, a dark gap between them, a labelled grey box while missing.
 function buildBackground() {
@@ -1332,6 +1361,8 @@ function buildBackground() {
 const isReady = () => MODES[state.mode].slots.every(sl => imgs.slots[sl.key]);
 // Rebuilds the scene from a snapshot (a save or a layout code); widgets without a saved picture get none (placeholders).
 async function applySnapshot(o) {
+  // the height first: the files and the widgets are placed on it (saves from before have none: 824)
+  if (!MODES[state.mode].still) { state.h = Number.isFinite(o.h) ? clampH(o.h) : defaultH(state.mode); applyGeometry(); }
   for (const k of ['frost', 'blur', 'dur', 'fps']) if (k in o) state[k] = o[k];
   if (THEMES[o.theme]) state.theme = o.theme;
   if (Array.isArray(o.palette) && o.palette.length === 5) state.palette = o.palette;
@@ -1387,10 +1418,22 @@ async function prepBackground(file, sl) {
   const url = URL.createObjectURL(file);
   try {
     const img = await loadImg(url).catch(() => { throw new Error(BAD_IMAGE); }), iw = img.naturalWidth, ih = img.naturalHeight;
-    if (Math.abs(iw / ih - sl.w / sl.h) > .01 * sl.w / sl.h)
-      throw new Error(`${sl.base}.png has to be ${sl.w} × ${sl.h} px or the same aspect ratio. This image is ${iw} × ${ih} px.`);
+    const M = MODES[state.mode], alone = M.slots.every(o => o.key === sl.key || !imgs.slots[o.key]);
+    if (!M.still && alone) {
+      const k = iw === sl.w ? 1 : iw === 2 * sl.w ? 2 : 0;
+      if (k && ih / k >= H_MIN && ih / k <= H_MAX) setHeight(ih / k);
+    }
+    let sx = 0, sy = 0, sw = iw, sh = ih;
+    // not the slot's shape: choose a slot-sized part of a larger image, pixel for pixel
+    if (Math.abs(iw / ih - sl.w / sl.h) > .01 * sl.w / sl.h) {
+      if (iw < sl.w || ih < sl.h)
+        throw new Error(`${sl.base}.png has to be ${sl.w} × ${sl.h} px, the same aspect ratio, or larger to choose an area from. This image is ${iw} × ${ih} px.`);
+      const at = await pickArea(img, sl);
+      if (!at) throw new Error('cancel');
+      [sx, sy] = at; sw = sl.w; sh = sl.h;
+    }
     const c = document.createElement('canvas'); c.width = sl.w * SCREEN; c.height = sl.h * SCREEN;
-    c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+    c.getContext('2d').drawImage(img, sx, sy, sw, sh, 0, 0, c.width, c.height);
     let out = c.toDataURL('image/webp', .9);
     if (!out.startsWith('data:image/webp')) out = c.toDataURL('image/png');
     return out;
@@ -1404,7 +1447,15 @@ Object.entries(MODES).forEach(([k, M]) => {
   $('modes').appendChild(l);
 });
 function renderSlots() {
-  document.querySelectorAll('input[name=mode]').forEach(i => { i.checked = i.value === state.mode; });
+  document.querySelectorAll('input[name=mode]').forEach(i => {
+    i.checked = i.value === state.mode;
+    const M = MODES[i.value], h = i.value === state.mode ? H : M.still ? M.h : 824;
+    i.closest('label').querySelector('.mono').textContent = `${M.slots.map(sl => sl.w).join(' + ')} × ${i.value === state.mode || M.still ? h : 'any'}`;
+  });
+  const still = MODES[state.mode].still, locked = MODES[state.mode].slots.some(sl => imgs.slots[sl.key]);
+  $('heightField').hidden = still;
+  $('showH').value = H; $('showH').disabled = locked;
+  $('showHNote').textContent = locked ? 'set by the file' : 'or upload a file';
   const box = $('slots'); box.innerHTML = '';
   MODES[state.mode].slots.forEach(sl => {
     const has = !!state.bg[sl.key], row = document.createElement('div'); row.className = 'asset';
@@ -1416,7 +1467,7 @@ function renderSlots() {
         const src = await prepBackground(f, sl);
         imgs.slots[sl.key] = await loadImg(src); state.bg[sl.key] = src;
         buildBackground(); syncGlobal(); syncReady(); changed();
-      } catch (e) { $('slotError').textContent = e.message; }
+      } catch (e) { if (e.message !== 'cancel') $('slotError').textContent = e.message; }
     });
     // removing a background file: the slot is empty again (the editor goes back to Layout until it is filled)
     const rm = row.querySelector('[data-remove]');
@@ -1428,6 +1479,7 @@ function renderSlots() {
     box.appendChild(row);
   });
 }
+$('showH').addEventListener('change', e => { const v = +e.target.value; if (v) setHeight(v); else e.target.value = H; });
 // Until every file of the showcase is there, only Layout is open.
 function syncReady() {
   const r = isReady();
@@ -1515,6 +1567,39 @@ $('icApply').onclick = () => { icDone?.([icB.x / icW, icB.y / icH, icB.w / icW, 
 $('icFull').onclick = () => { icB = { x: 0, y: 0, w: icW, h: icH }; icDraw(); };
 $('icCancel').onclick = () => ic.dlg.close();
 ic.dlg.addEventListener('close', () => icDone?.(null));
+// Background area: a file larger than its slot and not its shape shows whole, with a frame of exactly the slot's size
+// on it; drag the frame onto the part you want. Resolves the frame's top left corner in the file's pixels, or null.
+const bp = { dlg: $('bgPick'), cv: $('bgPick').querySelector('canvas'), box: $('bgPick').querySelector('.bp-box') };
+let bpB, bpK, bpW, bpH, bpDrag = null, bpDone = null;
+function bpDraw() { Object.assign(bp.box.style, { left: bpB.x + 'px', top: bpB.y + 'px', width: bpB.w + 'px', height: bpB.h + 'px' }); }
+function pickArea(img, sl) {
+  return new Promise(resolve => {
+    const iw = img.naturalWidth, ih = img.naturalHeight;
+    bpK = Math.min(Math.min(486, innerWidth - 66) / iw, Math.min(420, innerHeight - 240) / ih, 1);
+    bpW = Math.round(iw * bpK); bpH = Math.round(ih * bpK);
+    bp.cv.width = bpW; bp.cv.height = bpH; bp.cv.style.width = bpW + 'px'; bp.cv.style.height = bpH + 'px';
+    bp.cv.getContext('2d').drawImage(img, 0, 0, bpW, bpH);
+    const w = sl.w * bpK, h = sl.h * bpK;
+    bpB = { w, h, x: (bpW - w) / 2, y: (bpH - h) / 2, iw, ih, sl };
+    bpDraw();
+    $('bpNote').textContent = `${sl.base}.png is ${sl.w} × ${sl.h} px, this image ${iw} × ${ih} px. Drag the frame onto the part you want.`;
+    bpDone = v => { bpDone = null; resolve(v); };
+    bp.dlg.showModal();
+  });
+}
+bp.box.addEventListener('pointerdown', e => { e.preventDefault(); bpDrag = { x: e.clientX - bpB.x, y: e.clientY - bpB.y }; bp.box.setPointerCapture(e.pointerId); });
+bp.box.addEventListener('pointermove', e => {
+  if (!bpDrag) return;
+  bpB.x = cl(e.clientX - bpDrag.x, 0, bpW - bpB.w); bpB.y = cl(e.clientY - bpDrag.y, 0, bpH - bpB.h); bpDraw();
+});
+bp.box.addEventListener('pointerup', () => { bpDrag = null; });
+bp.box.addEventListener('pointercancel', () => { bpDrag = null; });
+$('bpApply').onclick = () => {
+  const { iw, ih, sl } = bpB;
+  bpDone?.([cl(Math.round(bpB.x / bpK), 0, iw - sl.w), cl(Math.round(bpB.y / bpK), 0, ih - sl.h)]); bp.dlg.close();
+};
+$('bpCancel').onclick = () => bp.dlg.close();
+bp.dlg.addEventListener('close', () => bpDone?.(null));
 // Crop on upload, as in the Beitragsverwaltung (zuschnitt.js), like Discord: drag to move, slider or wheel to zoom.
 // The picture always covers the square frame; Apply keeps exactly the framed part at 256 x 256.
 const crop = { dlg: $('crop'), stage: document.querySelector('.crop-stage'), img: document.querySelector('.crop-stage img'), frame: document.querySelector('.crop-frame'), zoom: $('cropZoom') };
