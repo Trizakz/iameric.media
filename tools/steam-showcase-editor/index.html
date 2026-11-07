@@ -107,8 +107,7 @@ button.danger.confirm { background: var(--danger); border-color: var(--danger); 
 .icon-btn { width: 30px; height: 30px; min-height: 30px; padding: 0; display: inline-grid; place-items: center; }
 .icon-btn[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
 .flip-v .msr { transform: rotate(90deg); }
-input[type=number] { font: inherit; color: var(--fg); }
-input[type=text], input[type=number], select { width: 100%; min-height: 30px; background: var(--field); border: 1px solid var(--line-strong); border-radius: 4px; padding: 4px 8px; }
+input[type=text], select { width: 100%; min-height: 30px; background: var(--field); border: 1px solid var(--line-strong); border-radius: 4px; padding: 4px 8px; }
 input[type=text]:hover, select:hover { border-color: #666; }
 input[type=text]::placeholder { color: #767676; }
 input[type=range] { width: 100%; accent-color: var(--accent); margin: 0; }
@@ -278,10 +277,6 @@ dialog p { margin: 0; }
 .mode .mono { margin-left: auto; }
 .mode:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); }
 .slots { display: flex; flex-direction: column; gap: var(--s3); }
-.height-field { margin-top: var(--s3); }
-.height-row { display: flex; align-items: center; gap: var(--s2); }
-.height-row input { width: 110px; }
-#showHNote { font-size: 12px; color: var(--muted); }
 .slot-meta { min-width: 0; margin-right: auto; }
 /* Free crop for images and GIFs */
 #imgCrop, #bgPick { width: min(520px, calc(100vw - 32px)); }
@@ -368,7 +363,7 @@ body.has-rail { padding-left: calc(56px + max(16px, env(safe-area-inset-left, 0p
   <div class="brand">
     <svg class="logo" viewBox="14.05 14.05 171.9 171.9" aria-hidden="true"><path d="M39.52 58.45a18.93 18.93 0 1 0 37.86 0a18.93 18.93 0 1 0 -37.86 0Z"/><path d="M105.15 58.45A36.4 36.4 0 1 1 141.55 94.85A46.7 46.7 0 0 0 94.85 141.55A36.4 36.4 0 1 1 58.45 105.15A46.7 46.7 0 0 0 105.15 58.45Z"/><path fill-rule="evenodd" d="M105.15 141.55a36.4 36.4 0 1 0 72.8 0a36.4 36.4 0 1 0 -72.8 0ZM117.53 134.27a16.74 16.74 0 1 0 33.49 0a16.74 16.74 0 1 0 -33.49 0Z"/></svg>
     <h1>Steam Showcase Editor</h1>
-    <span class="version">v0.55</span>
+    <span class="version">v0.58</span>
     <span class="meta">by Eric Leutemann</span>
   </div>
   <div class="export" role="group" aria-label="Help, import and export">
@@ -473,10 +468,6 @@ body.has-rail { padding-left: calc(56px + max(16px, env(safe-area-inset-left, 0p
       <div class="group">
         <h3 class="label">Showcase</h3>
         <div class="modes" id="modes" role="radiogroup" aria-label="Showcase"></div>
-        <div class="field height-field" id="heightField">
-          <div class="field-head"><label for="showH">Height</label><output id="showHNote"></output></div>
-          <div class="height-row"><input type="number" id="showH" min="100" max="4000" step="1" inputmode="numeric"><span class="mono">px</span></div>
-        </div>
       </div>
       <div class="group">
         <h3 class="label">Background</h3>
@@ -1009,8 +1000,8 @@ function characterWidget(x = 262, y = 90, height = CH0) {
 function defaultsFor() { uid = 0; return []; }
 const state = { widgets: [], sel: null, guides: [],
   frost: .06, blur: 16, dur: 6, fps: 12, theme: 'ember', palette: [...PALETTES.Sunset], mode: 'featured', bg: {}, h: 824 };
-// The Featured and Artwork Showcases are always 630 wide, but their height can be anything (it follows the files from
-// steam.design, or the Height field); the profile picture is always 184 x 184.
+// The Featured and Artwork Showcases are always 630 wide, but their height can be anything: it follows the first file
+// uploaded (from steam.design); with no file it is 824. The profile picture is always 184 x 184.
 const H_MIN = 100, H_MAX = 4000;
 const clampH = h => Math.round(Math.min(H_MAX, Math.max(H_MIN, h)));
 const defaultH = m => (m === 'avatar' ? 184 : 824);
@@ -1449,17 +1440,16 @@ Object.entries(MODES).forEach(([k, M]) => {
 function renderSlots() {
   document.querySelectorAll('input[name=mode]').forEach(i => {
     i.checked = i.value === state.mode;
-    const M = MODES[i.value], h = i.value === state.mode ? H : M.still ? M.h : 824;
-    i.closest('label').querySelector('.mono').textContent = `${M.slots.map(sl => sl.w).join(' + ')} × ${i.value === state.mode || M.still ? h : 'any'}`;
+    // the height of the Featured and Artwork Showcases is free: it follows the uploaded file
+    const M = MODES[i.value];
+    i.closest('label').querySelector('.mono').textContent = `${M.slots.map(sl => sl.w).join(' + ')} × ${M.still ? M.h : 'any'}`;
   });
-  const still = MODES[state.mode].still, locked = MODES[state.mode].slots.some(sl => imgs.slots[sl.key]);
-  $('heightField').hidden = still;
-  $('showH').value = H; $('showH').disabled = locked;
-  $('showHNote').textContent = locked ? 'set by the file' : 'or upload a file';
   const box = $('slots'); box.innerHTML = '';
   MODES[state.mode].slots.forEach(sl => {
     const has = !!state.bg[sl.key], row = document.createElement('div'); row.className = 'asset';
-    row.innerHTML = `<img alt=""><div class="slot-meta"><div class="file">${sl.base}.png</div><div class="mono">${sl.w} × ${sl.h}</div></div><button type="button"${has ? '' : ' class="primary"'}>${has ? 'Replace' : 'Upload'}</button>${has ? '<button type="button" data-remove>Remove</button>' : ''}`;
+    // until a file of this showcase is there, its height is still open
+    const open = !MODES[state.mode].still && !MODES[state.mode].slots.some(o => imgs.slots[o.key]);
+    row.innerHTML = `<img alt=""><div class="slot-meta"><div class="file">${sl.base}.png</div><div class="mono">${sl.w} × ${open ? 'any' : sl.h}</div></div><button type="button"${has ? '' : ' class="primary"'}>${has ? 'Replace' : 'Upload'}</button>${has ? '<button type="button" data-remove>Remove</button>' : ''}`;
     if (has) row.querySelector('img').src = state.bg[sl.key];
     row.querySelector('button').onclick = () => pickFile(async f => {
       $('slotError').textContent = '';
@@ -1474,12 +1464,12 @@ function renderSlots() {
     if (rm) rm.onclick = () => {
       $('slotError').textContent = '';
       delete state.bg[sl.key]; delete imgs.slots[sl.key];
+      if (!MODES[state.mode].slots.some(o => imgs.slots[o.key])) setHeight(defaultH(state.mode));
       buildBackground(); syncGlobal(); syncReady(); changed();
     };
     box.appendChild(row);
   });
 }
-$('showH').addEventListener('change', e => { const v = +e.target.value; if (v) setHeight(v); else e.target.value = H; });
 // Until every file of the showcase is there, only Layout is open.
 function syncReady() {
   const r = isReady();
