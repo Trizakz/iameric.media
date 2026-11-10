@@ -4,11 +4,21 @@ export const TOOLS = [
     "id": "steam-showcase-editor",
     "title": "Steam Showcase Editor",
     "description": "Design artwork for your Steam profile showcases: widgets, social links, images and GIFs, exported as PNG, JPG or GIF.",
-    "version": "0.75",
+    "version": "0.76",
     "date": "2026-11-10",
     "href": "tools/steam-showcase-editor/",
     "thumb": null,
     "changelog": [
+      {
+        "version": "0.76",
+        "date": "2026-11-11",
+        "title": "Calmer interface",
+        "changes": [
+          "More room between sections and cards, no divider lines",
+          "Export is the one highlighted button; the blue only marks what matters",
+          "Softer shadows, fewer text sizes, popups grow from where you clicked"
+        ]
+      },
       {
         "version": "0.75",
         "date": "2026-11-10",
