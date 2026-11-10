@@ -5,7 +5,7 @@ a.lk {
   gap: 0.34em;
   font: 600 0.9em/1 "Unbounded", var(--mono);
   letter-spacing: -0.01em;
-  color: var(--signal);
+  color: var(--coral, #ff6b57);
   text-decoration: none;
   white-space: nowrap;
 }
@@ -27,4 +27,12 @@ a.lk:focus-visible {
 .lk .material-symbols-rounded {
   font-size: 0.92em;
   line-height: 1;
+}
+/* the logo while it goes round its loop once (logo-build.js loopMark): a canvas a little larger than the logo,
+   because the drawing's box is (188 units against the logo's 155.9) */
+.mark-build {
+  flex: none;
+  width: 1.206em;
+  height: 1.206em;
+  margin: -0.103em;
 }

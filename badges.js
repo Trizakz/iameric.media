@@ -32,7 +32,7 @@ export const BADGES = [
   {
     "id": "design",
     "title": "design",
-    "col": 4,
+    "col": 3,
     "row": 3,
     "level": 2,
     "icon": "design_services"
@@ -52,6 +52,7 @@ export const BADGES = [
   {
     "id": "badge",
     "title": "AI",
+    "col": 2,
     "row": 2,
     "level": 2,
     "icon": "network_intelligence"
@@ -73,7 +74,7 @@ export const BADGES = [
   {
     "id": "badge-4",
     "title": "anime",
-    "col": 4,
+    "col": 5,
     "row": 1,
     "level": 2,
     "icon": "japanese_flag"
@@ -88,7 +89,7 @@ export const BADGES = [
   {
     "id": "badge-6",
     "title": "porter\nrobinson",
-    "col": 2,
+    "col": 3,
     "row": 2,
     "level": 2,
     "icon": "artist",
@@ -97,14 +98,14 @@ export const BADGES = [
   {
     "id": "badge-7",
     "title": "indie",
-    "col": 1,
-    "row": 2,
+    "col": 4,
+    "row": 1,
     "icon": "music_note_2"
   },
   {
     "id": "badge-8",
     "title": "soundtracks",
-    "col": 3,
+    "col": 4,
     "row": 2,
     "level": 2,
     "icon": "queue_music"
@@ -112,42 +113,41 @@ export const BADGES = [
   {
     "id": "badge-9",
     "title": "cooking",
-    "col": 4,
     "row": 2,
     "icon": "skillet_cooktop"
   },
   {
     "id": "badge-10",
     "title": "plants",
-    "col": 5,
+    "col": 1,
     "row": 2,
     "icon": "nest_eco_leaf"
   },
   {
     "id": "badge-11",
     "title": "cream\ncheese",
-    "row": 3,
+    "col": 5,
+    "row": 2,
     "level": 2,
     "icon": "fork_spoon"
   },
   {
     "id": "badge-12",
     "title": "tech",
-    "col": 1,
     "row": 3,
     "icon": "electrical_services"
   },
   {
     "id": "badge-13",
     "title": "bbq",
-    "col": 3,
+    "col": 2,
     "row": 3,
     "icon": "outdoor_grill"
   },
   {
     "id": "badge-14",
     "title": "japanese\ngraphic\ndesign",
-    "col": 2,
+    "col": 1,
     "row": 3,
     "icon": "art_track"
   },
@@ -160,8 +160,8 @@ export const BADGES = [
   {
     "id": "badge-16",
     "title": "obsidian.md",
-    "col": 2,
-    "row": 4,
+    "col": 4,
+    "row": 3,
     "level": 2,
     "icon": "folder_copy"
   },

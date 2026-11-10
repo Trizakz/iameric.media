@@ -2,26 +2,36 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Steam Showcase Editor</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&family=Unbounded:wght@600&family=Plus+Jakarta+Sans:wght@300;500;600;700;800&family=Pixelify+Sans:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Fira+Mono:wght@400;500&family=Unbounded:wght@600&family=Plus+Jakarta+Sans:wght@300;500;600;700;800&family=Pixelify+Sans:wght@400;500;600;700&display=swap">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@48,500,1,0&display=block">
 <style>
 /* Layout: a neutral-gray editor. Header with export on top; the 630x824 stage on the left, sized to fit the viewport; a tabbed inspector on the right. Stacks on phones. */
 :root {
-  --bg: #1b1b1b;
-  --chrome: #252525;
-  --raised: #323232;
-  --field: #1a1a1a;
-  --line: #3a3a3a;
-  --line-strong: #4d4d4d;
-  --fg: #e6e6e6;
-  --muted: #a6a6a6;
-  --accent: #b39dff; /* iameric's --signal */
-  --accent-hover: #c5b4ff;
-  --accent-ink: #141218;
-  --accent-soft: rgba(179, 157, 255, .14);
-  --danger: #f2776a;
+  /* iameric.media's "cobalt print" palette: ink and paper, cobalt for fills, coral for the logo */
+  --bg: #0d0e11;
+  --chrome: #17181c;    /* cards: header, inspector, dialogs */
+  --raised: #24262c;    /* the thumb of a choice, a secondary button */
+  --raised-hover: #2c2f36;
+  --field: #202227;     /* the track under fields and choices */
+  --field-hover: #272a30;
+  --line: #26282d;
+  --line-strong: #3d4048;
+  --fg: #eeeae0;
+  --muted: #a3a09a;
+  --faint: #77756f;
+  --accent: #4a6dff; /* the site's cobalt, a step lighter so white text and thin lines read on it */
+  --accent-hover: #5f80ff;
+  --accent-ink: #ffffff;
+  --accent-text: #8ea3ff; /* cobalt as text on the dark ground */
+  --accent-soft: rgba(74, 109, 255, .14);
+  --coral: #ff6b57;
+  --danger: #ff6b57;
+  /* a card: a hairline of light round it and a soft shadow under it; a thumb: the same, tighter */
+  --ring-card: 0 0 0 1px rgba(255, 255, 255, .08), 0 2px 10px rgba(0, 0, 0, .25);
+  --ring-thumb: 0 0 0 1px rgba(255, 255, 255, .1), 0 1px 2px rgba(0, 0, 0, .3);
+  --r-card: 12px; --r-ctl: 8px; --r-chip: 6px;
   --font-ui: "DM Sans", "Segoe UI", system-ui, sans-serif;
-  --font-mono: "DM Mono", ui-monospace, Menlo, Consolas, monospace;
+  --font-mono: "Fira Mono", ui-monospace, Menlo, Consolas, monospace;
   --font-brand: "Unbounded", var(--font-mono); /* iameric's wordmark face: the tool's name only */
   /* spacing scale (4-unit base) */
   --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 24px; --s6: 32px;
@@ -31,13 +41,13 @@
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
 /* stable gutters: the page and the inspector reserve their scrollbar's room, so nothing shifts when one appears */
-html { scrollbar-color: #4d4d4d transparent; scrollbar-gutter: stable; }
-::selection { background: rgba(179, 157, 255, .4); color: #fff; }
+html { scrollbar-color: #3d4048 transparent; scrollbar-gutter: stable; }
+::selection { background: rgba(74, 109, 255, .4); color: #fff; }
 body {
   background: var(--bg);
   color: var(--fg);
   font-family: var(--font-ui);
-  font-size: 14px;
+  font-size: 13px;
   line-height: 1.4;
   caret-color: var(--accent);
   padding-left: max(16px, env(safe-area-inset-left, 0px));
@@ -45,91 +55,113 @@ body {
   padding-block: 12px 24px;
 }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-.msr { font-family: "Material Symbols Rounded"; font-size: 18px; line-height: 1; font-weight: normal; font-style: normal; letter-spacing: normal; text-transform: none; white-space: nowrap; font-feature-settings: "liga"; -webkit-font-smoothing: antialiased; }
+.msr { font-family: "Material Symbols Rounded"; font-size: 18px; line-height: 1; font-weight: normal; font-style: normal; letter-spacing: normal; text-transform: none; white-space: nowrap; font-feature-settings: "liga"; -webkit-font-smoothing: antialiased; -webkit-user-select: none; user-select: none; }
 
 /* Header */
 .bar { max-width: 1160px; margin: 0 auto var(--s3); display: flex; flex-wrap: wrap; align-items: center; gap: var(--s2) var(--s4);
-  background: var(--chrome); border: 1px solid var(--line); border-radius: 6px; padding: var(--s2) var(--s3); }
+  background: var(--chrome); border-radius: var(--r-card); box-shadow: var(--ring-card); padding: 8px 8px 8px 16px; }
 .brand { display: flex; align-items: center; gap: var(--s3); margin-right: auto; min-width: 0; }
-.logo { width: 24px; height: 24px; color: var(--accent); fill: currentColor; flex: none; }
 h1 { font-family: var(--font-brand); font-size: 14px; font-weight: 600; letter-spacing: -0.01em; line-height: 1; margin: 0; white-space: nowrap; }
 /* file names from steam.design, always in the accent so they read as "this exact file" */
-.file { font-family: var(--font-mono); font-weight: 500; color: var(--accent); overflow-wrap: anywhere; }
-.version { font-family: var(--font-mono); font-size: 11px; line-height: 1; color: var(--muted); border: 1px solid var(--line-strong); border-radius: 4px; padding: 3px 5px; }
+.file { font-family: var(--font-mono); font-weight: 500; color: var(--accent-text); overflow-wrap: anywhere; }
+.version { font-family: var(--font-mono); font-size: 11px; line-height: 1; color: var(--muted); border: 1px solid var(--line-strong); border-radius: 4px; padding: 3px 4px; }
 .brand { gap: var(--s2) var(--s3); }
 .brand h1 + .version { margin-left: calc(var(--s2) - var(--s3)); }
 .meta { font-family: var(--font-mono); font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .export { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s2); }
 .toast { position: fixed; z-index: 50; left: 50%; bottom: 20px; transform: translateX(-50%); max-width: min(440px, calc(100vw - 32px));
-  padding: 10px 14px; border-radius: 6px; background: var(--raised); border: 1px solid var(--danger); color: var(--fg); font-size: 13px;
+  padding: 12px 16px; border-radius: 6px; background: var(--raised); border: 1px solid var(--danger); color: var(--fg); font-size: 13px;
   box-shadow: 0 10px 30px rgba(0,0,0,.45); animation: hint-in .25s cubic-bezier(.22, 1, .36, 1); }
 .toast:empty { display: none; }
 
 /* Workspace */
 .workspace { max-width: 1160px; margin: 0 auto; display: grid; grid-template-columns: auto minmax(300px, 1fr); gap: var(--s3); align-items: start; }
-.stage-wrap { position: sticky; top: var(--top); display: grid; place-items: center; padding: var(--s4); background: #151515; border: 1px solid var(--line); border-radius: 6px; }
+.stage-wrap { position: sticky; top: var(--top); display: grid; place-items: center; padding: var(--s4); background: #0a0b0d; border-radius: var(--r-card); box-shadow: var(--ring-card); }
 .stage { width: min(var(--maxw, 630px), max(340px, calc((100dvh - 120px) * var(--ar, .7646)))); max-width: 100%; aspect-ratio: var(--ar, .7646); overflow: hidden; box-shadow: 0 12px 40px rgba(0,0,0,.5); }
 canvas { display: block; width: 100%; height: 100%; touch-action: none; cursor: grab; }
 canvas.dragging { cursor: grabbing; }
 
 .inspector { position: sticky; top: var(--top); max-height: max(420px, calc(100dvh - 88px)); display: flex; flex-direction: column; min-width: 0;
-  background: var(--chrome); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
-.tabs { display: flex; border-bottom: 1px solid var(--line); padding: 0 var(--s2); }
-.tabs button { flex: 1 1 0; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 11px 4px 9px; border: 0; border-bottom: 2px solid transparent;
-  border-radius: 0; background: transparent; color: var(--muted); font-weight: 600; }
+  background: var(--chrome); border-radius: var(--r-card); box-shadow: var(--ring-card); overflow: hidden; }
+.tabs { display: flex; gap: 2px; margin: 12px 12px 0; padding: 2px; border-radius: var(--r-ctl); background: var(--field); }
+.tabs button { flex: 1 1 0; display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 28px; padding: 0 8px; border: 0;
+  border-radius: var(--r-chip); background: transparent; box-shadow: none; color: var(--muted); font-weight: 500; font-size: 12.5px; transition: color .2s, background-color .2s, box-shadow .2s; }
 .tabs button:hover { color: var(--fg); background: transparent; }
-.tabs button[aria-selected="true"] { color: var(--fg); border-bottom-color: var(--accent); }
+.tabs button[aria-selected="true"] { color: var(--fg); background: var(--raised); box-shadow: var(--ring-thumb); }
 .panel { overflow: auto; overscroll-behavior: contain; scrollbar-gutter: stable; padding: var(--s4); display: flex; flex-direction: column; }
-.group { display: flex; flex-direction: column; gap: var(--s3); }
-.group + .group, .panel-body > .group + .group { margin-top: var(--s6); padding-top: var(--s6); border-top: 1px solid var(--line); }
-.label { font-size: 12px; font-weight: 700; color: #cfcfcf; margin: 0; letter-spacing: .02em; }
-.hint { color: var(--muted); font-size: 13px; margin: 0; max-width: 60ch; }
+.group { display: flex; flex-direction: column; gap: var(--s2); }
+.group + .group, .panel-body > .group + .group { margin-top: var(--s4); padding-top: var(--s4); border-top: 1px solid var(--line); }
+.label { font-size: 12.5px; font-weight: 500; color: var(--fg); margin: 0; }
+.hint { color: var(--muted); font-size: 12.5px; margin: 0; max-width: 60ch; }
 
 /* Controls */
 button, select, input[type=text], textarea { font: inherit; color: var(--fg); }
-textarea { width: 100%; min-height: 30px; background: var(--field); border: 1px solid var(--line-strong); border-radius: 4px; padding: 6px 8px; resize: vertical; line-height: 1.4; }
-textarea:hover { border-color: #666; }
-textarea::placeholder { color: #767676; }
+textarea { width: 100%; min-height: 28px; background: var(--field); border: 0; border-radius: var(--r-chip); padding: 4px 8px; resize: vertical; line-height: 1.4; font-size: 12.5px; transition: background-color .15s; }
+textarea:hover { background: var(--field-hover); }
+textarea::placeholder { color: var(--faint); }
 textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 /* every button lays its icon and label out on one optical middle line; lists of choices align their labels to the left */
-button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; line-height: 1.15;
-  background: transparent; border: 1px solid var(--line-strong); border-radius: 4px; padding: 5px 12px; min-height: 30px; cursor: pointer; font-weight: 600;
-  transition: background-color .12s ease-out, border-color .12s ease-out; }
+button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; line-height: 1.15;
+  background: var(--raised); border: 0; border-radius: 999px; padding: 0 12px; min-height: 28px; cursor: pointer; font-weight: 500; font-size: 12.5px;
+  box-shadow: var(--ring-thumb); transition: background-color .15s ease-out, box-shadow .15s ease-out, color .15s ease-out; }
 button .msr { flex: none; }
-button:hover { background: var(--raised); }
-button:active { background: #3c3c3c; }
+button:hover { background: var(--raised-hover); }
+button:active { background: var(--raised); translate: 0 .5px; }
 button:disabled { opacity: .45; cursor: not-allowed; }
 button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
-button.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
-button.primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+button.primary { background: var(--accent); color: var(--accent-ink); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .16), 0 1px 2px rgba(0, 0, 0, .3); }
+button.primary:hover { background: var(--accent-hover); }
 button.danger { color: var(--danger); }
-button.danger.confirm { background: var(--danger); border-color: var(--danger); color: #1b1b1b; box-shadow: 0 0 0 3px rgba(242,119,106,.3), 0 0 18px rgba(242,119,106,.65); }
-.icon-btn { width: 30px; height: 30px; min-height: 30px; padding: 0; display: inline-grid; place-items: center; }
-.icon-btn[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+button.danger.confirm { background: var(--danger); color: #0d0e11; box-shadow: 0 0 0 3px rgba(255,107,87,.3); }
+.icon-btn { width: 28px; height: 28px; min-height: 28px; padding: 0; display: inline-grid; place-items: center; border-radius: var(--r-ctl); }
+.icon-btn[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent-text); box-shadow: inset 0 0 0 1px rgba(74, 109, 255, .5); }
 .flip-v .msr { transform: rotate(90deg); }
-input[type=text], select { width: 100%; min-height: 30px; background: var(--field); border: 1px solid var(--line-strong); border-radius: 4px; padding: 4px 8px; }
-input[type=text]:hover, select:hover { border-color: #666; }
-input[type=text]::placeholder { color: #767676; }
-input[type=range] { width: 100%; accent-color: var(--accent); margin: 0; }
+input[type=text], select { width: 100%; min-height: 28px; background: var(--field); border: 0; border-radius: var(--r-chip); padding: 4px 8px; font-size: 12.5px; transition: background-color .15s; }
+input[type=text]:hover, select:hover { background: var(--field-hover); }
+input[type=text]::placeholder { color: var(--faint); }
+/* a slim track on the field colour, cobalt up to the thumb (--fill, kept current by the script at the end), a paper thumb */
+input[type=range] { width: 100%; height: 16px; margin: 0; background: transparent; appearance: none; -webkit-appearance: none; cursor: pointer; }
+input[type=range]::-webkit-slider-runnable-track { height: 4px; border-radius: 4px; background: linear-gradient(90deg, var(--accent) var(--fill, 0%), var(--field-hover) var(--fill, 0%)); }
+input[type=range]::-moz-range-track { height: 4px; border-radius: 4px; background: var(--field-hover); }
+input[type=range]::-moz-range-progress { height: 4px; border-radius: 4px; background: var(--accent); }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; margin-top: -4px; border-radius: 50%; background: var(--fg); box-shadow: 0 0 0 1px rgba(0,0,0,.25), 0 1px 3px rgba(0,0,0,.4); transition: scale .15s; }
+input[type=range]::-moz-range-thumb { width: 14px; height: 14px; border: 0; border-radius: 50%; background: var(--fg); box-shadow: 0 0 0 1px rgba(0,0,0,.25), 0 1px 3px rgba(0,0,0,.4); }
+input[type=range]:hover::-webkit-slider-thumb { scale: 1.1; }
 /* the reset dot sits under the track at the default value (left set in JS, thumb half-width 8px) */
-.range { position: relative; padding-bottom: 10px; }
-.reset-dot { position: absolute; bottom: 0; width: 6px; height: 6px; min-height: 0; padding: 0; border: 0; border-radius: 50%;
+.range { position: relative; padding-bottom: 12px; }
+.reset-dot { position: absolute; bottom: 0; width: 6px; height: 6px; min-height: 0; padding: 0; border: 0; border-radius: 50%; box-shadow: none;
   background: var(--line-strong); transform: translateX(-50%); }
 .reset-dot::before { content: ""; position: absolute; inset: -6px; }
 .reset-dot.changed { background: var(--accent); }
 .reset-dot:hover:not(:disabled) { background: var(--accent-hover); transform: translateX(-50%) scale(1.3); }
 .reset-dot:disabled { opacity: .35; cursor: default; }
-input[type=color] { width: 32px; height: 28px; padding: 0 2px; border: 1px solid var(--line-strong); border-radius: 4px; background: var(--field); cursor: pointer; }
-.field { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
-.field > label, .field-head label { color: var(--muted); font-size: 13px; }
+input[type=color] { width: 30px; height: 28px; padding: 3px; border: 0; border-radius: var(--r-chip); background: var(--field); cursor: pointer; }
+.field { display: flex; flex-direction: column; gap: var(--s2); min-width: 0; } /* a label sits 8 from its field */
+.field > label, .field-head label { color: var(--muted); font-size: 12px; }
 .field-head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--s2); }
-output { font-family: var(--font-mono); font-size: 12px; color: var(--fg); font-variant-numeric: tabular-nums; }
+output { font-family: var(--font-mono); font-size: 11.5px; color: var(--fg); font-variant-numeric: tabular-nums; }
 .pair { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--s2); }
 .check { display: flex; gap: var(--s2); align-items: center; cursor: pointer; }
 .check input { accent-color: var(--accent); width: 15px; height: 15px; margin: 0; }
 .row { display: flex; gap: var(--s2); flex-wrap: wrap; }
-.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
 
+/* Edit tab: each group is a fine-tune card (after beautifului.dev): a raised card, its name in a bar over a hairline */
+#selBody > .group:not(.anim-group) { padding: 0 12px 12px; border-radius: 10px; background: #1c1e23; box-shadow: var(--ring-card); }
+#selBody > .group + .group { margin-top: 8px; padding-top: 0; border-top: 0; }
+#selBody > .group + .anim-group { margin-top: 8px; padding-top: var(--s3); }
+#selBody > .group:not(.anim-group) > .label:first-child { margin: 0 -12px 4px; padding: 12px 12px 8px; border-bottom: 1px solid var(--line); font-size: 12.5px; }
+#selBody > .group:not(.anim-group) > :first-child:not(.label) { margin-top: 12px; }
+.ft-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; }
+.ft-field { display: flex; align-items: center; gap: 2px; height: 28px; padding: 0 8px 0 2px; border-radius: var(--r-chip); background: var(--field); cursor: text; transition: background-color .15s, box-shadow .15s; }
+.ft-field:hover { background: var(--field-hover); }
+.ft-field:focus-within { box-shadow: inset 0 0 0 1px var(--accent); }
+.ft-key { flex: none; padding: 3px 4px; border-radius: 4px; font-size: 12px; color: var(--muted); cursor: ew-resize; user-select: none; touch-action: none; transition: color .15s, background-color .15s; }
+.ft-key:hover, .ft-field.scrubbing .ft-key { color: var(--fg); background: rgba(255, 255, 255, .07); }
+.ft-field input[type=text] { flex: 1; min-width: 0; height: 100%; min-height: 0; padding: 0 2px; background: transparent; font: 12px var(--font-mono); font-variant-numeric: tabular-nums; }
+.ft-field input[type=text]:hover { background: transparent; }
+.ft-field input[type=text]:focus-visible { outline: none; }
+.ft-unit { font-size: 11.5px; color: var(--faint); }
 /* Edit tab */
 .inspector-head { display: flex; align-items: center; gap: var(--s2); min-height: 30px; margin-bottom: var(--s5); }
 /* stacking buttons, then a little room, then duplicate and delete */
@@ -139,17 +171,17 @@ output { font-family: var(--font-mono); font-size: 12px; color: var(--fg); font-
 .keys { display: grid; grid-template-columns: auto 1fr; gap: var(--s2) var(--s3); margin: var(--s3) 0 0; font-size: 13px; color: var(--muted); }
 .keys dt { color: var(--fg); white-space: nowrap; }
 .keys dd { margin: 0; }
-kbd { font-family: var(--font-mono); font-size: 11.5px; padding: 0 5px; border: 1px solid var(--line-strong); border-bottom-width: 2px; border-radius: 4px; background: var(--field); color: var(--fg); }
+kbd { font-family: var(--font-mono); font-size: 11.5px; padding: 0 4px; border: 1px solid var(--line-strong); border-bottom-width: 2px; border-radius: 4px; background: var(--field); color: var(--fg); }
 .picks { display: flex; flex-wrap: wrap; gap: 4px; }
-.picks button { width: 30px; height: 30px; min-height: 30px; padding: 0; display: inline-grid; place-items: center; }
+.picks button { width: 28px; height: 28px; min-height: 28px; padding: 0; display: inline-grid; place-items: center; border-radius: var(--r-ctl); }
 .picks svg { width: 16px; height: 16px; fill: currentColor; }
 .picks-label { font-size: 12px; color: var(--muted); margin: var(--s1) 0 0; }
-.swatches { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
-.swatches button { width: 22px; height: 22px; min-height: 22px; padding: 0; border-radius: 50%; border: 1px solid rgba(255,255,255,.3); }
+.swatches { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.swatches button { width: 22px; height: 22px; min-height: 22px; padding: 0; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(255,255,255,.3); }
 
 /* Animation section: tinted and gently sweeping, so it reads as the place where motion lives */
-.anim-group { position: relative; overflow: hidden; border: 1px solid rgba(179,157,255,.45); background: var(--accent-soft); border-radius: 6px; padding: var(--s3); }
-.panel-body > .group + .anim-group { margin-top: var(--s6); padding-top: var(--s3); border-top: 1px solid rgba(179,157,255,.45); }
+.anim-group { position: relative; overflow: hidden; border: 1px solid rgba(74,109,255,.45); background: var(--accent-soft); border-radius: var(--r-ctl); padding: var(--s3); }
+.panel-body > .group + .anim-group { margin-top: var(--s6); padding-top: var(--s3); border-top: 1px solid rgba(74,109,255,.45); }
 .anim-group::before { content: ""; position: absolute; inset: 0; pointer-events: none;
   background: linear-gradient(105deg, transparent 35%, rgba(255,255,255,.09) 50%, transparent 65%); background-size: 250% 100%;
   animation: sweep 4s ease-in-out infinite; }
@@ -160,37 +192,39 @@ kbd { font-family: var(--font-mono); font-size: 11.5px; padding: 0 5px; border: 
 @keyframes bob { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-2px) rotate(-8deg); } }
 
 /* Add tab */
-.adders { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 6px; }
-.adders button { display: flex; justify-content: flex-start; gap: var(--s2); padding: 8px 10px; text-align: left; }
+.adders { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; }
+.adders button { display: flex; justify-content: flex-start; gap: var(--s2); padding: 8px 12px; text-align: left; border-radius: var(--r-ctl); }
 .adders .msr { color: var(--accent); }
 
 /* Style tab */
-.themes { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 6px; }
-.theme { display: flex; justify-content: flex-start; gap: var(--s2); padding: 5px 8px; text-align: left; font-weight: 600; min-width: 0; }
+.themes { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; }
+.theme { display: flex; justify-content: flex-start; gap: var(--s2); padding: 4px 8px; text-align: left; font-weight: 500; min-width: 0; border-radius: var(--r-ctl); }
 .theme span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.theme .sw { width: 18px; height: 18px; border-radius: 4px; border: 1px solid rgba(255,255,255,.25); flex: none; }
-.theme[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); }
-.palette { display: flex; gap: 6px; }
+.theme .sw { width: 18px; height: 18px; border-radius: 5px; box-shadow: inset 0 0 0 1px rgba(255,255,255,.2); flex: none; }
+.theme[aria-pressed="true"] { background: var(--accent-soft); box-shadow: inset 0 0 0 1px rgba(74, 109, 255, .6); }
+.palette { display: flex; gap: 8px; }
 .palette input[type=color] { flex: 1 1 0; min-width: 0; height: 34px; }
-.preset { display: inline-flex; align-items: center; gap: 6px; padding: 3px 8px 3px 5px; font-size: 13px; }
+.preset { display: inline-flex; align-items: center; gap: 8px; padding: 0 8px 0 8px; font-size: 12px; }
 .preset i { display: inline-flex; border-radius: 3px; overflow: hidden; height: 12px; }
 .preset i b { width: 8px; height: 12px; }
+.pal-actions { gap: 8px; }
 
 /* Scene tab */
 .asset { display: flex; align-items: center; gap: var(--s3); }
-.asset img { width: 42px; height: 55px; object-fit: cover; border-radius: 4px; border: 1px solid var(--line-strong); background: var(--field); flex: none; }
+.asset img { width: 42px; height: 55px; object-fit: cover; border-radius: var(--r-chip); border: 0; box-shadow: var(--ring-thumb); background: var(--field); flex: none; }
 .asset img.contain { object-fit: contain; }
 
-a { color: var(--accent-hover); text-underline-offset: 3px; }
+a { color: var(--accent-text); text-decoration: none; transition: color .15s; } /* no underlines, as on the website */
+a:hover { color: var(--fg); }
 code { font-family: var(--font-mono); font-size: 12px; }
 
 /* Export result */
-dialog { width: min(420px, calc(100vw - 32px)); margin-top: max(16px, 6dvh); max-height: calc(94dvh - 16px); padding: var(--s4); border: 1px solid var(--line-strong); border-radius: 8px;
-  background: var(--chrome); color: var(--fg); box-shadow: 0 30px 90px rgba(0,0,0,.6); }
+dialog { width: min(420px, calc(100vw - 32px)); margin-top: max(16px, 6dvh); max-height: calc(94dvh - 16px); padding: var(--s5); border: 0; border-radius: var(--r-card);
+  background: var(--chrome); color: var(--fg); box-shadow: 0 0 0 1px rgba(255, 255, 255, .09), 0 30px 90px rgba(0,0,0,.6); }
 dialog[open] { display: flex; flex-direction: column; gap: var(--s3); }
 dialog::backdrop { background: rgba(0,0,0,.6); }
 .dlg-head { display: flex; align-items: center; gap: var(--s2); }
-.dlg-head h2 { font-size: 15px; margin: 0 auto 0 0; }
+.dlg-head h2 { font-size: 14px; font-weight: 600; margin: 0 auto 0 0; }
 dialog img { width: 100%; border-radius: 4px; display: block; border: 1px solid var(--line); }
 dialog p { margin: 0; }
 .mono { font-family: var(--font-mono); font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
@@ -204,24 +238,39 @@ dialog p { margin: 0; }
 .exp-preview { display: flex; flex-direction: column; gap: var(--s2); }
 .exp-settings { display: flex; flex-direction: column; min-width: 0; }
 #exportDlg .group + .group { margin-top: var(--s4); padding-top: var(--s4); }
-.seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; border: 1px solid var(--line-strong); border-radius: 4px; overflow: hidden; }
-.seg label { position: relative; text-align: center; padding: 6px 0; cursor: pointer; color: var(--muted); font-weight: 600; }
-.seg label + label { border-left: 1px solid var(--line-strong); }
+.seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 2px; padding: 2px; border-radius: var(--r-ctl); background: var(--field); }
+.seg label { position: relative; text-align: center; padding: 4px 0; border-radius: var(--r-chip); cursor: pointer; color: var(--muted); font-weight: 500; font-size: 12.5px; transition: color .2s, background-color .2s, box-shadow .2s; }
+
 .seg input { position: absolute; opacity: 0; pointer-events: none; }
 .seg label:hover { color: var(--fg); }
-.seg label:has(input:checked) { background: var(--accent-soft); color: var(--fg); box-shadow: inset 0 -2px var(--accent); }
+.seg label:has(input:checked) { background: var(--raised); color: var(--fg); box-shadow: var(--ring-thumb); }
 .seg label:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: -2px; }
 .size-note { font-size: 13px; min-height: 1.4em; }
 /* Upload to Steam */
-.steam-steps { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: var(--s2); color: var(--muted); font-size: 13px; }
+.steam-steps { counter-reset: st; margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: var(--s4); color: var(--muted); font-size: 13px; line-height: 1.5; }
+.steam-steps > li { counter-increment: st; position: relative; display: grid; grid-template-columns: 24px minmax(0, 1fr); gap: var(--s3); }
+.steam-steps > li::before { content: counter(st); display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--accent-soft); box-shadow: inset 0 0 0 1px rgba(74, 109, 255, .45); color: var(--accent-text); font: 500 11px/1 var(--font-mono); }
+.steam-steps > li:not(:last-child)::after { content: ""; position: absolute; left: 11.5px; top: 28px; bottom: calc(-1 * var(--s4) + 4px); width: 1px; background: var(--line-strong); }
+.steam-steps > li > span { padding-top: 2px; }
 .steam-steps b { color: var(--fg); font-weight: 600; }
-.snippet { display: flex; gap: 6px; align-items: stretch; margin-top: 6px; }
-.snippet code { flex: 1; min-width: 0; padding: 6px 8px; background: var(--field); border: 1px solid var(--line-strong); border-radius: 4px; font-size: 11.5px; color: var(--fg); overflow-wrap: anywhere; }
-.steam-foot { margin: 0; font-size: 13px; color: var(--muted); }
+.snippet { display: flex; gap: 8px; align-items: stretch; margin-top: 8px; }
+.snippet code { flex: 1; min-width: 0; padding: 8px 8px; background: var(--field); border: 0; border-radius: var(--r-chip); font-size: 11.5px; color: var(--fg); overflow-wrap: anywhere; }
+.steam-foot { display: flex; gap: var(--s2); align-items: flex-start; margin: var(--s2) 0 0; padding: var(--s3); border-radius: var(--r-ctl); background: var(--field); font-size: 12.5px; color: var(--muted); }
+.steam-foot .msr { font-size: 16px; color: var(--accent-text); }
+/* the export window's foldable sections: a row with an icon, a name and what it holds */
+#exportDlg .more { margin-top: var(--s3); padding: 0; border: 0; border-radius: var(--r-ctl); background: var(--field); }
+#exportDlg .more summary { width: auto; padding: var(--s3); gap: var(--s2); font-weight: 500; }
+#exportDlg .more summary .sum-ico { color: var(--accent-text); font-size: 18px; }
+#exportDlg .more summary .sum-note { margin-left: auto; color: var(--faint); font: 400 11.5px var(--font-mono); }
+#exportDlg .more summary .chev { order: 9; color: var(--faint); }
+#exportDlg .more[open] summary { border-bottom: 1px solid var(--line); }
+#exportDlg .more-body { margin: 0; padding: var(--s4) var(--s3) var(--s3); }
 .size-note.ok { color: #7fd99a; }
 .size-note.bad { color: var(--danger); }
 .code-box { font-family: var(--font-mono); font-size: 11.5px; word-break: break-all; }
 #importDlg { width: min(480px, calc(100vw - 32px)); }
+.import-note { display: flex; gap: var(--s2); align-items: flex-start; margin: 0; padding: var(--s3); border-radius: var(--r-ctl); background: var(--accent-soft); box-shadow: inset 0 0 0 1px rgba(74, 109, 255, .35); font-size: 12.5px; color: var(--fg); }
+.import-note .msr { font-size: 16px; color: var(--accent-text); }
 .error { color: var(--danger); font-size: 13px; }
 .error:empty { display: none; }
 @media (max-width: 640px) { .exp-body { grid-template-columns: minmax(0, 1fr); } .exp-preview { max-width: 260px; } }
@@ -229,34 +278,40 @@ dialog p { margin: 0; }
 /* the "?" in the header and the hint that points at it once the tool has opened */
 .help-wrap { position: relative; display: flex; }
 .hint-pop { position: absolute; z-index: 20; top: calc(100% + 10px); left: 0; width: max-content; max-width: min(280px, calc(100vw - 32px));
-  display: flex; align-items: center; gap: var(--s2); padding: 8px 6px 8px 12px; border-radius: 6px;
+  display: flex; align-items: center; gap: var(--s2); padding: 8px 8px 8px 12px; border-radius: var(--r-ctl);
   background: var(--accent); color: var(--accent-ink); font-weight: 600; font-size: 13px; line-height: 1.3;
   box-shadow: 0 10px 30px rgba(0,0,0,.45); animation: hint-in .25s cubic-bezier(.22, 1, .36, 1); }
 .hint-pop::before { content: ""; position: absolute; top: -5px; left: 10px; width: 10px; height: 10px; background: var(--accent); transform: rotate(45deg); }
-.hint-pop button { position: relative; border: 0; width: 24px; height: 24px; min-height: 24px; color: var(--accent-ink); }
+.hint-pop button { position: relative; border: 0; width: 24px; height: 24px; min-height: 24px; color: var(--accent-ink); background: transparent; box-shadow: none; }
 .hint-pop button:hover { background: rgba(20,18,24,.12); }
-.hint-pop .go { width: auto; padding: 0; text-decoration: underline; text-underline-offset: 3px; font-weight: 700; }
+.hint-pop .go { width: auto; padding: 0; text-decoration: none; font-weight: 700; }
 .hint-pop .go:hover { background: none; }
 #openHelp.calling { border-color: var(--accent); color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
 @keyframes hint-in { from { opacity: 0; transform: translateY(-4px); } }
-#howtoDlg { width: min(1040px, calc(100vw - 32px)); padding: 0; }
+#howtoDlg { width: min(880px, calc(100vw - 32px)); padding: 0; }
 #howtoDlg[open] { display: block; }
-.howto { position: relative; padding: var(--s6); font-size: 15px; line-height: 1.55; }
-#closeHelp { position: absolute; top: var(--s3); right: var(--s3); }
-.howto-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: var(--s4) var(--s6); padding-bottom: var(--s5); margin-bottom: var(--s6); border-bottom: 1px solid var(--line); }
-.howto h2 { font-size: 24px; line-height: 1.2; letter-spacing: -0.01em; margin: 0 0 var(--s2); text-wrap: balance; }
-.lede { margin: 0; color: var(--muted); max-width: 60ch; font-size: 16px; }
-#startEditing { min-height: 36px; padding-inline: 16px; margin-right: var(--s6); }
-.steps { margin: 0; padding-left: 22px; display: flex; flex-direction: column; gap: var(--s5); }
-.steps > li::marker { font-family: var(--font-mono); color: var(--accent); }
-.howto h3 { font-size: 15px; margin: 0 0 var(--s1); }
-.howto p { margin: 0 0 var(--s2); color: var(--muted); max-width: 68ch; }
+/* How it works: the title, a line and the button on the left; the steps on the right as one numbered line, each
+   number on a small disc, the discs joined by a hairline */
+.howto { position: relative; display: grid; grid-template-columns: minmax(0, 260px) minmax(0, 1fr); gap: var(--s6); padding: var(--s6); font-size: 14px; line-height: 1.5; }
+#closeHelp { position: absolute; top: var(--s4); right: var(--s4); }
+.howto-head { display: flex; flex-direction: column; align-items: flex-start; gap: var(--s3); }
+.howto h2 { font: 600 22px/1.15 var(--font-brand); letter-spacing: -0.03em; margin: 0; text-wrap: balance; }
+.lede { margin: 0 0 var(--s2); color: var(--muted); font-size: 14px; }
+#startEditing { min-height: 36px; padding-inline: 16px; }
+.steps { position: relative; margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: var(--s5); }
+.steps > li { position: relative; display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: var(--s3); }
+.steps > li:not(:last-child)::before { content: ""; position: absolute; left: 13.5px; top: 32px; bottom: calc(-1 * var(--s5) + 4px); width: 1px; background: var(--line-strong); }
+.step-n { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--accent-soft); box-shadow: inset 0 0 0 1px rgba(74, 109, 255, .45); color: var(--accent-text); font: 500 12px/1 var(--font-mono); }
+.howto h3 { font-size: 14px; font-weight: 600; margin: 4px 0 var(--s1); }
+.howto p { margin: 0; color: var(--muted); max-width: 60ch; }
 .howto b { color: var(--fg); font-weight: 600; }
-.kinds { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: var(--s1) var(--s4); margin: 0; max-width: 68ch; }
-.kinds dt { color: var(--fg); font-weight: 600; }
-.kinds dd { margin: 0; color: var(--muted); }
+.kinds { display: grid; gap: var(--s1); margin: var(--s3) 0 0; padding: var(--s3); border-radius: var(--r-ctl); background: var(--field); }
+.kinds > div { display: grid; grid-template-columns: 140px minmax(0, 1fr); gap: var(--s3); align-items: baseline; }
+.kinds dt { color: var(--fg); font-size: 13px; }
+.kinds dd { margin: 0; display: flex; flex-wrap: wrap; gap: 4px var(--s2); font-size: 12px; }
+@media (max-width: 760px) { .howto { grid-template-columns: minmax(0, 1fr); padding: var(--s5) var(--s4); } .kinds > div { grid-template-columns: minmax(0, 1fr); gap: 0; } }
 .more { margin-top: var(--s6); padding-top: var(--s4); border-top: 1px solid var(--line); }
-.more summary { list-style: none; display: flex; align-items: center; gap: 6px; cursor: pointer; font-weight: 600; width: max-content; border-radius: 4px; }
+.more summary { list-style: none; display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 600; width: max-content; border-radius: 4px; }
 .more summary::-webkit-details-marker { display: none; }
 .more summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .chev { color: var(--accent); transition: transform .2s cubic-bezier(.22, 1, .36, 1); }
@@ -264,18 +319,12 @@ dialog p { margin: 0; }
 .more-body { margin-top: var(--s3); display: flex; flex-direction: column; gap: var(--s3); }
 #exportDlg .more { margin-top: var(--s4); }
 .more .keys { margin-top: var(--s3); }
-.howto .keys { font-size: 14px; max-width: 80ch; }
-@media (max-width: 760px) {
-  .howto { padding: var(--s4); }
-  .kinds { grid-template-columns: minmax(0, 1fr); gap: 2px; }
-  .kinds dd { margin-bottom: var(--s2); }
-}
 /* Layout tab: showcase choice and the background files */
-.modes { display: grid; gap: 6px; }
-.mode { display: flex; align-items: center; gap: var(--s2); padding: 7px 10px; border: 1px solid var(--line-strong); border-radius: 4px; cursor: pointer; font-weight: 600; }
+.modes { display: grid; gap: 8px; }
+.mode { display: flex; align-items: center; gap: var(--s2); padding: 8px 12px; border-radius: var(--r-ctl); background: var(--field); cursor: pointer; transition: background-color .15s, box-shadow .15s; }
 .mode input { accent-color: var(--accent); margin: 0; }
 .mode .mono { margin-left: auto; }
-.mode:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); }
+.mode:has(input:checked) { background: var(--accent-soft); box-shadow: inset 0 0 0 1px rgba(74, 109, 255, .6); }
 .slots { display: flex; flex-direction: column; gap: var(--s3); }
 .slot-meta { min-width: 0; margin-right: auto; }
 /* Free crop for images and GIFs */
@@ -325,10 +374,15 @@ dialog p { margin: 0; }
 .rail a:active .msr { transform: scale(.92); }
 /* the label slides out to the right on hover */
 .rail a::after { content: attr(data-label); position: absolute; left: calc(100% + 10px); top: 50%; translate: -6px -50%; opacity: 0; pointer-events: none;
-  background: var(--accent); color: var(--accent-ink); font: 600 12px/1 var(--font-ui); padding: 6px 8px; border-radius: 6px; white-space: nowrap;
+  background: var(--accent); color: var(--accent-ink); font: 600 12px/1 var(--font-ui); padding: 8px 8px; border-radius: 6px; white-space: nowrap;
   transition: opacity .2s, translate .35s cubic-bezier(.16, 1, .3, 1); }
 .rail a:hover::after, .rail a:focus-visible::after { opacity: 1; translate: 0 -50%; }
 .rail-line { width: 24px; height: 1px; background: var(--line); }
+/* the iameric logo at the rail's top leads home */
+.rail-mark { width: 22px; height: 22px; fill: currentColor; transition: scale .45s cubic-bezier(.16, 1, .3, 1); }
+.rail .rail-home { color: var(--coral); }
+.rail .rail-home:hover, .rail .rail-home:focus-visible { color: var(--coral); }
+.rail .rail-home:active .rail-mark { scale: .92; }
 /* Ko-fi at the rail's foot, lit in its own red on hover */
 .rail-foot { margin-top: auto; display: flex; flex-direction: column; align-items: center; gap: var(--s2); }
 .rail-logo { width: 18px; height: 18px; fill: currentColor; transition: transform .45s cubic-bezier(.16, 1, .3, 1); }
@@ -346,7 +400,7 @@ body.has-rail { padding-left: calc(56px + max(16px, env(safe-area-inset-left, 0p
 </style>
 
 <nav class="rail" id="rail" aria-label="iameric" hidden>
-  <a href="../../index.html" data-label="home" aria-label="iameric home"><span class="msr" aria-hidden="true">home</span></a>
+  <a class="rail-home" href="../../index.html" data-label="iameric" aria-label="iameric home"><svg class="rail-mark" viewBox="14.05 14.05 171.9 171.9" aria-hidden="true"><path d="M39.52 58.45a18.93 18.93 0 1 0 37.86 0a18.93 18.93 0 1 0 -37.86 0Z"/><path d="M105.15 58.45A36.4 36.4 0 1 1 141.55 94.85A46.7 46.7 0 0 0 94.85 141.55A36.4 36.4 0 1 1 58.45 105.15A46.7 46.7 0 0 0 105.15 58.45Z"/><path fill-rule="evenodd" d="M105.15 141.55a36.4 36.4 0 1 0 72.8 0a36.4 36.4 0 1 0 -72.8 0ZM117.53 134.27a16.74 16.74 0 1 0 33.49 0a16.74 16.74 0 1 0 -33.49 0Z"/></svg></a>
   <span class="rail-line" aria-hidden="true"></span>
   <a href="../../tools.html" data-label="all tools" aria-label="all tools"><span class="msr" aria-hidden="true">deployed_code</span></a>
   <!-- at the foot: Ko-fi to support the tools (logo: Simple Icons, CC0), and the notice that points to it once -->
@@ -355,16 +409,14 @@ body.has-rail { padding-left: calc(56px + max(16px, env(safe-area-inset-left, 0p
       <span>Glad it helped? <a class="go" id="kofiHintGo" href="https://ko-fi.com/ericleutemann" target="_blank" rel="noopener">Support me on Ko-fi</a></span>
       <button type="button" id="kofiHintClose" aria-label="Dismiss"><span class="msr" aria-hidden="true">close</span></button>
     </div>
-    <a class="rail-kofi" href="https://ko-fi.com/ericleutemann" target="_blank" rel="noopener" data-label="support on ko-fi" aria-label="support me on Ko-fi"><svg class="rail-logo" viewBox="0 0 24 24" aria-hidden="true"><path d="M23.881 8.948c-.773-4.085-4.859-4.593-4.859-4.593H.723c-.604 0-.679.798-.679.798s-.082 7.324-.022 11.822c.164 2.424 2.586 2.672 2.586 2.672s8.267-.023 11.966-.049c2.438-.426 2.683-2.566 2.658-3.734 4.352.24 7.422-2.831 6.649-6.916zm-11.062 3.511c-1.246 1.453-4.011 3.976-4.011 3.976s-.121.119-.31.023c-.076-.057-.108-.09-.108-.09-.443-.441-3.368-3.049-4.034-3.954-.709-.965-1.041-2.7-.091-3.71.951-1.01 3.005-1.086 4.363.407 0 0 1.565-1.782 3.468-.963 1.904.82 1.832 3.011.723 4.311zm6.173.478c-.928.116-1.682.028-1.682.028V7.284h1.77s1.971.551 1.971 2.638c0 1.913-.985 2.667-2.059 3.015z"/></svg></a>
+    <a class="rail-kofi" href="https://ko-fi.com/ericleutemann" target="_blank" rel="noopener" data-label="ko-fi @ericleutemann" aria-label="support me on Ko-fi"><svg class="rail-logo" viewBox="0 0 24 24" aria-hidden="true"><path d="M23.881 8.948c-.773-4.085-4.859-4.593-4.859-4.593H.723c-.604 0-.679.798-.679.798s-.082 7.324-.022 11.822c.164 2.424 2.586 2.672 2.586 2.672s8.267-.023 11.966-.049c2.438-.426 2.683-2.566 2.658-3.734 4.352.24 7.422-2.831 6.649-6.916zm-11.062 3.511c-1.246 1.453-4.011 3.976-4.011 3.976s-.121.119-.31.023c-.076-.057-.108-.09-.108-.09-.443-.441-3.368-3.049-4.034-3.954-.709-.965-1.041-2.7-.091-3.71.951-1.01 3.005-1.086 4.363.407 0 0 1.565-1.782 3.468-.963 1.904.82 1.832 3.011.723 4.311zm6.173.478c-.928.116-1.682.028-1.682.028V7.284h1.77s1.971.551 1.971 2.638c0 1.913-.985 2.667-2.059 3.015z"/></svg></a>
   </div>
 </nav>
 
 <header class="bar">
   <div class="brand">
-    <svg class="logo" viewBox="14.05 14.05 171.9 171.9" aria-hidden="true"><path d="M39.52 58.45a18.93 18.93 0 1 0 37.86 0a18.93 18.93 0 1 0 -37.86 0Z"/><path d="M105.15 58.45A36.4 36.4 0 1 1 141.55 94.85A46.7 46.7 0 0 0 94.85 141.55A36.4 36.4 0 1 1 58.45 105.15A46.7 46.7 0 0 0 105.15 58.45Z"/><path fill-rule="evenodd" d="M105.15 141.55a36.4 36.4 0 1 0 72.8 0a36.4 36.4 0 1 0 -72.8 0ZM117.53 134.27a16.74 16.74 0 1 0 33.49 0a16.74 16.74 0 1 0 -33.49 0Z"/></svg>
     <h1>Steam Showcase Editor</h1>
-    <span class="version">v0.58</span>
-    <span class="meta">by Eric Leutemann</span>
+    <span class="version">v0.75</span>
   </div>
   <div class="export" role="group" aria-label="Help, import and export">
     <div class="help-wrap">
@@ -383,39 +435,29 @@ body.has-rail { padding-left: calc(56px + max(16px, env(safe-area-inset-left, 0p
 <section class="howto" id="howto">
   <button class="icon-btn" id="closeHelp" aria-label="Close"><span class="msr" aria-hidden="true">close</span></button>
   <div class="howto-head">
-    <div>
-      <h2 id="howtoTitle">How it works</h2>
-      <p class="lede">Design artwork for your Steam profile on top of your own background.</p>
-    </div>
+    <h2 id="howtoTitle">How it works</h2>
+    <p class="lede">Design artwork for your Steam profile on top of your own background, in four steps.</p>
     <button class="primary" id="startEditing">Start designing<span class="msr" aria-hidden="true">arrow_forward</span></button>
   </div>
-    <ol class="steps">
-      <li><h3>Get your files</h3>
-        <p>Download your background from <a href="https://steam.design/" target="_blank" rel="noopener">steam.design</a> as a ZIP and unzip it.</p></li>
-      <li><h3>Choose a showcase</h3>
-        <p>In <b>Layout</b>, pick one and upload its files:</p>
-        <dl class="kinds">
-          <dt>Featured Showcase</dt><dd><span class="file">Artwork_Featured.png</span></dd>
-          <dt>Artwork Showcase</dt><dd><span class="file">Artwork_Middle.png</span> + <span class="file">Artwork_Right_Top.png</span></dd>
-          <dt>Profile Picture</dt><dd><span class="file">Avatar.png</span></dd>
-        </dl></li>
-      <li><h3>Design</h3>
-        <p><b>Style</b> sets theme and colors, <b>Widgets</b> adds things, <b>Edit</b> changes the selected one.</p></li>
-      <li><h3>Export</h3>
-        <p>Pick PNG, JPG or GIF (max 5 MB per file) and save. The export window has more detailed steps for uploading to Steam.</p></li>
-    </ol>
-  <details class="more">
-    <summary><span class="msr chev" aria-hidden="true">chevron_right</span>Shortcuts and tips</summary>
-    <dl class="keys">
-      <dt>Drag</dt><dd>Move. Hold <kbd>Alt</kbd> to skip snapping.</dd>
-      <dt><kbd>←</kbd> <kbd>→</kbd> <kbd>↑</kbd> <kbd>↓</kbd></dt><dd>Nudge 1 px, with <kbd>Shift</kbd> 10 px.</dd>
-      <dt><kbd>Delete</kbd></dt><dd>Remove the selected widget.</dd>
-      <dt><kbd>Ctrl</kbd> + <kbd>]</kbd> / <kbd>[</kbd></dt><dd>Bring forward, send backward (<kbd>Shift</kbd>: to front, to back).</dd>
-      <dt>Edge handles</dt><dd>Drag to set a text widget's width, and the profile card's height.</dd>
-    <dt>Wheel</dt><dd>Scale images and icons; <kbd>Shift</kbd> + wheel rotates.</dd>
-      <dt>Layout code</dt><dd>Export gives you a code; paste it into Import to rebuild the design later.</dd>
-    </dl>
-  </details>
+  <ol class="steps">
+    <li><span class="step-n" aria-hidden="true">1</span><div>
+      <h3>Get your files</h3>
+      <p>Download your background from <a href="https://steam.design/" target="_blank" rel="noopener">steam.design</a> as a ZIP and unzip it.</p></div></li>
+    <li><span class="step-n" aria-hidden="true">2</span><div>
+      <h3>Choose a showcase</h3>
+      <p>In <b>Layout</b>, pick one and upload its files.</p>
+      <dl class="kinds">
+        <div><dt>Featured Showcase</dt><dd><span class="file">Artwork_Featured.png</span></dd></div>
+        <div><dt>Artwork Showcase</dt><dd><span class="file">Artwork_Middle.png</span><span class="file">Artwork_Right_Top.png</span></dd></div>
+        <div><dt>Profile Picture</dt><dd><span class="file">Avatar.png</span></dd></div>
+      </dl></div></li>
+    <li><span class="step-n" aria-hidden="true">3</span><div>
+      <h3>Design</h3>
+      <p><b>Style</b> sets theme and colours, <b>Widgets</b> adds things, <b>Edit</b> changes the selected one.</p></div></li>
+    <li><span class="step-n" aria-hidden="true">4</span><div>
+      <h3>Export</h3>
+      <p>Pick PNG, JPG or GIF (at most 5 MB per file) and save. The export window walks you through the upload to Steam.</p></div></li>
+  </ol>
 </section>
 </dialog>
 
@@ -446,16 +488,16 @@ body.has-rail { padding-left: calc(56px + max(16px, env(safe-area-inset-left, 0p
     <section class="panel" id="panel-style" role="tabpanel" aria-labelledby="tab-style" hidden>
       <div class="group">
         <h3 class="label">Theme</h3>
-        <p class="picks-label">Colored by your palette</p>
         <div class="themes" id="themesPalette"></div>
-        <p class="picks-label">Own colors</p>
-        <div class="themes" id="themesFixed"></div>
       </div>
       <div class="group">
         <h3 class="label">Palette</h3>
         <div class="palette" id="palette"></div>
-        <div class="chips" id="presets"></div>
-        <div class="row"><button id="palFromBg">Pick from background</button></div>
+        <div class="row pal-actions">
+          <button type="button" class="preset" id="palTheme"><i></i><span>Theme palette</span></button>
+          <button type="button" id="palRandom"><span class="msr" aria-hidden="true">shuffle</span>Random</button>
+          <button type="button" id="palFromBg"><span class="msr" aria-hidden="true">colorize</span>Pick from background</button>
+        </div>
       </div>
       <div class="group" id="glassGroup">
         <h3 class="label">Glass</h3>
@@ -520,11 +562,11 @@ body.has-rail { padding-left: calc(56px + max(16px, env(safe-area-inset-left, 0p
         <div class="row"><button class="primary" id="save" disabled><span class="msr" aria-hidden="true">download</span>Save…</button></div>
       </div>
       <details class="more" id="steamSteps">
-        <summary><span class="msr chev" aria-hidden="true">chevron_right</span>Upload to Steam</summary>
+        <summary><span class="msr sum-ico" aria-hidden="true">upload</span>Upload to Steam<span class="sum-note" id="steamCount"></span><span class="msr chev" aria-hidden="true">chevron_right</span></summary>
         <div class="more-body" id="steamBody"></div>
       </details>
       <details class="more">
-        <summary><span class="msr chev" aria-hidden="true">chevron_right</span>Layout code</summary>
+        <summary><span class="msr sum-ico" aria-hidden="true">data_object</span>Layout code<span class="sum-note">to rebuild it later</span><span class="msr chev" aria-hidden="true">chevron_right</span></summary>
         <div class="more-body">
           <textarea id="layoutCode" class="code-box" rows="3" readonly spellcheck="false" aria-label="Layout code"></textarea>
           <div class="row"><button id="copyCode"><span class="msr" aria-hidden="true">content_copy</span><span>Copy code</span></button></div>
@@ -550,6 +592,7 @@ body.has-rail { padding-left: calc(56px + max(16px, env(safe-area-inset-left, 0p
 <dialog id="importDlg" aria-labelledby="importTitle">
   <div class="dlg-head"><h2 id="importTitle">Import layout</h2><button class="icon-btn" id="closeImport" aria-label="Close"><span class="msr" aria-hidden="true">close</span></button></div>
   <label class="hint" for="importCode">Paste a layout code. It replaces the current layout.</label>
+  <p class="import-note"><span class="msr" aria-hidden="true">image</span><span>The code does not hold your background. After importing, choose your background file in <b>Layout</b> again; the layout shows once it is there.</span></p>
   <textarea id="importCode" class="code-box" rows="5" spellcheck="false" placeholder="SSE1-…"></textarea>
   <p class="error" id="importError" role="alert"></p>
   <div class="row"><button class="primary" id="doImport">Import</button><button id="cancelImport">Cancel</button></div>
@@ -621,16 +664,55 @@ const THEMES = {
     radius: 2, glass: false, fill: '#f2efe6', border: '#1c1c1c', borderW: 2, hardShadow: 'rgba(28,28,28,.9)', frost: .06, blur: 16, shadow: 0,
     ink: '28,28,28', textShadow: null, font: '"Pixelify Sans"' }
 };
-const PALETTES = {
-  Sunset: ['#ffd27a', '#ff9a6b', '#ff6f6f', '#ff7ab8', '#ffe7cf'],
-  Lagoon: ['#7fe3ff', '#4f9dff', '#8a7bff', '#5ef0c2', '#e6f6ff'],
-  Sakura: ['#ffb3d1', '#ff7aa8', '#c58bff', '#ffd6e5', '#fff0f5'],
-  Pastel: ['#a9d2ff', '#ffb8d9', '#cbb6ff', '#a8ebc4', '#ffd8a8'],
-  'Cyber Pastel': ['#bb53cf', '#f9a1f8', '#ffdbad', '#6f6fd8', '#171836'],
-  Matcha: ['#c9f08a', '#7fd99a', '#4fbfa8', '#f3e7b0', '#eef8e6'],
-  Neon: ['#39f3ff', '#ff3df2', '#b4ff39', '#7a5cff', '#fff35c'],
-  Mono: ['#ffffff', '#cfcfd4', '#9a9aa3', '#6b6b74', '#e9e9ee']
+// each theme's own palette ("Theme palette" in the Style tab puts it back)
+const THEME_PALETTES = {
+  ember: ['#ffb38a', '#ff8a5c', '#ffd27a', '#ff6f6f', '#ffe7cf'],
+  clear: ['#7fe3ff', '#4f9dff', '#8a7bff', '#5ef0c2', '#e6f6ff'],
+  optic: ['#9fd4ff', '#3a4a6a', '#ff7ab8', '#5ef0c2', '#e6f6ff'],
+  porcelain: ['#e8c9b0', '#c9a08a', '#5a3a44', '#a9d2ff', '#f4ece4'],
+  pastel: ['#a9d2ff', '#ffb8d9', '#cbb6ff', '#a8ebc4', '#ffd8a8'],
+  candy: ['#bb53cf', '#f9a1f8', '#ffdbad', '#6f6fd8', '#171836'],
+  pill: ['#ff5f8f', '#5fb4ff', '#ffd25f', '#b4ff39', '#1a1a1d'],
+  prism: ['#ff5f8f', '#ffd25f', '#5fffb0', '#5fb4ff', '#b07bff'],
+  aurora: ['#7fe3ff', '#8a7bff', '#ff7ab8', '#5ef0c2', '#e6f6ff'],
+  arcade: ['#39f3ff', '#ff3df2', '#b4ff39', '#7a5cff', '#fff35c'],
+  clay: ['#f0b8a0', '#9fc9b8', '#6b625a', '#c9b6e4', '#d9d6d0'],
+  paper: ['#e07a5f', '#3d5a80', '#4a3c32', '#81b29a', '#f2ece2'],
+  pixel: ['#ff6f6f', '#4f9dff', '#1c1c1c', '#ffd25f', '#f2efe6'],
 };
+// a palette colour at a set lightness, its saturation capped: light surfaces and dark text that still carry its hue
+function toneL(hex, L, sMax = 1) {
+  const [r, g, b] = hexRgb(hex).map(v => v / 255), mx = Math.max(r, g, b), mn = Math.min(r, g, b), d = mx - mn, l0 = (mx + mn) / 2;
+  let h = 0; if (d) h = mx === r ? ((g - b) / d) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4;
+  const S = Math.min(sMax, d === 0 ? 0 : d / (1 - Math.abs(2 * l0 - 1))), H = (h * 60 + 360) % 360;
+  const k = n => (n + H / 30) % 12, a = S * Math.min(L, 1 - L), f = n => L - a * Math.max(-1, Math.min(k(n) - 3, 9 - k(n), 1));
+  return '#' + [f(0), f(8), f(4)].map(v => Math.round(Math.max(0, Math.min(1, v)) * 255).toString(16).padStart(2, '0')).join('');
+}
+const rgbOf = h => hexRgb(h).join(',');
+// what each theme takes from the palette: the glass tint, a solid fill, edges and the text colour
+const TONES = {
+  ember: () => ({ tint: rgbOf(toneL(pal(0), .88, .9)), textShadow: `rgba(${rgbOf(toneL(pal(0), .12, .8))},.35)` }),
+  clear: () => ({ tint: rgbOf(toneL(pal(4), .97, .5)) }),
+  optic: () => ({ tint: rgbOf(toneL(pal(1), .1, .35)) }),
+  porcelain: () => ({ tint: rgbOf(toneL(pal(4), .96, .4)), ink: rgbOf(toneL(pal(2), .13, .3)) }),
+  pastel: () => ({ tint: rgbOf(toneL(pal(4), .97, .6)), ink: rgbOf(toneL(pal(2), .2, .3)) }),
+  candy: () => ({ ink: rgbOf(toneL(pal(0), .22, .6)) }),
+  pill: () => ({ fill: toneL(pal(4), .045, .15) }),
+  prism: () => ({ tint: rgbOf(toneL(pal(3), .07, .3)) }),
+  arcade: () => ({ tint: rgbOf(toneL(pal(3), .07, .5)) }),
+  clay: () => ({ fill: toneL(pal(4), .9, .15), ink: rgbOf(toneL(pal(2), .19, .1)) }),
+  paper: () => { const k = rgbOf(toneL(pal(2), .1, .4)); return { fill: toneL(pal(4), .95, .4), ink: k, border: `rgba(${k},.14)` }; },
+  pixel: () => { const k = toneL(pal(2), .11, .2); return { fill: toneL(pal(4), .93, .3), ink: rgbOf(k), border: k, hardShadow: `rgba(${rgbOf(k)},.9)` }; },
+};
+const themed = key => { const base = THEMES[key] || THEMES.ember; return { ...base, ...(TONES[key] ? TONES[key]() : {}) }; };
+// a random palette that holds together: hues spread round one base, one colour light for the surfaces
+function randomPalette() {
+  const h0 = Math.random() * 360, rnd = (a, b) => a + Math.random() * (b - a);
+  const hues = [0, 28, 165, 200, 320].map(d => (h0 + d + rnd(-8, 8)) % 360);
+  const hsl = (h, sat, l) => { const k = n => (n + h / 30) % 12, a = sat * Math.min(l, 1 - l), f = n => l - a * Math.max(-1, Math.min(k(n) - 3, 9 - k(n), 1));
+    return '#' + [f(0), f(8), f(4)].map(v => Math.round(v * 255).toString(16).padStart(2, '0')).join(''); };
+  return hues.map((h, i) => i === 4 ? hsl(h, rnd(.35, .6), rnd(.86, .92)) : hsl(h, rnd(.6, .92), rnd(.55, .72)));
+}
 let TH = THEMES.ember;
 let INK = null; // a widget's own text colour ("r,g,b") while it is drawn without a plate
 const ink = a => `rgba(${INK || TH.ink},${a})`;
@@ -999,7 +1081,7 @@ function characterWidget(x = 262, y = 90, height = CH0) {
 // every showcase starts empty
 function defaultsFor() { uid = 0; return []; }
 const state = { widgets: [], sel: null, guides: [],
-  frost: .06, blur: 16, dur: 6, fps: 12, theme: 'ember', palette: [...PALETTES.Sunset], mode: 'featured', bg: {}, h: 824 };
+  frost: .06, blur: 16, dur: 6, fps: 12, theme: 'ember', palette: [...THEME_PALETTES.ember], mode: 'featured', bg: {}, h: 824 };
 // The Featured and Artwork Showcases are always 630 wide, but their height can be anything: it follows the first file
 // uploaded (from steam.design); with no file it is 824. The profile picture is always 184 x 184.
 const H_MIN = 100, H_MAX = 4000;
@@ -1078,7 +1160,7 @@ function backdrop(S) {
 }
 // Rainbow that is brightest at the top-left and bottom-right and fades to nothing in between.
 function prismGradient(c, x, y, ww, hh, a) {
-  const cols = ['255,95,143', '255,210,95', '95,255,176', '95,180,255', '176,123,255', '255,95,210'];
+  const cols = [0, 1, 2, 3, 4, 0].map(i => rgbOf(pal(i)));
   if (!c.createConicGradient) { const g = c.createLinearGradient(x, y, x + ww, y + hh); cols.forEach((col, i) => g.addColorStop(i / 5, `rgba(${col},${a})`)); return g; }
   const g = c.createConicGradient(-Math.PI * .95, x + ww / 2, y + hh / 2);
   [[0, 0], [.04, 1], [.1, .9], [.17, .6], [.26, 0], [.5, 0], [.54, .9], [.6, 1], [.67, .6], [.76, 0], [1, 0]].forEach(([at, k], i) =>
@@ -1152,7 +1234,7 @@ function drawSurface(c, x, y, ww, hh, R, s, S, t, ph, anim, id) {
   }
   if (TH.fringe) {
     c.save(); c.globalCompositeOperation = 'lighter'; c.lineWidth = 8 * s;
-    [['255,70,120', -1.8], ['70,200,255', 1.8]].forEach(([col, d]) => {
+    [[rgbOf(pal(2)), -1.8], [rgbOf(pal(0)), 1.8]].forEach(([col, d]) => {
       rr(c, x + d * s, y - d * s * .5, ww, hh, R); c.strokeStyle = `rgba(${col},${.3 * TH.fringe})`; c.stroke();
     });
     c.restore();
@@ -1184,7 +1266,7 @@ function drawSurface(c, x, y, ww, hh, R, s, S, t, ph, anim, id) {
   if (TH.innerRim) { c.lineWidth = .6; c.strokeStyle = `rgba(255,255,255,${rim(.14)})`; rr(c, x + 2.6, y + 2.6, ww - 5.2, hh - 5.2, R - 2.6); c.stroke(); }
   if (TH.border) { const bw = TH.borderW || 1; c.lineWidth = bw; c.strokeStyle = TH.border; rr(c, x + bw / 2, y + bw / 2, ww - bw, hh - bw, R - bw / 2); c.stroke(); }
   if (TH.prism) {
-    c.save(); c.shadowColor = 'rgba(160,190,255,.7)'; c.shadowBlur = 10 * S;
+    c.save(); c.shadowColor = withAlpha(pal(3), .7); c.shadowBlur = 10 * S;
     c.lineWidth = 1.8; c.strokeStyle = prismGradient(c, x, y, ww, hh, 1); rr(c, x + 1, y + 1, ww - 2, hh - 2, R - 1); c.stroke(); c.restore();
   }
   if (TH.glow) {
@@ -1235,7 +1317,7 @@ function drawWidget(c, w, S, ui, t) {
   c.restore();
 }
 function render(c, S, ui, t = null) {
-  TH = THEMES[state.theme] || THEMES.ember;
+  TH = themed(state.theme);
   FF = TH.font ? `${TH.font},${BASE_FF}` : BASE_FF;
   c.setTransform(S, 0, 0, S, 0, 0); c.clearRect(0, 0, W, H);
   c.drawImage(imgs.bg, 0, 0, W, H);
@@ -1252,25 +1334,25 @@ function render(c, S, ui, t = null) {
     c.strokeRect(-d.w / 2, -d.h / 2, d.w, d.h);
     c.setLineDash([]); c.beginPath(); c.moveTo(0, -d.h / 2); c.lineTo(0, -d.h / 2 - 30); c.stroke();
     c.restore();
-    c.save(); c.lineWidth = 2; c.strokeStyle = '#b39dff';
+    c.save(); c.lineWidth = 2; c.strokeStyle = '#5f80ff';
     hd.corners.forEach(([x, y]) => { c.fillStyle = '#fff'; c.beginPath(); c.arc(x, y, 6.5, 0, TAU); c.fill(); c.stroke(); });
-    c.fillStyle = '#b39dff'; c.strokeStyle = '#fff'; c.beginPath(); c.arc(hd.rot[0], hd.rot[1], 8, 0, TAU); c.fill(); c.stroke();
+    c.fillStyle = '#5f80ff'; c.strokeStyle = '#fff'; c.beginPath(); c.arc(hd.rot[0], hd.rot[1], 8, 0, TAU); c.fill(); c.stroke();
     c.restore();
     c.save(); c.translate(hd.rot[0], hd.rot[1]); c.rotate(w.r || 0); msIcon(c, 'rotate_right', 0, 0, 12, '#fff'); c.restore();
   }
   if (state.sel && TYPES[state.sel.type].resizable) {
     const hw = widthHandles(state.sel);
-    c.save(); c.fillStyle = '#fff'; c.strokeStyle = '#b39dff'; c.lineWidth = 2;
+    c.save(); c.fillStyle = '#fff'; c.strokeStyle = '#5f80ff'; c.lineWidth = 2;
     [hw.left, hw.right].forEach(([x, y]) => { rr(c, x - 4, y - 12, 8, 24, 4); c.fill(); c.stroke(); });
     if (TYPES[state.sel.type].resizableH) { const hh = heightHandles(state.sel); [hh.top, hh.bottom].forEach(([x, y]) => { rr(c, x - 12, y - 4, 24, 8, 4); c.fill(); c.stroke(); }); }
     c.restore();
   }
-  c.save(); c.strokeStyle = 'rgba(179,157,255,.95)'; c.lineWidth = 1;
+  c.save(); c.strokeStyle = 'rgba(74,109,255,.95)'; c.lineWidth = 1;
   state.guides.forEach(([o, v]) => { c.beginPath(); if (o === 'x') { c.moveTo(v, 0); c.lineTo(v, H); } else { c.moveTo(0, v); c.lineTo(W, v); } c.stroke(); });
   c.restore();
 }
 let playing = true, curT = null, raf = 0;
-const draw = () => render(ctx, SCREEN, true, playing ? curT : null);
+const draw = () => { render(ctx, SCREEN, true, playing ? curT : null); syncXform(); };
 function tick(ms) { curT = (ms / 1000 / state.dur) % 1; draw(); raf = playing ? requestAnimationFrame(tick) : 0; }
 function setPlaying(v) { playing = v; cancelAnimationFrame(raf); if (v) raf = requestAnimationFrame(tick); else { curT = null; draw(); } }
 
@@ -1344,7 +1426,7 @@ function buildBackground() {
     msIcon(x, 'upload', cx, y + ic / 2, ic, '#9a9a9a'); y += ic + 8 * k;
     x.textAlign = 'center'; x.textBaseline = 'top';
     x.font = f1; x.fillStyle = '#d0d0d0'; l1.forEach(l => { x.fillText(l, cx, y); y += lh1; }); y += 4 * k;
-    x.font = f2; x.fillStyle = '#b39dff'; l2.forEach(l => { x.fillText(l, cx, y); y += lh2; });
+    x.font = f2; x.fillStyle = '#5f80ff'; l2.forEach(l => { x.fillText(l, cx, y); y += lh2; });
     x.textBaseline = 'alphabetic';
   });
   imgs.bg = c; imgVersion++;
@@ -1404,24 +1486,21 @@ async function prepImage(file, mode) {
 let statusTimer = 0;
 function setStatus(m) { clearTimeout(statusTimer); $('status').textContent = m; statusTimer = setTimeout(() => { $('status').textContent = ''; }, 5000); }
 const BAD_IMAGE = 'That image could not be opened. Try a PNG, JPG or WebP file.';
-// A background file must match its slot: the exact size, or at least the same aspect ratio (it is then scaled).
+// A background file: Steam shows the showcase at a fixed width (630, or 506 + 100) and any height. So a file of any
+// width is scaled to the slot's width and its height follows: a 2160 x 2160 file becomes 630 x 630. Only when that
+// height is out of range, or a second file has to match the height the first one set, an area is chosen.
 async function prepBackground(file, sl) {
   const url = URL.createObjectURL(file);
   try {
     const img = await loadImg(url).catch(() => { throw new Error(BAD_IMAGE); }), iw = img.naturalWidth, ih = img.naturalHeight;
     const M = MODES[state.mode], alone = M.slots.every(o => o.key === sl.key || !imgs.slots[o.key]);
-    if (!M.still && alone) {
-      const k = iw === sl.w ? 1 : iw === 2 * sl.w ? 2 : 0;
-      if (k && ih / k >= H_MIN && ih / k <= H_MAX) setHeight(ih / k);
-    }
+    if (!M.still && alone) setHeight(clampH(ih * sl.w / iw));
     let sx = 0, sy = 0, sw = iw, sh = ih;
-    // not the slot's shape: choose a slot-sized part of a larger image, pixel for pixel
+    // still not the slot's shape: choose the part to use, the largest area of the slot's shape the file holds
     if (Math.abs(iw / ih - sl.w / sl.h) > .01 * sl.w / sl.h) {
-      if (iw < sl.w || ih < sl.h)
-        throw new Error(`${sl.base}.png has to be ${sl.w} × ${sl.h} px, the same aspect ratio, or larger to choose an area from. This image is ${iw} × ${ih} px.`);
       const at = await pickArea(img, sl);
       if (!at) throw new Error('cancel');
-      [sx, sy] = at; sw = sl.w; sh = sl.h;
+      [sx, sy, sw, sh] = at;
     }
     const c = document.createElement('canvas'); c.width = sl.w * SCREEN; c.height = sl.h * SCREEN;
     c.getContext('2d').drawImage(img, sx, sy, sw, sh, 0, 0, c.width, c.height);
@@ -1557,8 +1636,8 @@ $('icApply').onclick = () => { icDone?.([icB.x / icW, icB.y / icH, icB.w / icW, 
 $('icFull').onclick = () => { icB = { x: 0, y: 0, w: icW, h: icH }; icDraw(); };
 $('icCancel').onclick = () => ic.dlg.close();
 ic.dlg.addEventListener('close', () => icDone?.(null));
-// Background area: a file larger than its slot and not its shape shows whole, with a frame of exactly the slot's size
-// on it; drag the frame onto the part you want. Resolves the frame's top left corner in the file's pixels, or null.
+// Background area: a file not of its slot's shape shows whole, with a frame of the slot's shape on it, as large as
+// the file allows; drag it onto the part you want. Resolves [x, y, w, h] of the frame in the file's pixels, or null.
 const bp = { dlg: $('bgPick'), cv: $('bgPick').querySelector('canvas'), box: $('bgPick').querySelector('.bp-box') };
 let bpB, bpK, bpW, bpH, bpDrag = null, bpDone = null;
 function bpDraw() { Object.assign(bp.box.style, { left: bpB.x + 'px', top: bpB.y + 'px', width: bpB.w + 'px', height: bpB.h + 'px' }); }
@@ -1569,10 +1648,11 @@ function pickArea(img, sl) {
     bpW = Math.round(iw * bpK); bpH = Math.round(ih * bpK);
     bp.cv.width = bpW; bp.cv.height = bpH; bp.cv.style.width = bpW + 'px'; bp.cv.style.height = bpH + 'px';
     bp.cv.getContext('2d').drawImage(img, 0, 0, bpW, bpH);
-    const w = sl.w * bpK, h = sl.h * bpK;
-    bpB = { w, h, x: (bpW - w) / 2, y: (bpH - h) / 2, iw, ih, sl };
+    // the frame: the slot's shape, as large as the file allows
+    const fw = Math.min(iw, ih * sl.w / sl.h), fh = fw * sl.h / sl.w, w = fw * bpK, h = fh * bpK;
+    bpB = { w, h, x: (bpW - w) / 2, y: (bpH - h) / 2, iw, ih, fw, fh, sl };
     bpDraw();
-    $('bpNote').textContent = `${sl.base}.png is ${sl.w} × ${sl.h} px, this image ${iw} × ${ih} px. Drag the frame onto the part you want.`;
+    $('bpNote').textContent = `${sl.base}.png is ${sl.w} × ${sl.h} px, this image ${iw} × ${ih} px. Drag the frame onto the part you want; it is scaled to ${sl.w} px wide.`;
     bpDone = v => { bpDone = null; resolve(v); };
     bp.dlg.showModal();
   });
@@ -1585,8 +1665,8 @@ bp.box.addEventListener('pointermove', e => {
 bp.box.addEventListener('pointerup', () => { bpDrag = null; });
 bp.box.addEventListener('pointercancel', () => { bpDrag = null; });
 $('bpApply').onclick = () => {
-  const { iw, ih, sl } = bpB;
-  bpDone?.([cl(Math.round(bpB.x / bpK), 0, iw - sl.w), cl(Math.round(bpB.y / bpK), 0, ih - sl.h)]); bp.dlg.close();
+  const { iw, ih, fw, fh } = bpB;
+  bpDone?.([cl(Math.round(bpB.x / bpK), 0, iw - fw), cl(Math.round(bpB.y / bpK), 0, ih - fh), fw, fh]); bp.dlg.close();
 };
 $('bpCancel').onclick = () => bp.dlg.close();
 bp.dlg.addEventListener('close', () => bpDone?.(null));
@@ -1989,6 +2069,29 @@ function fieldNode(s, entry) {
   entry.forEach(e => row.appendChild(fieldEl(s, ...e)));
   return row;
 }
+let xfFields = [];
+function ftField(key, label, get, set, unit = '', def) {
+  const el = document.createElement('label'); el.className = 'ft-field';
+  el.innerHTML = `<span class="ft-key" aria-hidden="true">${key}</span><input type="text" inputmode="numeric" aria-label="${label}" spellcheck="false" autocomplete="off">${unit ? `<span class="ft-unit">${unit}</span>` : ''}`;
+  const keyEl = el.querySelector('.ft-key'), input = el.querySelector('input');
+  const show = () => { input.value = get(); };
+  const apply = v => { if (Number.isFinite(v)) { set(Math.round(v)); show(); draw(); } };
+  input.addEventListener('change', () => { apply(parseFloat(input.value)); changed(); });
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter') input.blur();
+    if (e.key === 'ArrowUp' || e.key === 'ArrowDown') { e.preventDefault(); apply(get() + (e.key === 'ArrowUp' ? 1 : -1) * (e.shiftKey ? 10 : 1)); changed(); }
+  });
+  let drag = null;
+  keyEl.addEventListener('pointerdown', e => { e.preventDefault(); keyEl.setPointerCapture(e.pointerId); drag = { x: e.clientX, v: get() }; el.classList.add('scrubbing'); });
+  keyEl.addEventListener('pointermove', e => { if (drag) apply(drag.v + Math.round((e.clientX - drag.x) / 2) * (e.shiftKey ? 10 : 1)); });
+  const end = () => { if (!drag) return; drag = null; el.classList.remove('scrubbing'); changed(); };
+  keyEl.addEventListener('pointerup', end); keyEl.addEventListener('pointercancel', end);
+  if (def !== undefined) keyEl.addEventListener('dblclick', () => { apply(def); changed(); });
+  show();
+  return { el, sync: () => { if (document.activeElement !== input && el.isConnected) show(); } };
+}
+// the Transform card follows the widget while it is dragged on the canvas
+function syncXform() { xfFields.forEach(f => f.sync()); }
 function group(label, ...nodes) {
   const g = document.createElement('div'); g.className = 'group';
   const h = document.createElement('h3'); h.className = 'label'; h.textContent = label;
@@ -2056,11 +2159,17 @@ function select(s) {
   selBody.appendChild(group('Content', ...fieldsOf(T, s.p).map(e => fieldNode(s, e))));
   if (s.type !== 'image') selBody.appendChild(group('Plate', fieldEl(s, 'tile', 'Embed on plate', 'check'),
     ...(s.type !== 'icon' || s.p.label ? textColorField(s.p).map(e => fieldNode(s, e)) : [])));
-  const xf = transformable(s);
-  const scaleBy = v => { if (xf) { const [cx, cy] = centerOf(s); setWidgetScale(s, v / 100, cx, cy); } else s.s = v / 100; changed(); };
-  const sizeNodes = [slider('wscale', 'Scale', xf ? 10 : state.mode === 'avatar' ? 25 : 70, xf ? 600 : 160, Math.round(s.s * 100), scaleBy, pct, 100)];
-  if (xf) sizeNodes.push(
-    slider('wrot', 'Rotation', -180, 180, Math.round((s.r || 0) * 180 / Math.PI), v => { s.r = v * Math.PI / 180; changed(); }, v => v + '°', 0));
+  const xf = transformable(s), lo = xf ? 10 : state.mode === 'avatar' ? 25 : 70, hi = xf ? 600 : 160;
+  const scaleBy = v => { if (xf) { const [cx, cy] = centerOf(s); setWidgetScale(s, v / 100, cx, cy); } else s.s = v / 100; };
+  const grid = document.createElement('div'); grid.className = 'ft-grid';
+  xfFields = [
+    ftField('X', 'Position X', () => Math.round(s.x), v => { s.x = v; }),
+    ftField('Y', 'Position Y', () => Math.round(s.y), v => { s.y = v; }),
+    ftField('Scale', 'Scale', () => Math.round(s.s * 100), v => scaleBy(cl(v, lo, hi)), '%', 100),
+    ...(xf ? [ftField('Rotate', 'Rotation', () => Math.round((s.r || 0) * 180 / Math.PI), v => { s.r = cl(v, -180, 180) * Math.PI / 180; }, '°', 0)] : []),
+  ];
+  grid.append(...xfFields.map(f => f.el));
+  const sizeNodes = [grid];
   if (T.resizable && s.cw) {
     const fitRow = document.createElement('div'); fitRow.className = 'row';
     const fitBtn = document.createElement('button'); fitBtn.type = 'button'; fitBtn.textContent = 'Fit width to text';
@@ -2069,7 +2178,7 @@ function select(s) {
     sizeNodes.push(fitRow);
   }
   if (s.type !== 'image' && s.type !== 'icon') sizeNodes.push(fieldEl(s, 'mx', 'Mirror horizontally', 'check'));
-  selBody.appendChild(group('Size', ...sizeNodes));
+  selBody.appendChild(group('Transform', ...sizeNodes));
   // a still mode (the profile picture) only exports PNG or JPG, so its widgets have no animation to set
   if (!MODES[state.mode].still) selBody.appendChild(animationGroup(s, T));
 }
@@ -2079,20 +2188,16 @@ Object.entries(THEMES).forEach(([key, th]) => {
   const b = document.createElement('button'); b.className = 'theme'; b.type = 'button'; b.dataset.theme = key;
   b.innerHTML = `<span class="sw" style="background:${th.swatch}"></span><span>${th.name}</span>`;
   b.onclick = () => { state.theme = key; state.frost = th.frost; state.blur = th.blur; syncGlobal(); changed(); };
-  // themes whose surface itself takes the palette (fill, colour clouds, glow) are listed apart from those with fixed surfaces
-  $(th.candy || th.blobs || th.glow || th.tintGlow ? 'themesPalette' : 'themesFixed').appendChild(b);
+  $('themesPalette').appendChild(b);
 });
 const palInputs = [0, 1, 2, 3, 4].map(i => {
   const inp = document.createElement('input'); inp.type = 'color'; inp.id = 'pal' + i; inp.setAttribute('aria-label', 'Accent ' + (i + 1));
   inp.oninput = () => { state.palette[i] = inp.value; changed(); };
   $('palette').appendChild(inp); return inp;
 });
-Object.entries(PALETTES).forEach(([name, cols]) => {
-  const b = document.createElement('button'); b.className = 'preset'; b.type = 'button';
-  b.innerHTML = `<i>${cols.map(c => `<b style="background:${c}"></b>`).join('')}</i>${name}`;
-  b.onclick = () => { state.palette = [...cols]; syncGlobal(); changed(); };
-  $('presets').appendChild(b);
-});
+// the current theme's own palette, random, or five colours from the background
+$('palTheme').onclick = () => { state.palette = [...(THEME_PALETTES[state.theme] || THEME_PALETTES.ember)]; syncGlobal(); changed(); };
+$('palRandom').onclick = () => { state.palette = randomPalette(); syncGlobal(); changed(); };
 // Five vivid, distinct colours from the background, lifted so they read on glass.
 function paletteFromBackground() {
   const c = document.createElement('canvas'); c.width = 160; c.height = 210;
@@ -2115,10 +2220,10 @@ function paletteFromBackground() {
     return '#' + [f(0), f(8), f(4)].map(v => Math.round(v * 255).toString(16).padStart(2, '0')).join('');
   });
 }
-$('palFromBg').onclick = () => { state.palette = paletteFromBackground(); syncGlobal(); changed(); };
+$('palFromBg').onclick = () => { if (!imgs.bg) return; state.palette = paletteFromBackground(); syncGlobal(); changed(); };
 
 function syncGlobal() {
-  TH = THEMES[state.theme] || THEMES.ember;
+  TH = themed(state.theme);
   $('frost').value = Math.round(state.frost * 100); $('blur').value = state.blur;
   $('frostOut').textContent = Math.round(state.frost * 100); $('blurOut').textContent = state.blur + ' px';
   $('glassGroup').hidden = !TH.glass; // solid themes have no glass to tune
@@ -2127,6 +2232,8 @@ function syncGlobal() {
   $('fps').value = [8, 10, 12, 15, 20, 24].includes(state.fps) ? state.fps : (state.fps = 12);
   document.querySelectorAll('.theme').forEach(b => b.setAttribute('aria-pressed', b.dataset.theme === state.theme));
   palInputs.forEach((inp, i) => { inp.value = state.palette[i]; });
+  $('palTheme').querySelector('i').innerHTML = (THEME_PALETTES[state.theme] || THEME_PALETTES.ember).map(c => `<b style="background:${c}"></b>`).join('');
+
   syncFrostDot(); syncBlurDot();
 }
 $('frost').oninput = e => { state.frost = e.target.value / 100; $('frostOut').textContent = e.target.value; changed(); };
@@ -2143,7 +2250,9 @@ $('reset').onclick = () => {
     return;
   }
   clearTimeout(resetArmed); resetArmed = 0; b.textContent = 'Reset layout'; b.classList.remove('confirm');
-  state.widgets = defaultsFor(state.mode); select(null); changed();
+  // everything goes: the widgets (image widgets with them) and the background files
+  state.widgets = defaultsFor(state.mode); state.bg = {}; imgs.slots = {}; setHeight(defaultH(state.mode));
+  select(null); buildBackground(); syncGlobal(); syncReady(); changed();
 };
 
 /* ---------- GIF encoder ---------- */
@@ -2174,24 +2283,7 @@ function buildPalette(datas, max) {
   });
   return { pal, n: boxes.length };
 }
-function makeMapper(pal, n) {
-  const lut = new Int16Array(32768).fill(-1);
-  return k => {
-    const v = lut[k]; if (v >= 0) return v;
-    const r = (k >> 10) * 8 + 4, g = ((k >> 5) & 31) * 8 + 4, b = (k & 31) * 8 + 4; let best = 0, bd = 1e9;
-    for (let i = 0; i < n; i++) { const dr = pal[i * 3] - r, dg = pal[i * 3 + 1] - g, db = pal[i * 3 + 2] - b, d = dr * dr + dg * dg + db * db; if (d < bd) { bd = d; best = i; } }
-    return lut[k] = best;
-  };
-}
 const BAY = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5];
-function indexFrame(d, w, h, map, out) {
-  for (let y = 0, p = 0; y < h; y++) for (let x = 0; x < w; x++, p++) {
-    const i = p * 4, dz = (BAY[((y & 3) << 2) | (x & 3)] - 7.5) * .5;
-    let r = d[i] + dz, g = d[i + 1] + dz, b = d[i + 2] + dz;
-    r = r < 0 ? 0 : r > 255 ? 255 : r; g = g < 0 ? 0 : g > 255 ? 255 : g; b = b < 0 ? 0 : b > 255 ? 255 : b;
-    out[p] = map(((r >> 3) << 10) | ((g >> 3) << 5) | (b >> 3));
-  }
-}
 function lzwEncode(px) {
   const clear = 256, eoi = 257; let size = 9, next = 258, cur = 0, bits = 0; const out = [];
   const emit = c => { cur |= c << bits; bits += size; while (bits >= 8) { out.push(cur & 255); cur >>>= 8; bits -= 8; } };
@@ -2210,21 +2302,65 @@ function lzwEncode(px) {
 }
 const u16 = n => [n & 255, (n >> 8) & 255];
 const nextTurn = () => new Promise(r => setTimeout(r, 0));
-// Each frame after the first marks unchanged pixels transparent (index 255), so only the animated parts cost bytes.
-// rects: the files to cut from each frame (canvas units); each gets its own palette and GIF. Returns one Blob per rect.
+// A frame's own palette (a GIF local colour table, so the whole animation can show far more than 256 colours):
+// median cut over its colours at 6 bits a channel. After the first frame only the pixels that changed count, so
+// every colour of the table goes where the picture moves. Boxes keep their ranges, so a split costs one sort.
+function framePalette(d, changed, max) {
+  const hist = new Uint32Array(262144), n = d.length >> 2;
+  for (let p = 0; p < n; p++) { if (changed && !changed[p]) continue; const i = p << 2; hist[((d[i] >> 2) << 12) | ((d[i + 1] >> 2) << 6) | (d[i + 2] >> 2)]++; }
+  const ch = (k, c) => c === 0 ? k >> 12 : c === 1 ? (k >> 6) & 63 : k & 63;
+  const box = keys => {
+    let pop = 0; const lo = [63, 63, 63], hi = [0, 0, 0];
+    for (const k of keys) { pop += hist[k]; for (let c = 0; c < 3; c++) { const v = ch(k, c); if (v < lo[c]) lo[c] = v; if (v > hi[c]) hi[c] = v; } }
+    const r = [hi[0] - lo[0], hi[1] - lo[1], hi[2] - lo[2]], c = r[0] >= r[1] && r[0] >= r[2] ? 0 : r[1] >= r[2] ? 1 : 2;
+    return { keys, pop, c, score: keys.length > 1 ? r[c] * Math.sqrt(pop) : -1 };
+  };
+  const all = []; for (let k = 0; k < 262144; k++) if (hist[k]) all.push(k);
+  if (!all.length) { all.push(0); hist[0] = 1; }
+  const boxes = [box(all)];
+  while (boxes.length < max) {
+    let bi = -1, bs = 0;
+    boxes.forEach((b, i) => { if (b.score > bs) { bs = b.score; bi = i; } });
+    if (bi < 0) break;
+    const { keys, pop, c } = boxes[bi];
+    keys.sort((p, q) => ch(p, c) - ch(q, c));
+    let acc = 0, cut = keys.length - 1;
+    for (let i = 0; i < keys.length - 1; i++) { acc += hist[keys[i]]; if (acc >= pop / 2) { cut = i + 1; break; } }
+    boxes.splice(bi, 1, box(keys.slice(0, cut)), box(keys.slice(cut)));
+  }
+  const pal = new Uint8Array(768);
+  boxes.forEach((b, i) => {
+    let r = 0, g = 0, bl = 0;
+    for (const k of b.keys) { const w = hist[k]; r += w * ch(k, 0); g += w * ch(k, 1); bl += w * ch(k, 2); }
+    pal[i * 3] = Math.round(r / b.pop * 4 + 1.5); pal[i * 3 + 1] = Math.round(g / b.pop * 4 + 1.5); pal[i * 3 + 2] = Math.round(bl / b.pop * 4 + 1.5);
+  });
+  return { pal, n: boxes.length };
+}
+// nearest palette colour for a 6-bit colour, remembered per frame
+function frameMapper(pal, n) {
+  const lut = new Int16Array(262144).fill(-1);
+  return k => {
+    const v = lut[k]; if (v >= 0) return v;
+    const r = (k >> 12) * 4 + 2, g = ((k >> 6) & 63) * 4 + 2, b = (k & 63) * 4 + 2; let best = 0, bd = 1e9;
+    for (let i = 0; i < n; i++) { const dr = pal[i * 3] - r, dg = pal[i * 3 + 1] - g, db = pal[i * 3 + 2] - b, d = 2 * dr * dr + 4 * dg * dg + 3 * db * db; if (d < bd) { bd = d; best = i; } }
+    return lut[k] = best;
+  };
+}
+// Every frame: the pixels that differ from the frame before, in their bounding box, with that frame's own palette;
+// the rest is transparent (index 255) and the previous frame shows through, so unchanged parts cost no bytes and
+// keep their colours. A light ordered dither (fixed to the screen, so it does not crawl) smooths gradients.
+// rects: the files to cut from each frame (canvas units); one GIF per rect. Returns one Blob per rect.
 async function makeGif({ S, colors, rects }, onStatus, stale) {
   const n = state.dur * state.fps;
   const cvs = document.createElement('canvas'); cvs.width = W * S; cvs.height = H * S;
   const g = cvs.getContext('2d', { willReadFrequently: true });
   const cut = r => g.getImageData(r.x * S, 0, r.w * S, r.h * S).data;
-  onStatus('Building color palette…'); await nextTurn();
-  const samples = rects.map(() => []);
-  for (const t of [0, 1 / 3, 2 / 3]) { render(g, S, false, t); rects.forEach((r, i) => samples[i].push(cut(r))); }
-  const delay = Math.round(100 / state.fps);
-  const enc = rects.map((r, i) => {
-    const w = r.w * S, h = r.h * S, { pal, n: pn } = buildPalette(samples[i], colors);
-    return { r, w, h, map: makeMapper(pal, pn), idx: new Uint8Array(w * h), px: new Uint8Array(w * h), prev: new Uint8Array(w * h),
-      parts: [new Uint8Array([71, 73, 70, 56, 57, 97, ...u16(w), ...u16(h), 0xF7, 0, 0]), pal,
+  const delay = Math.round(100 / state.fps), max = Math.min(255, colors);
+  const enc = rects.map(r => {
+    const w = r.w * S, h = r.h * S;
+    return { r, w, h, prev: null, changed: new Uint8Array(w * h),
+      // no global colour table: every frame brings its own
+      parts: [new Uint8Array([71, 73, 70, 56, 57, 97, ...u16(w), ...u16(h), 0x70, 0, 0]),
         new Uint8Array([0x21, 0xFF, 11, ...'NETSCAPE2.0'.split('').map(c => c.charCodeAt(0)), 3, 1, 0, 0, 0])] };
   });
   for (let f = 0; f < n; f++) {
@@ -2232,13 +2368,30 @@ async function makeGif({ S, colors, rects }, onStatus, stale) {
     if (stale()) throw new Error('stale');
     render(g, S, false, f / n);
     for (const e of enc) {
-      const { w, h, idx, px, prev } = e;
-      indexFrame(cut(e.r), w, h, e.map, idx);
-      for (let p = 0; p < px.length; p++) px[p] = f > 0 && idx[p] === prev[p] ? 255 : idx[p];
-      prev.set(idx);
+      const { w, h, changed } = e, d = cut(e.r), prev = e.prev;
+      // what changed, and where
+      let x0 = w, y0 = h, x1 = -1, y1 = -1;
+      for (let y = 0, p = 0; y < h; y++) for (let x = 0; x < w; x++, p++) {
+        const i = p << 2, c = !prev || d[i] !== prev[i] || d[i + 1] !== prev[i + 1] || d[i + 2] !== prev[i + 2];
+        changed[p] = c ? 1 : 0;
+        if (c) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+      }
+      if (x1 < 0) { x0 = y0 = 0; x1 = y1 = 0; } // nothing moved: one transparent pixel keeps the timing
+      const bw = x1 - x0 + 1, bh = y1 - y0 + 1, { pal, n: pn } = framePalette(d, prev ? changed : null, max), map = frameMapper(pal, pn);
+      const px = new Uint8Array(bw * bh);
+      for (let y = y0, q = 0; y <= y1; y++) for (let x = x0; x <= x1; x++, q++) {
+        const p = y * w + x;
+        if (!changed[p]) { px[q] = 255; continue; }
+        const i = p << 2, dz = (BAY[((y & 3) << 2) | (x & 3)] - 7.5) * 0.35;
+        let r = d[i] + dz, gg = d[i + 1] + dz, b = d[i + 2] + dz;
+        r = r < 0 ? 0 : r > 255 ? 255 : r; gg = gg < 0 ? 0 : gg > 255 ? 255 : gg; b = b < 0 ? 0 : b > 255 ? 255 : b;
+        px[q] = map(((r >> 2) << 12) | ((gg >> 2) << 6) | (b >> 2));
+      }
+      e.prev = d;
       const data = lzwEncode(px), blocks = new Uint8Array(data.length + Math.ceil(data.length / 255));
       for (let o = 0, q = 0; o < data.length; o += 255) { const len = Math.min(255, data.length - o); blocks[q++] = len; for (let j = 0; j < len; j++) blocks[q++] = data[o + j]; }
-      e.parts.push(new Uint8Array([0x21, 0xF9, 4, (1 << 2) | (f > 0 ? 1 : 0), ...u16(delay), 255, 0, 0x2C, 0, 0, 0, 0, ...u16(w), ...u16(h), 0, 8]), blocks, new Uint8Array([0]));
+      // control block (keep the frame, index 255 transparent), image block with its local table of 256
+      e.parts.push(new Uint8Array([0x21, 0xF9, 4, (1 << 2) | 1, ...u16(delay), 255, 0, 0x2C, ...u16(x0), ...u16(y0), ...u16(bw), ...u16(bh), 0x87]), pal, new Uint8Array([8]), blocks, new Uint8Array([0]));
     }
   }
   return enc.map(e => new Blob([...e.parts, new Uint8Array([0x3B])], { type: 'image/gif' }));
@@ -2267,18 +2420,20 @@ const STEAM_CODE = "$J('#image_width').val(1000).attr('id',''),$J('#image_height
 function renderSteamSteps() {
   const M = MODES[state.mode], files = M.slots.map(sl => `<span class="file">${sl.base}.${fmt()}</span>`);
   if (state.mode === 'avatar') {
-    $('steamBody').innerHTML = `<ol class="steam-steps"><li>On your Steam profile, open <b>Edit Profile → Avatar</b>.</li><li>Click <b>Upload your avatar</b>, choose ${files[0]} and save.</li></ol>`;
+    $('steamBody').innerHTML = `<ol class="steam-steps"><li><span>On your Steam profile, open <b>Edit Profile → Avatar</b>.</span></li><li><span>Click <b>Upload your avatar</b>, choose ${files[0]} and save.</span></li></ol>`;
+    $('steamCount').textContent = '2 steps';
     return;
   }
   const showcase = state.mode === 'artwork' ? 'Artwork Showcase' : 'Featured Artwork Showcase';
   $('steamBody').innerHTML = `<ol class="steam-steps">
-    <li>Open <a href="${STEAM_UPLOAD}" target="_blank" rel="noopener">Steam's artwork upload</a> in Chrome or Firefox and choose ${files.length > 1 ? `${files[0]} under <b>Choose File</b>. Do steps 1 to 4 again for ${files[1]}.` : `${files[0]} under <b>Choose File</b>.`}</li>
-    <li>Open the console: <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>J</kbd> in Chrome, <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>K</kbd> in Firefox. In Firefox, type <b>allow pasting</b> once first.</li>
-    <li>Paste this line and press <kbd>Enter</kbd>:<div class="snippet"><code id="steamCode"></code><button type="button" class="icon-btn" id="copySteamCode" aria-label="Copy code"><span class="msr" aria-hidden="true">content_copy</span></button></div></li>
-    <li>Add a title, tick <b>I certify that I created this artwork</b> and click <b>Save and Continue</b>.</li>
-    <li>In <b>Edit Profile → Featured Showcase</b>, pick <b>${showcase}</b> and select your artwork${files.length > 1 ? 's' : ''}. In the picker ${files.length > 1 ? 'they look' : 'it looks'} like a thin black line; that is normal.</li>
+    <li><span>Open <a href="${STEAM_UPLOAD}" target="_blank" rel="noopener">Steam's artwork upload</a> in Chrome or Firefox and choose ${files[0]} under <b>Choose File</b>.${files.length > 1 ? ` Then do steps 1 to 4 again for ${files[1]}.` : ''}</span></li>
+    <li><span>Open the console: <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>J</kbd> in Chrome, <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>K</kbd> in Firefox. In Firefox, type <b>allow pasting</b> once first.</span></li>
+    <li><span>Paste this line and press <kbd>Enter</kbd>:<div class="snippet"><code id="steamCode"></code><button type="button" class="icon-btn" id="copySteamCode" aria-label="Copy code"><span class="msr" aria-hidden="true">content_copy</span></button></div></span></li>
+    <li><span>Add a title, tick <b>I certify that I created this artwork</b> and click <b>Save and Continue</b>.</span></li>
+    <li><span>In <b>Edit Profile → Featured Showcase</b>, pick <b>${showcase}</b> and select your artwork${files.length > 1 ? 's' : ''}. In the picker ${files.length > 1 ? 'they look' : 'it looks'} like a thin black line; that is normal.</span></li>
   </ol>
-  <p class="steam-foot">You need Steam level 10 for a showcase. <a href="${STEAM_GUIDE}" target="_blank" rel="noopener">Full guide on Steam</a></p>`;
+  <p class="steam-foot"><span class="msr" aria-hidden="true">info</span><span>You need Steam level 10 for a showcase. <a href="${STEAM_GUIDE}" target="_blank" rel="noopener">Full guide on Steam</a></span></p>`;
+  $('steamCount').textContent = '5 steps';
   $('steamCode').textContent = STEAM_CODE;
   $('copySteamCode').onclick = async () => {
     const b = $('copySteamCode');
@@ -2445,5 +2600,14 @@ loadImg(DEF_CHR).then(async c => {
   if (!/\/tools\/[^/]+\/?(index\.html)?$/.test(location.pathname)) return;
   rail.hidden = false;
   document.body.classList.add('has-rail');
+})();
+// the ranges' cobalt fill up to the thumb (the track's --fill), kept current however a value changes
+(() => {
+  const fillRange = r => r.style.setProperty('--fill', ((r.value - (r.min || 0)) / ((r.max || 100) - (r.min || 0))) * 100 + '%');
+  const all = () => document.querySelectorAll('input[type=range]').forEach(fillRange);
+  document.addEventListener('input', e => { if (e.target.type === 'range') fillRange(e.target); });
+  document.addEventListener('click', () => requestAnimationFrame(all), true);
+  new MutationObserver(() => requestAnimationFrame(all)).observe(document.body, { subtree: true, childList: true });
+  all();
 })();
 </script>

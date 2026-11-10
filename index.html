@@ -9,29 +9,38 @@
   <title>iameric</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <!-- Unbounded as a variable font (200..900): the big word changes weight with the pointer (home-type.js) -->
-  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:opsz,wght@9..40,400;9..40,500&family=Unbounded:wght@200..900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="sub.css">
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Mono:wght@400;500&family=DM+Sans:opsz,wght@9..40,400;9..40,500&family=Unbounded:wght@600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="links.css">
   <link rel="stylesheet" href="footer.css">
   <link rel="stylesheet" href="nav.css">
+  <link rel="stylesheet" href="intro.css">
+  <!-- the start animation (intro.js) plays once per visit and not with reduced motion; set before the first paint,
+       so the home never shows for a moment first -->
+  <script>
+    try {
+      if (sessionStorage.getItem('iameric-intro') !== '1' && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        document.documentElement.classList.add('intro-on');
+        sessionStorage.setItem('iameric-intro', '1');
+      }
+    } catch {}
+  </script>
   <style>
-    /* "graphit": neutral greys from the near-black ground up to a warm off-white text, plus one accent
-       colour, --signal. */
+    /* "cobalt print": ink and paper like a risograph print. Cobalt is the one ink for fills (and the reel's
+       duotone), coral the small second ink for marks. Same tokens in sub.css and legal.html */
     :root {
-      --bg: #0b0b0c;
-      --panel: #151517;
-      --line: #2c2c30;
-      --text: #e6e4df;
-      --signal: #b39dff;
-      --edge: clamp(20px, calc(16vw - 60px), 220px); /* content kept towards the middle */
-      --edge-y: clamp(16px, calc(7vh - 14px), 64px);
-      --gap: clamp(24px, 3vw, 56px); /* between the left block and the video */
-      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+      --bg: #0d0e11;
+      --panel: #18191d;
+      --line: #26272c;
+      --text: #eeeae0;
+      --muted: #a3a09a;
+      --signal: #2f5bff;
+      --on-signal: #ffffff;
+      --coral: #ff6b57;
+      --edge: clamp(20px, calc(16vw - 60px), 220px);
       --expo: cubic-bezier(0.16, 1, 0.3, 1);
-      --mono: "DM Mono", ui-monospace, Menlo, Consolas, monospace;
+      --mono: "Fira Mono", ui-monospace, Menlo, Consolas, monospace;
+      --nav: 72px;
     }
-    /* one screen, never scrolling, on phones too */
     html, body {
       margin: 0;
       height: 100%;
@@ -44,7 +53,7 @@
     }
     ::selection {
       background: var(--signal);
-      color: var(--bg);
+      color: var(--on-signal);
     }
     a {
       color: inherit;
@@ -56,254 +65,214 @@
       border-radius: 4px;
     }
 
-    /* on a computer: a block on the left third (wordmark, footer; widgets later) on the plain ground with its dot grid,
-       and the video on the right two thirds with the big word along its bottom */
-    .stage {
-      position: relative;
-      height: 100%;
-      display: grid;
-      grid-template-columns: calc(100% / 3) minmax(0, 1fr);
-    }
-    .side {
-      position: relative;
-      box-sizing: border-box;
-      min-height: 0;
-      padding: var(--edge-y) var(--gap) clamp(16px, 3.4vh, 40px) var(--edge);
-      display: grid;
-      grid-template-rows: auto minmax(0, 1fr) auto;
-    }
-    /* instrument-panel ground: a faint dot grid fading out towards the block's edges (only here, not on the video) */
-    .side::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background-image: radial-gradient(circle, rgba(230, 228, 223, 0.08) 1px, transparent 1.4px);
-      background-size: 22px 22px;
-      -webkit-mask-image: radial-gradient(ellipse at 50% 50%, #000 30%, transparent 78%);
-      mask-image: radial-gradient(ellipse at 50% 50%, #000 30%, transparent 78%);
-      pointer-events: none;
-    }
-    .side > * {
-      position: relative;
-    }
-    /* the grey column lies over the light shaft and dust (.particles), so they only show over the video */
-    @media (min-width: 761px) {
-      .side {
-        background: var(--bg);
-      }
-    }
+    /* one screen: the reel in a large frame under the menu, a thin footer line under it */
     .home {
-      position: relative;
-      min-width: 0;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
-      padding: 0 var(--edge) clamp(10px, 3vh, 36px) var(--gap);
+      box-sizing: border-box;
+      height: 100%;
+      padding: var(--nav) var(--edge) 0;
+      display: grid;
+      grid-template-rows: minmax(0, 1fr) auto;
     }
 
-    /* the video: a soft loop of Eric's "Nostalgia-Inspired Edit" (0–29.4 s at half speed with interpolated frames,
-       54 s without the flickering concert, 26.92–31.72 s of _media/work/slow2x.mp4, cut with ffmpeg; darkened and lavender-tinted in the file itself, 640 x 640, no
-       blur in the file; assets/home-bg.*). The strong
-       blur happens here in the browser: blurred video compresses into visible blocks, a CSS blur stays perfectly
-       smooth. The video is larger than its frame, so the blur's soft edges stay outside; a fine grain on top keeps
-       the gradients from banding. The still frame stands in until it plays, and for reduced motion */
-    .bg {
-      position: fixed;
-      inset: 0;
+    /* the reel: Eric's "Nostalgia-Inspired Edit" (assets/home-bg.*) printed in two inks. The file is already grey and full
+       range (no brightening here, that showed the compression), then the cobalt layer multiplies over it, so the lights turn cobalt and the shadows stay ink, like
+       a two-colour risograph. A darker top and foot on top, so the words read. Corners: 24 like the folder cards' rim */
+    .reel {
+      position: relative;
       overflow: hidden;
-      pointer-events: none;
+      border-radius: 24px;
+      background: #0a0b0d;
+      isolation: isolate;
     }
-    @media (min-width: 761px) {
-      .bg {
-        left: calc(100% / 3);
-      }
-    }
-    .bg-video {
+    .reel-video {
       position: absolute;
-      inset: -8%;
-      width: 116%;
-      height: 116%;
-      object-fit: cover;
-      filter: blur(14px);
-    }
-    /* PS5-style light shaft and dust (particles.js) over the whole window, above the video, under the content */
-    .particles {
-      position: fixed;
       inset: 0;
-      pointer-events: none;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: brightness(0.74);
+      scale: 1.04;
     }
-    .bg::after {
+    .reel::before {
       content: "";
       position: absolute;
       inset: 0;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.5 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-      opacity: 0.06;
-    }
-
-    /* the wordmark small in the top left corner, set in Unbounded, a wide geometric face with soft ends;
-       "iameric" has only x-height letters, so all stand at the same height */
-    .wordmark {
-      margin: 0;
-      font-family: "Unbounded", var(--mono);
-      font-weight: 600;
-      font-size: clamp(19px, 1.6vw, 27px);
-      line-height: 1;
-      letter-spacing: -0.01em;
-      color: var(--signal);
-    }
-    /* the logo (links.css) before the wordmark, at the wordmark's size; it goes round its loop once on load */
-    .mark {
-      display: flex;
-      align-items: center;
-      gap: 0.4em;
-      font-size: clamp(19px, 1.6vw, 27px);
-      color: var(--signal);
-    }
-
-    /* the footer, condensed into the block: label/value pairs in a row under the barcode */
-    .footer {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: flex-start;
-      gap: 14px 22px;
-      color: var(--text);
-      font: 14px/1 "DM Sans", sans-serif;
-    }
-    .footer .foot-code {
-      flex-basis: 100%;
-      max-width: 110px;
-    }
-    .footer .foot-logo {
-      display: none;
-    }
-    @media (min-width: 761px) {
-      .side .footer {
-        grid-row: 3; /* the bottom of the block, under the (for now empty) middle */
-        display: grid;
-        grid-template-columns: repeat(3, auto);
-        justify-content: start;
-        gap: 14px clamp(14px, 1.4vw, 22px);
-      }
-      .side .footer .foot-code {
-        grid-column: 1 / -1;
-      }
-    }
-
-    .giant {
-      display: flex;
-      margin: 0;
-      font-family: "Unbounded", var(--mono);
-      font-weight: 600;
-      line-height: 0.92;
-      letter-spacing: -0.02em;
-      white-space: nowrap;
-      user-select: none; /* it is a thing to play with, not text to copy */
-      -webkit-user-select: none;
-      /* the letters rise out of their line: nothing shows below it */
-      clip-path: inset(-0.5em -0.3em 0 -0.3em);
-    }
-    /* the letters near the pointer (--k, home-type.js) light up in the accent: a bright lavender, wrapped in soft
-       lavender blur, tight close to the letter and wide further out */
-    .g-l {
-      --k: 0;
-      position: relative;
       z-index: 1;
-      flex: none;
-      display: inline-block;
-      text-align: center;
-      color: color-mix(in oklch, var(--text), #c9b8ff calc(var(--k) * 100%));
-      text-shadow:
-        0 0 calc(var(--k) * 0.06em) rgb(201 184 255 / calc(var(--k) * 0.9)),
-        0 0 calc(var(--k) * 0.2em) rgb(179 157 255 / calc(var(--k) * 0.75)),
-        0 0 calc(var(--k) * 0.55em) rgb(179 157 255 / calc(var(--k) * 0.55)),
-        0 0 calc(var(--k) * 1.1em) rgb(140 110 240 / calc(var(--k) * 0.35));
+      background: var(--signal);
+      mix-blend-mode: multiply;
     }
-    /* once the letters have risen, nothing clips their glow any more */
-    .giant.live {
-      clip-path: none;
+    .reel::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      background: radial-gradient(70% 70% at 50% 50%, rgb(13 14 17 / 0.5), rgb(13 14 17 / 0.2));
+      pointer-events: none;
     }
-    /* on load: the letters rise one after another and settle from thin to their weight */
-    @media (prefers-reduced-motion: no-preference) {
-      .giant:not(.live) .g-l {
-        animation: g-rise 1.25s var(--expo) calc(0.25s + var(--i) * 0.07s) both;
-      }
+    /* the lockup in the middle of the frame: the logo large, its moons going round slowly and evenly the whole time
+       (logo-build.js orbitState), and the sentence about Eric tucked under its right side. The logo lies over the
+       words in "difference": where it covers them they turn dark inside it, so the words read through the logo as
+       it turns. The pair is isolated, so the logo blends only with the words, never with the reel */
+    .reel-in {
+      position: absolute;
+      inset: 0;
+      z-index: 3;
+      box-sizing: border-box;
+      padding: clamp(24px, 4vw, 64px);
+      display: grid;
+      place-content: center;
+      --o: min(58vh, 36vw);
     }
-    @keyframes g-rise {
-      from { translate: 0 105%; font-weight: 200; }
+    .lockup {
+      isolation: isolate;
+      display: grid;
+      grid-template-columns: calc(var(--o) * 0.66) calc(var(--o) * 0.34) minmax(0, 19ch);
+      align-items: center;
+      font-size: clamp(19px, 1.75vw, 30px);
+    }
+    .orb {
+      grid-area: 1 / 1 / 2 / 3;
+      z-index: 1;
+      width: var(--o);
+      aspect-ratio: 1;
+      color: var(--text);
+      mix-blend-mode: difference;
+      pointer-events: none;
+    }
+    .intro {
+      grid-area: 1 / 2 / 2 / 4;
+      margin: 0;
+      font: 400 1em/1.3 "DM Sans", sans-serif;
+      letter-spacing: -0.015em;
+      color: var(--text);
+      text-wrap: pretty;
+    }
+    .stuff {
+      color: var(--coral);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+    .stuff:hover {
+      color: #ff8a7a;
     }
 
-    /* phones: one column over the full video (no dot grid): wordmark, the big word, the footer */
+    /* the one moment on load: the frame opens from a line across its middle, the logo settles in, then the words */
+    @media (prefers-reduced-motion: no-preference) {
+      .reel {
+        animation: reel-open 1.2s var(--expo) 0.1s both;
+      }
+      .orb {
+        animation: orb-in 1.4s var(--expo) 0.55s both;
+      }
+      .intro {
+        animation: fade-in 1.2s var(--expo) 0.9s both;
+      }
+    }
+    @keyframes reel-open {
+      from { clip-path: inset(49% 0 49% 0 round 24px); }
+      to { clip-path: inset(0 0 0 0 round 24px); }
+    }
+    @keyframes orb-in {
+      from { opacity: 0; scale: 0.82; }
+    }
+    @keyframes fade-in {
+      from { opacity: 0; translate: 0 10px; }
+    }
+
+    /* phones: the logo above, the words under its lower part, both in the middle of the frame */
     @media (max-width: 760px) {
-      .stage {
+      :root { --nav: 60px; }
+      .home {
+        padding: var(--nav) 12px 0;
+      }
+      .reel {
+        border-radius: 20px;
+      }
+      .reel-in {
+        --o: min(70vw, 38vh);
+      }
+      .lockup {
         grid-template-columns: minmax(0, 1fr);
-        grid-template-rows: auto minmax(0, 1fr) auto auto;
-        padding: calc(var(--edge-y) + 52px) var(--edge) var(--edge-y);
-        box-sizing: border-box;
+        grid-template-rows: calc(var(--o) * 0.72) auto;
+        justify-items: center;
+        align-items: start;
+        font-size: clamp(17px, 4.8vw, 22px);
       }
-      .side {
-        display: contents;
+      .orb {
+        grid-area: 1 / 1 / 3 / 2;
       }
-      .side::before {
-        display: none;
+      .intro {
+        grid-area: 2 / 1 / 3 / 2;
+        max-width: 20ch;
+        text-align: center;
       }
-      .top { grid-row: 1; }
-      .home { grid-row: 3; padding: 0 0 18px; }
-      .footer { grid-row: 4; }
     }
   </style>
 </head>
 <body>
+  <div class="intro-anim" aria-hidden="true">
+    <div class="ia-plane">
+      <div class="ia-field"></div>
+      <div class="ia-words">
+        <div class="ia-word">iameric</div>
+        <div class="ia-add">(media designer)</div>
+      </div>
+    </div>
+  </div>
   <!-- the menu, the same on every page (nav.css, nav.js) -->
-  <nav class="site-nav" aria-label="menu"><div class="nav-links"><a href="projects.html"><span class="nav-roll"><span>projects</span></span></a><a href="tools.html"><span class="nav-roll"><span>tools</span></span></a><a href="about.html"><span class="nav-roll"><span>about</span></span></a></div><a class="nav-cta" href="contact.html">get in touch<span class="nav-arrow" aria-hidden="true"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 10.5l7-7M5 3.5h5.5V9"/></svg><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 10.5l7-7M5 3.5h5.5V9"/></svg></span></a></nav>
-  <div class="bg" aria-hidden="true">
-    <video class="bg-video" autoplay muted loop playsinline preload="auto" poster="assets/home-bg.webp">
-      <source src="assets/home-bg.webm" type="video/webm">
-      <source src="assets/home-bg.mp4" type="video/mp4">
-    </video>
-  </div>
-  <div class="particles" aria-hidden="true"></div>
-  <div class="stage">
-    <aside class="side">
-      <header class="top">
-        <div class="mark"><i class="mark-logo" aria-hidden="true"></i><p class="wordmark">iameric</p></div>
-      </header>
+  <nav class="site-nav" aria-label="menu"><a class="nav-home" href="index.html" aria-label="iameric, home" aria-current="page"><i class="mark-logo" aria-hidden="true"></i><span class="nav-word">iameric</span></a><div class="nav-links"><a href="projects.html"><span class="nav-roll"><span>projects</span></span></a><a href="tools.html"><span class="nav-roll"><span>tools</span></span></a><a href="about.html"><span class="nav-roll"><span>about</span></span></a></div><a class="nav-cta" href="contact.html"><span class="nav-cta-text">get in touch</span><span class="nav-arrow" aria-hidden="true"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 10.5l7-7M5 3.5h5.5V9"/></svg><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 10.5l7-7M5 3.5h5.5V9"/></svg></span></a></nav>
+  <main class="home">
+    <section class="reel">
+      <video class="reel-video" autoplay muted loop playsinline preload="auto" poster="assets/home-bg.webp" aria-hidden="true">
+        <source src="assets/home-bg.webm" type="video/webm">
+        <source src="assets/home-bg.mp4" type="video/mp4">
+      </video>
+      <div class="reel-in">
+        <div class="lockup">
+          <canvas class="orb" aria-hidden="true"></canvas>
+          <h1 class="intro" lang="en">I'm Eric, an apprentice media designer from Germany. I cut videos, build websites and dabble in all kinds of other <a class="stuff" href="about.html#interests">stuff</a>.</h1>
+        </div>
+      </div>
+    </section>
 
-      <footer class="footer foot">
-        <img class="foot-code" src="assets/barcode.svg" alt="" width="110" height="22">
-        <p class="foot-col"><span>© <span class="year">2026</span></span><b>iameric</b></p>
-        <p class="foot-col"><span>version</span><b class="version">v1.0</b></p>
-        <p class="foot-col"><span>imprint</span><a class="lk" href="legal.html">legal notice</a></p>
-        <img class="foot-logo" src="assets/logo.svg" alt="" width="30" height="30">
-      </footer>
-    </aside>
+    <footer class="site-foot">
+      <span class="foot-copy">© <span class="year">2026</span> iameric</span>
+      <nav class="socials" aria-label="connections"><a class="so" href="https://www.youtube.com/@trizakz" target="_blank" rel="noopener" aria-label="YouTube @trizakz" data-name="youtube @trizakz"><svg class="so-logo" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a><a class="so" href="https://steamcommunity.com/profiles/76561198201300135" target="_blank" rel="noopener" aria-label="Steam @Trizakz" data-name="steam @Trizakz"><svg class="so-logo" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M11.979 0C5.678 0 .511 4.86.022 11.037l6.432 2.658c.545-.371 1.203-.59 1.912-.59.063 0 .125.004.188.006l2.861-4.142V8.91c0-2.495 2.028-4.524 4.524-4.524 2.494 0 4.524 2.031 4.524 4.527s-2.03 4.525-4.524 4.525h-.105l-4.076 2.911c0 .052.004.105.004.159 0 1.875-1.515 3.396-3.39 3.396-1.635 0-3.016-1.173-3.331-2.727L.436 15.27C1.862 20.307 6.486 24 11.979 24c6.627 0 11.999-5.373 11.999-12S18.605 0 11.979 0zM7.54 18.21l-1.473-.61c.262.543.714.999 1.314 1.25 1.297.539 2.793-.076 3.332-1.375.263-.63.264-1.319.005-1.949s-.75-1.121-1.377-1.383c-.624-.26-1.29-.249-1.878-.03l1.523.63c.956.4 1.409 1.5 1.009 2.455-.397.957-1.497 1.41-2.454 1.012H7.54zm11.415-9.303c0-1.662-1.353-3.015-3.015-3.015-1.665 0-3.015 1.353-3.015 3.015 0 1.665 1.35 3.015 3.015 3.015 1.663 0 3.015-1.35 3.015-3.015zm-5.273-.005c0-1.252 1.013-2.266 2.265-2.266 1.249 0 2.266 1.014 2.266 2.266 0 1.251-1.017 2.265-2.266 2.265-1.253 0-2.265-1.014-2.265-2.265z"/></svg></a><a class="so" href="https://anilist.co/user/Trizakz/" target="_blank" rel="noopener" aria-label="AniList @Trizakz" data-name="anilist @Trizakz"><svg class="so-logo" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M24 17.53v2.421c0 .71-.391 1.101-1.1 1.101h-5l-.057-.165L11.84 3.736c.106-.502.46-.788 1.053-.788h2.422c.71 0 1.1.391 1.1 1.1v12.38H22.9c.71 0 1.1.392 1.1 1.101zM11.034 2.947l6.337 18.104h-4.918l-1.052-3.131H6.019l-1.077 3.131H0L6.361 2.948h4.673zm-.66 10.96-1.69-5.014-1.541 5.015h3.23z"/></svg></a><a class="so" href="https://open.spotify.com/user/k9e2rki611cfd6m9ktvqcw3rp" target="_blank" rel="noopener" aria-label="Spotify @Trizakz" data-name="spotify @Trizakz"><svg class="so-logo" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg></a><a class="so" href="https://github.com/Trizakz" target="_blank" rel="noopener" aria-label="GitHub @Trizakz" data-name="github @Trizakz"><svg class="so-logo" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg></a><a class="so" href="https://ko-fi.com/ericleutemann" target="_blank" rel="noopener" aria-label="Ko-fi @ericleutemann" data-name="ko-fi @ericleutemann"><svg class="so-logo" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M23.881 8.948c-.773-4.085-4.859-4.593-4.859-4.593H.723c-.604 0-.679.798-.679.798s-.082 7.324-.022 11.822c.164 2.424 2.586 2.672 2.586 2.672s8.267-.023 11.966-.049c2.438-.426 2.683-2.566 2.658-3.734 4.352.24 7.422-2.831 6.649-6.916zm-11.062 3.511c-1.246 1.453-4.011 3.976-4.011 3.976s-.121.119-.31.023c-.076-.057-.108-.09-.108-.09-.443-.441-3.368-3.049-4.034-3.954-.709-.965-1.041-2.7-.091-3.71.951-1.01 3.005-1.086 4.363.407 0 0 1.565-1.782 3.468-.963 1.904.82 1.832 3.011.723 4.311zm6.173.478c-.928.116-1.682.028-1.682.028V7.284h1.77s1.971.551 1.971 2.638c0 1.913-.985 2.667-2.059 3.015z"/></svg></a></nav>
+      <a class="foot-legal" href="legal.html">legal notice</a>
+    </footer>
+  </main>
 
-    <main class="home">
-      <h1 class="giant">iameric</h1>
-    </main>
-  </div>
-
-  <script type="importmap">
-    {
-      "imports": {
-        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
-      }
-    }
-  </script>
   <script type="module">
-    import { mountGiant } from './home-type.js';
-    import { loopMark } from './logo-build.js';
+    import { loopMark, orbitState, drawState } from './logo-build.js';
+    const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
     // reduced motion: the still frame only
-    if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      const v = document.querySelector('.bg-video');
+    if (still) {
+      const v = document.querySelector('.reel-video');
       v.removeAttribute('autoplay');
       v.pause();
     }
-    mountGiant(document.querySelector('.giant'));
-    // the light shaft and the dust load on their own (three.js is large), so the word never waits for them
-    import('./particles.js').then(m => m.mountParticles(document.querySelector('.particles')));
-    // the wordmark's logo goes round its loop once, as on the sub pages
-    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) loopMark(document.querySelector('.mark .mark-logo'));
+    // the menu's logo goes round its loop once per visit, not again on every page change
+    let seen = false;
+    try { seen = sessionStorage.getItem('iameric-logo') === '1'; sessionStorage.setItem('iameric-logo', '1'); } catch {}
+    if (!still && !seen) loopMark(document.querySelector('.nav-home .mark-logo'));
 
+    // the big logo: the moons go round at one even, slow speed, one turn in ROUND ms, with no easing
+    const orb = document.querySelector('.orb'), ROUND = 14000;
+    const fit = () => {
+      const px = Math.round(orb.getBoundingClientRect().width * Math.min(devicePixelRatio || 1, 2));
+      if (orb.width !== px) orb.width = orb.height = px;
+    };
+    fit();
+    addEventListener('resize', fit);
+    if (still) drawState(orbitState(0), '.orb');
+    else {
+      const t0 = performance.now();
+      const frame = now => {
+        drawState(orbitState((2 * Math.PI * (now - t0)) / ROUND), '.orb');
+        requestAnimationFrame(frame);
+      };
+      requestAnimationFrame(frame);
+    }
   </script>
   <script>
     // launched in 2026: show "2026" that year, "2026 – <current year>" afterwards
@@ -313,5 +282,6 @@
     });
   </script>
   <script src="nav.js"></script>
+  <script type="module" src="intro.js"></script>
 </body>
 </html>

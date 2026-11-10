@@ -1,0 +1,79 @@
+/* the start animation on the home page (intro.js), after the lettering of the "Cheerleader" lyric video: words
+   typed on letter by letter, lying on a plane tilted away in perspective, with a field of small plus signs on it,
+   a short addition in brackets after the main word. Once per visit (sessionStorage), skipped with reduced motion
+   and on any click or key. html.intro-on is set by a small script in the page's head, so the home never flashes first */
+.intro-anim {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  place-items: center;
+  overflow: hidden;
+  background: #0d0e11;
+  perspective: 1100px;
+  cursor: pointer;
+}
+html.intro-on .intro-anim {
+  display: grid;
+}
+/* while it plays, the home's own entrance waits under it */
+html.intro-on .reel,
+html.intro-on .orb,
+html.intro-on .intro {
+  animation-play-state: paused;
+}
+.ia-plane {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transform: rotateX(34deg) rotateY(-16deg) rotateZ(-7deg);
+}
+/* the plus signs, far larger than the screen so the tilt never shows an edge, drifting slowly along the plane */
+.ia-field {
+  position: absolute;
+  inset: -60%;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Cpath d='M18 13h4v5h5v4h-5v5h-4v-5h-5v-4h5z' fill='%232f5bff'/%3E%3C/svg%3E");
+  background-size: 40px 40px;
+  opacity: 0;
+  -webkit-mask-image: radial-gradient(50% 50% at 50% 50%, #000 35%, transparent);
+  mask-image: radial-gradient(50% 50% at 50% 50%, #000 35%, transparent);
+}
+.ia-words {
+  position: relative;
+  display: grid;
+  justify-items: start;
+  gap: 0.08em;
+  font-size: clamp(56px, 15vw, 220px);
+}
+.ia-word {
+  font: 600 1em/0.9 "Unbounded", sans-serif;
+  letter-spacing: -0.05em;
+  color: #eeeae0;
+  white-space: nowrap;
+}
+.ia-add {
+  margin-left: 0.2em;
+  font: 500 0.15em/1 "DM Sans", sans-serif;
+  letter-spacing: -0.01em;
+  color: #ff6b57;
+  white-space: nowrap;
+}
+/* a letter waits unseen until intro.js types it on */
+.ia-words span {
+  display: inline-block;
+  opacity: 0;
+}
+.ia-add span {
+  white-space: pre;
+}
+@media (max-width: 760px) {
+  .ia-plane {
+    transform: rotateX(30deg) rotateY(-10deg) rotateZ(-8deg);
+  }
+  .ia-add {
+    font-size: 0.2em;
+  }
+}

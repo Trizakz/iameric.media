@@ -82,7 +82,7 @@ a.w:focus-visible {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   font-weight: 500;
 }
 .w-city .material-symbols-rounded {
@@ -108,7 +108,7 @@ a.w:focus-visible {
 .w-weather {
   display: flex;
   align-items: baseline;
-  gap: 6px;
+  gap: 8px;
   white-space: nowrap;
 }
 .w-temp {
@@ -218,8 +218,8 @@ a.w:focus-visible {
   align-self: end;
   display: flex;
   align-items: center;
-  gap: 6px;
-  margin-bottom: 5px;
+  gap: 8px;
+  margin-bottom: 4px;
   color: color-mix(in srgb, var(--text) 62%, transparent);
 }
 .w-music .w-title {
@@ -293,7 +293,7 @@ a.w:focus-visible {
     display: grid;
     grid-template-columns: repeat(2, var(--w));
     justify-content: center;
-    gap: 14px;
+    gap: 16px;
     pointer-events: auto;
   }
   .w-col {

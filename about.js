@@ -29,7 +29,7 @@ export function mount(root) {
     li.firstElementChild.setAttribute('aria-hidden', 'true');
   });
   const els = [...pile.querySelectorAll('.ab-badge')];
-  // the honeycomb from badges.js; phones pour the badges into four columns, reading order kept.
+  // the tiles from badges.js (holo ones twice the size); phones pack them into four columns, reading order kept.
   // They arrive one after another in reading order
   const phone = matchMedia('(max-width: 760px)');
   const arrange = () => {
@@ -41,7 +41,7 @@ export function mount(root) {
       const el = els.find(e => e.dataset.badge === b.id), { x, y } = grid.cell(b.col ?? 0, b.row ?? 0);
       el.style.setProperty('--x', `${x}%`);
       el.style.setProperty('--y', `${y}%`);
-      el.style.setProperty('--w', `${grid.w}%`);
+      el.style.setProperty('--w', `${grid.wOf(b)}%`);
       el.style.setProperty('--d', `${delay.get(b.id).toFixed(2)}s`);
     });
   };

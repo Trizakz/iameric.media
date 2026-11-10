@@ -126,7 +126,7 @@ function screenTexture(tag, aod) {
   g.fillText(title, 50, 260);
   if ('letterSpacing' in g) g.letterSpacing = '0px';
 
-  g.font = '400 50px "DM Mono", monospace';
+  g.font = '400 50px "Fira Mono", monospace';
   // full strength on the lit screen, where the gradient's darker end would swallow a faded line
   g.globalAlpha = aod ? 0.75 : 1;
   g.fillText(tag.sub || '', 58, 350, c.width - 116);
@@ -144,7 +144,7 @@ function screenTexture(tag, aod) {
   g.lineTo(130, 496);
   g.lineTo(92, 522);
   g.fill();
-  g.font = '400 46px "DM Mono", monospace';
+  g.font = '400 46px "Fira Mono", monospace';
   g.fillText('open', 152, 512);
   g.fillRect(c.width - 400, 462, 3, 68);
   g.textAlign = 'right';
@@ -196,7 +196,7 @@ function iconScreen(tag, color) {
       g.textBaseline = 'middle';
       g.font = '120px "Material Symbols Rounded"';
       g.fillText(tag.icon || '', 26, c.height / 2 + 4);
-      g.font = '400 74px "DM Mono", monospace';
+      g.font = '400 74px "Fira Mono", monospace';
       g.fillText(time, 166, c.height / 2 + 4);
       g.fillRect(430, 52, 3, 120);
       // the logo, 104 px square, where the battery used to be
@@ -817,7 +817,7 @@ export async function mountTags(container, tags, { focusBlur = false, returnTo =
   // the screens are drawn with the page fonts; load them explicitly, a canvas does not trigger the download
   await Promise.all([
     document.fonts.load('500 150px "DM Sans"'),
-    document.fonts.load('400 64px "DM Mono"'),
+    document.fonts.load('400 64px "Fira Mono"'),
     document.fonts.load('96px "Material Symbols Rounded"', 'mail'),
   ]);
 

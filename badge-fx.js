@@ -63,11 +63,11 @@ export function mountBadgeFx(pile, badges) {
   resize.observe(pile);
 
   const specks = [], warm = new Set();
-  // a point on the hexagon's edge, seen from the canvas, and the way out from there
+  // a point on the tile's edge, seen from the canvas, and the way out from there
   function spawn(el, bokeh, hot) {
     const box = canvas.getBoundingClientRect(), r = el.getBoundingClientRect();
     const a = Math.random() * Math.PI * 2, R = (r.width / 2) * 0.86, cos = Math.cos(a), sin = Math.sin(a);
-    const edge = R / Math.max(Math.abs(cos) * 1.155, Math.abs(cos) * 0.577 + Math.abs(sin)); // on the pointy-top hexagon
+    const edge = R / Math.max(Math.abs(cos), Math.abs(sin)); // on the square tile
     const speed = (bokeh ? 2 + Math.random() * 3 : 3 + Math.random() * 6) * (hot ? 2.4 : 1);
     specks.push({
       x: r.left + r.width / 2 + cos * edge - box.left,

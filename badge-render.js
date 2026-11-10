@@ -1,6 +1,6 @@
 // The badges as SVG, drawn from plain data (badges.js). Used by the about page and by badge-editor.html, so a
-// badge looks the same in both. A badge is a sharp-cornered plate with the icon above the title, and
-// its `level` says how much the interest means: 1 cream, 2 holo (the higher, the more notched its outline). The colour is
+// badge looks the same in both. A badge is a square tile with soft corners, the icon above the title, and its
+// `level` says how much the interest means: 1 cream, 2 holo (the same size, its own finish and effects). The colour is
 // soft patches running into each other, set a little differently per badge; soft occlusion along the
 // edges. Icons are Google Material
 // Symbols, always filled (drawn as ligature text, so any icon name works), text is set in the site's
@@ -9,19 +9,19 @@
 //   import { badgeSVG, ensureFonts } from './badge-render.js';
 //   el.innerHTML = badgeSVG(badge);      // one <svg class="ab-badge">
 //   ensureFonts(document, badges);      // loads the weights and icons the badges use
-//   const g = gridLayout(badges, cols); // the honeycomb: g.aspect, g.w and g.cell(col, row) -> { x, y }
+//   const g = gridLayout(badges, cols); // the tile board: g.aspect, g.w, g.wOf(b) and g.cell(col, row) -> { x, y }
 
 // the levels, lowest first, with the colour of icon and text
 export const LEVELS = [
   { name: 'creme', ink: '#17130c' }, // dark ink on the light pearl plate
-  { name: 'holo', ink: '#ffffff' }, // white on the deep violet gradient
+  { name: 'holo', ink: '#ffffff' }, // white on the deep cobalt gradient
 ];
 
 // every setting a badge can have, with its default. badges.js only needs to store what differs.
 export const DEFAULTS = {
   id: 'badge',
   title: 'badge',
-  // place in the honeycomb (odd rows sit half a cell in and have one cell less)
+  // place on the tile board
   col: 0,
   row: 0,
   x: 0,
@@ -49,40 +49,18 @@ export const DEFAULTS = {
 export const FONTS = {
   Unbounded: { css: '"Unbounded", sans-serif', weights: [200, 300, 400, 500, 600, 700, 800, 900] },
   'DM Sans': { css: '"DM Sans", sans-serif', weights: [100, 200, 300, 400, 500, 600, 700, 800, 900] },
-  'DM Mono': { css: '"DM Mono", monospace', weights: [300, 400, 500] },
+  'Fira Mono': { css: '"Fira Mono", monospace', weights: [300, 400, 500] },
 };
 
 export const withDefaults = b => ({ ...DEFAULTS, ...b });
 const f = n => Math.round(n * 10) / 10;
 const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
-// a hexagon in the 200 x 200 box, point up, with barely softened corners: each corner is cut back along both
-// edges and joined with a curve
-const C = 100, R = 97;
-const corner = (r, n) => { const a = ((-90 + n * 60) * Math.PI) / 180; return [C + r * Math.cos(a), C + r * Math.sin(a)]; };
-const hexagon = (r, round) => Array.from({ length: 6 }, (_, i) => {
-  const [px, py] = corner(r, i), [ax, ay] = corner(r, i - 1), [bx, by] = corner(r, i + 1), k = round / r;
-  return `${i ? 'L' : 'M'}${f(px + (ax - px) * k)} ${f(py + (ay - py) * k)}Q${f(px)} ${f(py)} ${f(px + (bx - px) * k)} ${f(py + (by - py) * k)}`;
-}).join('') + 'Z';
-export const HEX = hexagon(R, 2);
-
-// a notched outline: the hexagon with its side corners chamfered (a share of an edge) and notches stepped into
-// the edges. Each notch is [edge, from, to, depth]: along an edge from one corner to the next, pressed inwards
-function notched(notches, chamfer) {
-  const pts = [];
-  for (let i = 0; i < 6; i++) {
-    const [ax, ay] = corner(R, i), [bx, by] = corner(R, i + 1), len = Math.hypot(bx - ax, by - ay);
-    const nx = -(by - ay) / len, ny = (bx - ax) / len; // pointing inwards
-    const at = (t, d = 0) => [ax + (bx - ax) * t + nx * d, ay + (by - ay) * t + ny * d];
-    pts.push(at(i === 0 || i === 3 ? 0 : chamfer));
-    for (const [, from, to, depth] of notches.filter(n => n[0] === i)) {
-      const step = (depth * 0.8) / len;
-      pts.push(at(from), at(from + step, depth), at(to - step, depth), at(to));
-    }
-    if (i !== 2 && i !== 5) pts.push(at(1 - chamfer));
-  }
-  return 'M' + pts.map(([x, y]) => `${f(x)} ${f(y)}`).join('L') + 'Z';
-}
+// a square tile in the 200 x 200 box with soft corners (the name HEX stays for the editor's cells)
+const C = 100, M = 4, RAD = 46;
+const tile = (inset = M, r = RAD) => { const a = inset, z = 200 - inset;
+  return `M${a + r} ${a}H${z - r}Q${z} ${a} ${z} ${a + r}V${z - r}Q${z} ${z} ${z - r} ${z}H${a + r}Q${a} ${z} ${a} ${z - r}V${a + r}Q${a} ${a} ${a + r} ${a}Z`; };
+export const HEX = tile();
 
 // each level's colours: the ground, then soft patches as [colour, x, y, radius] in shares of the plate
 const FINISH = [
@@ -96,14 +74,13 @@ const FINISH = [
   },
   { // holo: the projects' placeholder gradient (sub.css .pj-ph), deep violet at the top into the lavender of
     // --signal at the bottom, a lavender glow rising from the bottom edge, lilac iridescent bands flowing across
-    base: '#4b35c2',
-    grad: [['#2a1c86', 0], ['#4b35c2', 0.38], ['#7d63e0', 0.72], ['#b39dff', 1]], // top to bottom
-    fades: [['#a58bff', 0.5, 1.04, 0.5]],
-    iris: ['#f5f0ff', '#c8b4ff', '#ece4ff', '#a98cff', '#faf8ff', '#dccbff', '#e6dcff', '#f5f0ff', '#c8b4ff', '#ece4ff', '#a98cff', '#faf8ff', '#dccbff'],
-    occlusion: '#2e2350',
+    base: '#2f5bff',
+    grad: [['#14287a', 0], ['#2f5bff', 0.38], ['#5c7dff', 0.72], ['#aab9ff', 1]], // top to bottom
+    fades: [['#7f97ff', 0.5, 1.04, 0.5]],
+    iris: ['#f2f5ff', '#b8c6ff', '#e4eaff', '#8fa5ff', '#f8faff', '#cdd8ff', '#dde5ff', '#f2f5ff', '#b8c6ff', '#e4eaff', '#8fa5ff', '#f8faff', '#cdd8ff'],
+    occlusion: '#16224d',
     gloss: 0.6,
-    grooves: [0.9], // one frame (two read as busy)
-    outline: notched([[1, 0.2, 0.8, 5], [4, 0.2, 0.8, 5]], 0.035), // two, on the right and left sides
+    outline: HEX,
   },
 ];
 const random = seed => () => ((seed = (seed * 16807) % 2147483647) - 1) / 2147483646;
@@ -124,36 +101,37 @@ function content(b, ink, id) {
   return icon + text;
 }
 
-// the honeycomb, in the units of a badge's 200 x 200 box: a hexagon is 168 wide and 194 high, plus the
-// gap between them. Rows overlap by a quarter hexagon, and there are as many as the badges need.
-const CELL = { x: 190, y: 164, hex: 194, left: 16, top: 3, slip: 8 };
+// the board: a square grid in the units of a badge's 200 x 200 box, a gap between the cells, one tile per cell
+const GAP = 16, STEP = 200 + GAP;
+export const span = () => 1; // every tile takes one cell (holo ones too)
 export function gridLayout(badges, cols, extraRows = 0) {
-  const rows = Math.max(0, ...badges.map(b => withDefaults(b).row)) + 1 + extraRows;
-  const width = cols * CELL.x, height = (rows - 1) * CELL.y + CELL.hex + CELL.slip;
+  const rows = Math.max(0, ...badges.map(b => { const d = withDefaults(b); return d.row + span(d); })) + extraRows;
+  const width = cols * STEP - GAP, height = Math.max(1, rows) * STEP - GAP;
+  const share = n => ((n * STEP - GAP) / width) * 100;
   return {
     rows,
     aspect: width / height,
-    w: (200 / width) * 100,
-    cell: (col, row) => ({
-      x: f((((col + (row % 2 ? 0.5 : 0)) * CELL.x - CELL.left) / width) * 1000) / 10,
-      y: f(((row * CELL.y - CELL.top) / height) * 1000) / 10,
-    }),
+    w: share(1),
+    wOf: b => share(span(b)),
+    cell: (col, row) => ({ x: f(((col * STEP) / width) * 1000) / 10, y: f(((row * STEP) / height) * 1000) / 10 }),
     // the cell nearest to a point given in % of the pile
     nearest(px, py) {
-      const row = Math.max(0, Math.round(((py / 100) * height + CELL.top - CELL.hex / 2) / CELL.y));
-      const col = Math.round(((px / 100) * width - CELL.x / 2) / CELL.x - (row % 2 ? 0.5 : 0));
-      return { col: Math.max(0, Math.min(cols - 1 - row % 2, col)), row };
+      const col = Math.floor(((px / 100) * width) / STEP), row = Math.floor(((py / 100) * height) / STEP);
+      return { col: Math.max(0, Math.min(cols - 1, col)), row: Math.max(0, row) };
     },
   };
 }
-// the badges in reading order, poured into fewer columns (phones)
+// the badges in reading order, packed into `cols` columns: each takes the first place it fits (phones, a narrower
+// board, a badge turned holo)
 export function flow(badges, cols) {
-  const list = [...badges].map(withDefaults).sort((a, b) => a.row - b.row || a.col - b.col);
-  let col = 0, row = 0;
+  const list = [...badges].map(withDefaults).sort((a, b) => a.row - b.row || a.col - b.col), taken = new Set();
+  const free = (c, r, n) => { for (let y = r; y < r + n; y++) for (let x = c; x < c + n; x++) if (x >= cols || taken.has(`${x},${y}`)) return false; return true; };
   return list.map(b => {
-    const at = { ...b, col, row };
-    if (++col >= cols - row % 2) { col = 0; row++; }
-    return at;
+    const n = Math.min(span(b), cols);
+    for (let r = 0; ; r++) for (let c = 0; c <= cols - n; c++) if (free(c, r, n)) {
+      for (let y = r; y < r + n; y++) for (let x = c; x < c + n; x++) taken.add(`${x},${y}`);
+      return { ...b, col: c, row: r };
+    }
   });
 }
 
@@ -195,7 +173,7 @@ export function badgeSVG(input, { uid = input.id, cls = 'ab-badge', place = true
     return `<path d="${shape}" fill="none" stroke="#2a1600" stroke-opacity="0.26" stroke-width="${f(7 / k)}" filter="url(#${id}-soft)" ${at(0)}/><path d="${shape}" fill="none" stroke="#fff" stroke-opacity="0.65" stroke-width="${w}" ${at(1.6)}/><path d="${shape}" fill="none" stroke="#2a1600" stroke-opacity="0.42" stroke-width="${w}" ${at(0)}/>`;
   };
   const grooves = (l.grooves || []).map(groove).join('');
-  // the hover ring: a white line just outside the plate, a plain hexagon, lit when the badge is hovered (about.css)
+  // the hover ring: a white line just outside the plate, a plain tile, lit when the badge is hovered (about.css)
   const ring = `<path class="ring" d="${HEX}" fill="none" stroke="#fff" stroke-width="2.5" stroke-linejoin="round" transform="translate(100 100) scale(0.93) translate(-100 -100)" pointer-events="none"/>`;
   let halo = '', shine = '', iris = '';
   if (holo) {
@@ -234,7 +212,7 @@ export function ensureFonts(doc, badges, { allIcons = false } = {}) {
     const l = doc.createElement('link');
     l.rel = 'stylesheet';
     l.dataset.badgeFonts = '';
-    l.href = 'https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=DM+Sans:opsz,wght@9..40,100..900&family=Unbounded:wght@200..900&display=swap';
+    l.href = 'https://fonts.googleapis.com/css2?family=Fira+Mono:wght@400;500&family=DM+Sans:opsz,wght@9..40,100..900&family=Unbounded:wght@200..900&display=swap';
     head.append(l);
   }
   const names = new Set(badges.map(b => b.icon).filter(Boolean));
