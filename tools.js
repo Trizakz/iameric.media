@@ -146,11 +146,21 @@ export const TOOLS = [
     "id": "wl-lerntool",
     "title": "WL Lerntool",
     "description": "Wirtschaftslehre lernen: Themen lesen, Skizzen beschriften, Fragen beantworten und Karteikarten üben.",
-    "version": "0.1",
+    "version": "0.2",
     "date": "2026-11-11",
     "href": "tools/wl-lerntool/",
     "thumb": null,
     "changelog": [
+      {
+        "version": "0.2",
+        "date": "2026-11-11",
+        "title": "Handy-Ansicht und Erfolgs-Signale",
+        "changes": [
+          "Auf dem Handy sitzt die Auswahl als ausklappbare Leiste unten: eingeklappt mit Tabs und einer Zeile Stand, ausgeklappt mit allen Details",
+          "Die Seitenleiste ist auf dem Handy weg, ein kleines Logo im Kopf führt zur Startseite",
+          "Richtige Antworten leuchten grün auf, dazu Serie, Fortschrittsbalken pro Frage, Welle in der Skizze und Karten, die wegfliegen"
+        ]
+      },
       {
         "version": "0.1",
         "date": "2026-11-11",

@@ -246,6 +246,7 @@ dialog p { margin: 0; }
 .rail-kofi.calling { color: #ff5e5b; box-shadow: 0 0 0 3px rgba(255, 94, 91, .25); }
 body.has-rail { padding-left: calc(56px + max(16px, env(safe-area-inset-left, 0px))); }
 
+:root { --ok: #7fd99a; --ok-soft: rgba(127, 217, 154, .1); --ok-line: rgba(127, 217, 154, .55); }
 /* WL Lerntool: layout and parts that belong to this tool (the base is taken from the tool UI blueprint) */
 .workspace { max-width: 1160px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: var(--s4); align-items: start; }
 .stage-wrap { min-width: 0; display: flex; flex-direction: column; gap: var(--s4); padding: var(--s4); background: #0a0b0d; border-radius: var(--r-card); box-shadow: var(--ring-card); min-height: 480px; }
@@ -305,7 +306,7 @@ button.ghost:hover { background: var(--raised); color: var(--fg); }
 .dia g.blank:hover .bg { fill: rgba(74, 109, 255, .24); }
 .dia g.blank.sel .bg { stroke: var(--accent); stroke-dasharray: none; stroke-width: 2; fill: rgba(74, 109, 255, .26); }
 .dia g.blank .q { fill: var(--accent-text); font-size: 15px; font-weight: 600; text-anchor: middle; }
-.dia g.blank.done .bg { fill: rgba(127, 217, 154, .08); stroke: rgba(127, 217, 154, .55); stroke-dasharray: none; }
+.dia g.blank.done .bg { fill: rgba(127, 217, 154, .08); stroke: var(--ok-line); stroke-dasharray: none; }
 .dia g.blank.static { cursor: default; }
 .dia g.blank.static .bg { display: none; }
 .dia g.blank.wrong .bg { stroke: var(--danger); fill: rgba(255, 107, 87, .16); }
@@ -319,8 +320,8 @@ button.ghost:hover { background: var(--raised); color: var(--fg); }
 @keyframes shake { 20% { translate: -4px 0; } 40% { translate: 4px 0; } 60% { translate: -3px 0; } 80% { translate: 2px 0; } }
 .note { display: flex; gap: var(--s2); align-items: flex-start; margin: 0; padding: var(--s3); border-radius: var(--r-ctl); background: var(--field); font-size: 13px; color: var(--muted); }
 .note .msr { font-size: 16px; color: var(--muted); flex: none; }
-.note.ok { background: rgba(127, 217, 154, .1); box-shadow: inset 0 0 0 1px rgba(127, 217, 154, .4); color: var(--fg); }
-.note.ok .msr { color: #7fd99a; }
+.note.ok { background: var(--ok-soft); box-shadow: inset 0 0 0 1px rgba(127, 217, 154, .4); color: var(--fg); }
+.note.ok .msr { color: var(--ok); }
 .note.bad { background: rgba(255, 107, 87, .1); box-shadow: inset 0 0 0 1px rgba(255, 107, 87, .4); color: var(--fg); }
 .note.bad .msr { color: var(--danger); }
 
@@ -338,21 +339,21 @@ button.ghost:hover { background: var(--raised); color: var(--fg); }
 .opt .msr { margin-left: auto; flex: none; }
 .opt[aria-pressed="true"] { background: var(--accent-soft); box-shadow: inset 0 0 0 1px rgba(74, 109, 255, .6); }
 .opt[aria-pressed="true"] .k { background: var(--accent); color: var(--accent-ink); }
-.opt.right { background: rgba(127, 217, 154, .1); box-shadow: inset 0 0 0 1px rgba(127, 217, 154, .55); }
-.opt.right .k { background: #7fd99a; color: #0d0e11; }
-.opt.right .msr { color: #7fd99a; }
+.opt.right { background: var(--ok-soft); box-shadow: inset 0 0 0 1px var(--ok-line); }
+.opt.right .k { background: var(--ok); color: #0d0e11; }
+.opt.right .msr { color: var(--ok); }
 .opt.miss { background: rgba(255, 107, 87, .1); box-shadow: inset 0 0 0 1px rgba(255, 107, 87, .55); }
 .opt.miss .k { background: var(--danger); color: #0d0e11; }
 .opt.miss .msr { color: var(--danger); }
-.opt.right-hint { box-shadow: inset 0 0 0 1px rgba(127, 217, 154, .55); }
+.opt.right-hint { box-shadow: inset 0 0 0 1px var(--ok-line); }
 .opt:disabled { opacity: 1; cursor: default; }
 .pairs { display: flex; flex-direction: column; gap: var(--s2); }
 .pair-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--s3); align-items: center; padding: var(--s2) var(--s3); border-radius: var(--r-ctl); background: var(--chrome); box-shadow: var(--ring-card); font-size: 14px; }
-.pair-row.right { background: rgba(127, 217, 154, .1); box-shadow: inset 0 0 0 1px rgba(127, 217, 154, .55); }
+.pair-row.right { background: var(--ok-soft); box-shadow: inset 0 0 0 1px var(--ok-line); }
 .pair-row.miss { background: rgba(255, 107, 87, .1); box-shadow: inset 0 0 0 1px rgba(255, 107, 87, .55); }
 .pair-row select { background: var(--field); }
 .pair-row .fix { grid-column: 1 / -1; font-size: 12px; color: var(--muted); }
-.pair-row .fix b { color: #7fd99a; font-weight: 600; }
+.pair-row .fix b { color: var(--ok); font-weight: 600; }
 select { appearance: none; -webkit-appearance: none; padding-right: 28px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M3 4.5 6 7.5 9 4.5' fill='none' stroke='%23a3a09a' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; }
 select:disabled { opacity: 1; }
 .q-actions { display: flex; gap: var(--s2); align-items: center; flex-wrap: wrap; }
@@ -390,7 +391,7 @@ select:disabled { opacity: 1; }
 .row-btn[aria-pressed="true"] { background: var(--accent-soft); box-shadow: inset 0 0 0 1px rgba(74, 109, 255, .6); }
 .row-btn .msr { color: var(--muted); }
 .row-btn .mono { margin-left: auto; white-space: nowrap; }
-.row-btn.done .mono { color: #7fd99a; }
+.row-btn.done .mono { color: var(--ok); }
 .stat { display: flex; flex-direction: column; gap: var(--s2); }
 .stat-head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--s2); }
 .stat-head span:first-child { color: var(--muted); font-size: 12px; }
@@ -401,21 +402,103 @@ select:disabled { opacity: 1; }
 .empty .big { font-size: 18px; font-weight: 600; color: var(--fg); }
 .empty button { min-height: 36px; padding-inline: 16px; }
 
+.dia .t.end { text-anchor: end; }
+
+/* ---- success cues ---- */
+.bar-fill.full { background: var(--ok); }
+.segs { display: flex; gap: 2px; width: 100%; }
+.segs i { flex: 1 1 0; min-width: 2px; height: 4px; border-radius: 2px; background: var(--field-hover); transition: background-color .3s cubic-bezier(.22, 1, .36, 1); }
+.segs i.ok { background: var(--ok); }
+.segs i.no { background: var(--danger); }
+.segs i.cur { background: var(--fg); }
+.streak { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px 2px 4px; border-radius: 999px; background: var(--ok-soft); box-shadow: inset 0 0 0 1px var(--ok-line); color: var(--ok); font: 500 12px/1.4 var(--font-mono); animation: pop .4s cubic-bezier(.34, 1.56, .64, 1); }
+.streak .msr { font-size: 16px; }
+.score.good b { color: var(--ok); }
+.opt .k .msr { font-size: 16px; }
+.opt.right .k { animation: pop .4s cubic-bezier(.34, 1.56, .64, 1); }
+.opt.right { animation: ring-ok .8s cubic-bezier(.22, 1, .36, 1); }
+.opt.miss { animation: shake .35s cubic-bezier(.22, 1, .36, 1); }
+@keyframes ring-ok { from { box-shadow: inset 0 0 0 1px var(--ok-line), 0 0 0 0 rgba(127, 217, 154, .5); } to { box-shadow: inset 0 0 0 1px var(--ok-line), 0 0 0 10px rgba(127, 217, 154, 0); } }
+@keyframes pop { 0% { transform: scale(.55); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+.note.pop-in { animation: note-in .35s cubic-bezier(.22, 1, .36, 1); }
+@keyframes note-in { from { opacity: 0; transform: translateY(6px); } }
+.note.ok .msr { animation: pop .45s cubic-bezier(.34, 1.56, .64, 1); }
+.dia g.blank .bg { transform-box: fill-box; transform-origin: center; }
+.dia g.blank.pop .bg { animation: blank-ok .7s cubic-bezier(.22, 1, .36, 1); }
+.dia g.blank.pop text { animation: pop .4s cubic-bezier(.34, 1.56, .64, 1); transform-box: fill-box; transform-origin: center; }
+.dia g.blank.wave .bg { animation: blank-ok .8s cubic-bezier(.22, 1, .36, 1) both; animation-delay: calc(var(--i) * 35ms); }
+@keyframes blank-ok { 0% { fill: rgba(127, 217, 154, .5); stroke-width: 4; transform: scale(1.06); } 100% { transform: scale(1); } }
+.fc.in { animation: card-in .32s cubic-bezier(.22, 1, .36, 1); }
+@keyframes card-in { from { opacity: 0; transform: translateY(12px) scale(.97); } }
+.fc.out-ok { animation: out-ok .26s cubic-bezier(.5, 0, .75, 0) forwards; pointer-events: none; }
+.fc.out-ok .fc-face { box-shadow: 0 0 0 2px var(--ok-line), var(--ring-card); }
+.fc.out-again { animation: out-again .26s cubic-bezier(.5, 0, .75, 0) forwards; pointer-events: none; }
+@keyframes out-ok { to { opacity: 0; transform: translateX(48px) rotate(4deg) scale(.92); } }
+@keyframes out-again { to { opacity: 0; transform: translateX(-48px) rotate(-4deg) scale(.92); } }
+@media (prefers-reduced-motion: reduce) {
+  .streak, .opt.right, .opt.right .k, .opt.miss, .note.pop-in, .note.ok .msr, .dia g.blank.pop .bg, .dia g.blank.pop text, .dia g.blank.wave .bg, .fc.in, .fc.out-ok, .fc.out-again { animation: none; }
+}
+
+/* ---- bottom sheet (small screens): the inspector becomes a dock; folded it shows the tabs and one summary line, unfolded the details ---- */
+.sheet-head, .scrim, .home-link { display: none; }
 @media (max-width: 1100px) {
   .workspace { grid-template-columns: minmax(0, 1fr); }
+  body { padding-bottom: calc(112px + env(safe-area-inset-bottom, 0px)); }
   .stage-wrap { padding: var(--s2); min-height: 0; }
   .st-head, .st-body > .st-sub { padding-inline: var(--s2); }
-  .inspector { display: contents; }
-  .tabs { order: -1; margin: 0; padding: 4px; background: var(--chrome); box-shadow: var(--ring-card); border-radius: var(--r-card); position: sticky; top: var(--top); z-index: 5; }
-  .tabs button { min-height: 32px; }
-  .panel { overflow: visible; background: var(--chrome); border-radius: var(--r-card); box-shadow: var(--ring-card); }
   .meta { display: none; }
-  .export { flex: 1 1 100%; }
-  .export button.fill { flex: 1 1 0; }
+  .export { flex: 0 0 auto; margin-left: auto; }
+  .brand { margin-right: 0; }
   .doc, .q-wrap, .result { padding: var(--s2); }
   .fc-term { font-size: 20px; }
+
+  .scrim { display: block; position: fixed; inset: 0; z-index: 30; background: rgba(0, 0, 0, .55); opacity: 0; pointer-events: none; transition: opacity .25s ease-out; }
+  .scrim.show { opacity: 1; pointer-events: auto; }
+  .inspector { position: fixed; z-index: 40; left: 0; right: 0; bottom: 0; top: auto; max-height: none; display: flex; flex-direction: column;
+    border-radius: 16px 16px 0 0; background: var(--chrome); overflow: hidden; padding-bottom: env(safe-area-inset-bottom, 0px);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, .07), 0 -8px 32px rgba(0, 0, 0, .45); }
+  .sheet-head { order: 1; position: relative; display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: var(--s1) var(--s2);
+    width: 100%; min-height: 0; padding: var(--s4) var(--s4) var(--s3); border-radius: 0; background: transparent; box-shadow: none; text-align: left; justify-content: stretch; }
+  .sheet-head:hover, .sheet-head:active { background: transparent; translate: none; }
+  .sheet-grab { position: absolute; top: 6px; left: 50%; width: 36px; height: 4px; margin-left: -18px; border-radius: 2px; background: var(--line-strong); }
+  .sheet-main { font-size: 14px; font-weight: 600; letter-spacing: -0.01em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .sheet-meta { font: 500 12px/1.4 var(--font-mono); color: var(--muted); white-space: nowrap; }
+  .sheet-chev { color: var(--muted); transition: transform .3s cubic-bezier(.22, 1, .36, 1); }
+  .inspector.open .sheet-chev { transform: rotate(180deg); }
+  .sheet-bar { grid-column: 1 / -1; height: 3px; border-radius: 2px; background: var(--field-hover); overflow: hidden; }
+  .sheet-bar i { display: block; height: 100%; width: 0; border-radius: 2px; background: var(--muted); transition: width .35s cubic-bezier(.22, 1, .36, 1), background-color .3s; }
+  .sheet-bar i.full { background: var(--ok); }
+  .panel { order: 2; max-height: 0; padding-block: 0; overflow: hidden; visibility: hidden; transition: max-height .32s cubic-bezier(.22, 1, .36, 1), padding .32s cubic-bezier(.22, 1, .36, 1), visibility 0s .32s; }
+  .inspector.open .panel { max-height: min(62dvh, 560px); padding-block: var(--s2) var(--s5); overflow: auto; visibility: visible; transition-delay: 0s; }
+  .tabs { order: 3; margin: 0 var(--s3) var(--s3); background: var(--field); }
+  .tabs button { min-height: 36px; }
 }
-.dia .t.end { text-anchor: end; }
+@media (max-width: 720px), (pointer: coarse) {
+  button { min-height: 40px; }
+  .icon-btn { width: 40px; height: 40px; min-height: 40px; }
+  .picks button, .seg label { min-height: 36px; }
+  .seg label { display: grid; place-items: center; }
+  .bank button { min-height: 40px; padding-inline: 16px; }
+  .opt { min-height: 52px; }
+  .q-actions button, .fc-actions button { min-height: 44px; }
+  select { min-height: 40px; }
+  .q-text { font-size: 17px; }
+}
+@media (max-width: 720px) {
+  body { padding-inline: var(--s3); }
+  .rail { display: none; }
+  body.has-rail { padding-left: var(--s3); }
+  body.has-rail .home-link { display: inline-grid; place-items: center; width: 40px; height: 40px; border-radius: var(--r-ctl); background: var(--raised); box-shadow: var(--ring-thumb); color: var(--coral); }
+  .home-link .rail-mark { width: 18px; height: 18px; }
+  .bar { padding: 8px 8px 8px 16px; gap: var(--s2); flex-wrap: nowrap; }
+  .brand { min-width: 0; }
+  .version { flex: none; }
+  .tabs button { padding: 0 4px; gap: 4px; }
+  .doc h2 { font-size: 20px; }
+  .card { padding: var(--s4) var(--s3); }
+  .fc { min-height: 240px; }
+}
+@media (max-width: 420px) { #quickQuiz .lbl { display: none; } #quickQuiz { width: 40px; padding: 0; } }
 
 </style>
 </head>
@@ -434,18 +517,26 @@ select:disabled { opacity: 1; }
 <header class="bar">
   <div class="brand">
     <h1>WL Lerntool</h1>
-    <span class="version">v0.1</span>
+    <span class="version">v0.2</span>
   </div>
   <span class="meta" id="meta"></span>
   <div class="export" role="group" aria-label="Hilfe und Quiz">
+    <a class="home-link" href="../../index.html" aria-label="iameric home"><svg class="rail-mark" viewBox="14.05 14.05 171.9 171.9" aria-hidden="true"><path d="M39.52 58.45a18.93 18.93 0 1 0 37.86 0a18.93 18.93 0 1 0 -37.86 0Z"/><path d="M105.15 58.45A36.4 36.4 0 1 1 141.55 94.85A46.7 46.7 0 0 0 94.85 141.55A36.4 36.4 0 1 1 58.45 105.15A46.7 46.7 0 0 0 105.15 58.45Z"/><path fill-rule="evenodd" d="M105.15 141.55a36.4 36.4 0 1 0 72.8 0a36.4 36.4 0 1 0 -72.8 0ZM117.53 134.27a16.74 16.74 0 1 0 33.49 0a16.74 16.74 0 1 0 -33.49 0Z"/></svg></a>
     <button class="icon-btn" id="openHelp" aria-label="So funktioniert's"><span class="msr" aria-hidden="true">question_mark</span></button>
-    <button class="primary fill" id="quickQuiz"><span class="msr" aria-hidden="true">quiz</span>Quiz starten</button>
+    <button class="primary fill" id="quickQuiz" aria-label="Quiz starten"><span class="msr" aria-hidden="true">quiz</span><span class="lbl">Quiz starten</span></button>
   </div>
 </header>
 
 <main class="workspace">
   <section class="stage-wrap" id="stage" aria-live="polite"></section>
-  <aside class="inspector">
+  <aside class="inspector" id="inspector">
+    <button class="sheet-head" id="sheetToggle" aria-expanded="false" aria-controls="panel">
+      <span class="sheet-grab" aria-hidden="true"></span>
+      <span class="sheet-main" id="sheetMain"></span>
+      <span class="sheet-meta" id="sheetMeta"></span>
+      <span class="msr sheet-chev" aria-hidden="true">expand_less</span>
+      <span class="sheet-bar" aria-hidden="true"><i id="sheetFill"></i></span>
+    </button>
     <div class="tabs" role="tablist">
       <button role="tab" data-tab="lernen"><span class="msr" aria-hidden="true">menu_book</span>Lernen</button>
       <button role="tab" data-tab="skizzen"><span class="msr" aria-hidden="true">account_tree</span>Skizzen</button>
@@ -455,6 +546,7 @@ select:disabled { opacity: 1; }
     <div class="panel" id="panel"></div>
   </aside>
 </main>
+<div class="scrim" id="scrim"></div>
 
 <dialog id="howtoDlg" aria-labelledby="howtoTitle">
 <section class="howto">
@@ -721,9 +813,9 @@ try { Object.assign(P, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (
 const save = () => { try { localStorage.setItem(KEY, JSON.stringify(P)); } catch (e) {} };
 
 // ---------- state of the three exercise kinds ----------
-const D = { id: 'wirtschaft', mode: 'view', level: 1, placed: {}, sel: null, mistakes: 0, flash: null, bank: [] };
-const Q = { scope: 'all', only: 'all', shuffle: true, list: [], i: 0, sel: null, picks: {}, pm: {}, checked: false, ok: false, results: {}, finished: false };
-const F = { scope: 'all', queue: [], flipped: false };
+const D = { id: 'wirtschaft', mode: 'view', level: 1, placed: {}, sel: null, mistakes: 0, flash: null, bank: [], pop: null, celebrate: false };
+const Q = { scope: 'all', only: 'all', shuffle: true, streak: 0, list: [], i: 0, sel: null, picks: {}, pm: {}, checked: false, ok: false, results: {}, finished: false };
+const F = { scope: 'all', queue: [], flipped: false, busy: false, fresh: false };
 
 const LEFT = new Set(['personal', 'facility', 'statistik', 'recht', 'rechnungswesen', 'pf', 'nachfrager', 'konkurrenz']);
 const topicName = id => TOPICS.find(t => t.id === id).short;
@@ -734,7 +826,7 @@ const maxLevel = id => Math.max(...blanksOf(id).map(b => b.lvl));
 const activeBlanks = () => D.mode === 'practice' ? blanksOf(D.id).filter(b => b.lvl <= D.level) : [];
 const firstOpen = () => { const b = activeBlanks().find(b => !D.placed[b.id]); return b ? b.id : null; };
 function resetDia() {
-  D.placed = {}; D.mistakes = 0; D.flash = null; D.solved = false;
+  D.placed = {}; D.mistakes = 0; D.flash = null; D.solved = false; D.pop = null; D.celebrate = false;
   D.bank = shuffle(activeBlanks().map(b => b.ans));
   D.sel = firstOpen();
 }
@@ -743,6 +835,7 @@ const diaDone = id => !!P.d[id + ':' + maxLevel(id)];
 function diagramSVG(id, o) {
   const d = DIAGRAMS[id], [W, H] = d.vb;
   let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(d.title)}"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" class="arr"/></marker></defs>`;
+  let bi = 0;
   for (const sh of d.shapes) {
     if (sh.k === 'rect') s += `<rect class="${sh.c}" x="${sh.x}" y="${sh.y}" width="${sh.w}" height="${sh.h}" rx="${sh.r || 0}"/>`;
     else if (sh.k === 'ell') s += `<ellipse class="${sh.c}" cx="${sh.cx}" cy="${sh.cy}" rx="${sh.rx}" ry="${sh.ry}"/>`;
@@ -752,9 +845,9 @@ function diagramSVG(id, o) {
       const act = o.practice && sh.lvl <= o.level, filled = !act || o.placed[sh.id];
       const pill = sh.shape === 'pill', rx = pill ? sh.h / 2 : 6;
       if (sh.shape === 'node' || pill) s += `<rect class="box" x="${sh.x}" y="${sh.y}" width="${sh.w}" height="${sh.h}" rx="${pill ? sh.h / 2 : 8}"/>`;
-      const cls = 'blank' + (act ? (filled ? ' done' : (o.sel === sh.id ? ' sel' : '')) : ' static') + (o.flash && o.flash.blank === sh.id ? ' wrong' : '');
+      const cls = 'blank' + (act ? (filled ? ' done' : (o.sel === sh.id ? ' sel' : '')) : ' static') + (o.flash && o.flash.blank === sh.id ? ' wrong' : '') + (o.pop === sh.id ? ' pop' : '') + (o.wave && act ? ' wave' : '');
       const attrs = act && !filled ? ` tabindex="0" role="button" aria-label="Lücke ${esc(topicName(d.topic))}"` : '';
-      s += `<g class="${cls}" data-blank="${sh.id}"${attrs}><rect class="bg" x="${sh.x}" y="${sh.y}" width="${sh.w}" height="${sh.h}" rx="${rx}"/>`;
+      s += `<g class="${cls}" data-blank="${sh.id}" style="--i:${bi++}"${attrs}><rect class="bg" x="${sh.x}" y="${sh.y}" width="${sh.w}" height="${sh.h}" rx="${rx}"/>`;
       const cy = sh.y + sh.h / 2;
       if (!filled) s += `<text class="q" x="${sh.x + sh.w / 2}" y="${cy + 5}">?</text>`;
       else {
@@ -773,8 +866,9 @@ function attempt(ans, target) {
   const b = activeBlanks().find(b => b.id === (target || D.sel || firstOpen()));
   if (!b || D.placed[b.id]) return;
   if (b.ans === ans) {
-    D.placed[b.id] = true; D.sel = firstOpen();
-    if (!D.sel) { const k = D.id + ':' + D.level, prev = P.d[k]; P.d[k] = { best: prev ? Math.min(prev.best, D.mistakes) : D.mistakes }; save(); }
+    D.placed[b.id] = true; D.sel = firstOpen(); D.pop = b.id; setTimeout(() => { if (D.pop === b.id) D.pop = null; }, 700);
+    if (!D.sel) {
+      D.celebrate = true; setTimeout(() => { D.celebrate = false; }, 1600); const k = D.id + ':' + D.level, prev = P.d[k]; P.d[k] = { best: prev ? Math.min(prev.best, D.mistakes) : D.mistakes }; save(); }
   } else {
     D.mistakes++; D.flash = { chip: ans, blank: b.id };
     setTimeout(() => { D.flash = null; renderStage(); }, 420);
@@ -794,7 +888,7 @@ function startQuiz(wrongOnly) {
   if (wrongOnly) list = list.filter(q => Q.results[q.id] === false);
   else if (Q.only === 'open') list = list.filter(q => P.q[q.id] !== 1);
   Q.list = (Q.shuffle ? shuffle(list) : list).map(prep);
-  Q.i = 0; Q.finished = false; Q.results = {}; clearQ();
+  Q.i = 0; Q.finished = false; Q.results = {}; Q.streak = 0; clearQ();
 }
 const clearQ = () => { Q.sel = null; Q.picks = {}; Q.pm = {}; Q.checked = false; Q.ok = false; };
 const cur = () => Q.list[Q.i];
@@ -804,7 +898,7 @@ function checkQ() {
   if (q.k === 'mc') ok = Q.sel === q.a;
   else if (q.k === 'multi') { const p = Object.keys(Q.picks).filter(k => Q.picks[k]).map(Number).sort((a, b) => a - b); ok = p.length === q.a.length && p.every((v, i) => v === q.a[i]); }
   else ok = q.items.every((it, i) => Q.pm[i] === it[1]);
-  Q.checked = true; Q.ok = ok; Q.results[q.id] = ok; P.q[q.id] = ok ? 1 : 0; save(); render();
+  Q.streak = ok ? Q.streak + 1 : 0; Q.checked = true; Q.ok = ok; Q.results[q.id] = ok; P.q[q.id] = ok ? 1 : 0; save(); render();
 }
 function nextQ() { if (Q.i + 1 >= Q.list.length) Q.finished = true; else { Q.i++; clearQ(); } render(); }
 
@@ -820,12 +914,22 @@ const count = o => Object.values(o).filter(Boolean).length;
 const qRight = () => QUESTIONS.filter(q => P.q[q.id] === 1).length;
 
 function bar(label, a, b) {
-  return `<div class="stat"><div class="stat-head"><span>${label}</span><output>${a} / ${b}</output></div><div class="bar-track"><div class="bar-fill" style="width:${b ? a / b * 100 : 0}%"></div></div></div>`;
+  return `<div class="stat"><div class="stat-head"><span>${label}</span><output>${a} / ${b}</output></div><div class="bar-track"><div class="bar-fill${b && a >= b ? ' full' : ''}" style="width:${b ? a / b * 100 : 0}%"></div></div></div>`;
 }
 const seg = (name, act, opts, val) => `<div class="seg" role="radiogroup">${opts.map(([v, l]) => `<label><input type="radio" name="${name}" data-act="${act}" value="${v}"${String(v) === String(val) ? ' checked' : ''}>${l}</label>`).join('')}</div>`;
 const group = (title, inner) => `<div class="group"><h3 class="label">${title}</h3>${inner}</div>`;
 
+function sheetInfo() {
+  const nd = Object.keys(DIAGRAMS).length, total = QUESTIONS.length + CARDS.length + nd, got = qRight() + count(P.c) + Object.keys(DIAGRAMS).filter(diaDone).length;
+  if (P.tab === 'lernen') return [TOPICS.find(t => t.id === P.topic).title, Math.round(got / total * 100) + ' % gelernt', got / total];
+  if (P.tab === 'skizzen') { const act = activeBlanks(), n = count(D.placed); return [DIAGRAMS[D.id].title, D.mode === 'practice' ? `${n}/${act.length}` : 'Ansehen', act.length ? n / act.length : 0]; }
+  if (P.tab === 'fragen') { const n = Q.list.length, done = Object.keys(Q.results).length; return [!n ? 'Nichts offen' : Q.finished ? 'Ergebnis' : `Frage ${Q.i + 1} von ${n}`, `${Object.values(Q.results).filter(Boolean).length} richtig`, n ? done / n : 0]; }
+  return [`${F.queue.length} offen`, `${count(P.c)}/${CARDS.length} gewusst`, count(P.c) / CARDS.length];
+}
 function renderMeta() {
+  const [main, meta, frac] = sheetInfo();
+  $('sheetMain').textContent = main; $('sheetMeta').textContent = meta;
+  const fill = $('sheetFill'); fill.style.width = Math.round(frac * 100) + '%'; fill.classList.toggle('full', frac >= 1);
   $('meta').textContent = `Fragen ${qRight()}/${QUESTIONS.length} · Karten ${count(P.c)}/${CARDS.length}`;
   document.querySelectorAll('.tabs [data-tab]').forEach(b => b.setAttribute('aria-selected', b.dataset.tab === P.tab));
 }
@@ -862,16 +966,21 @@ function renderPanel() {
 
 function renderStage() {
   const st = $('stage');
+  const keep = P.tab === 'skizzen' && st.querySelector('.dia') ? st.querySelector('.dia').scrollLeft : null;
   if (P.tab === 'lernen') {
     st.innerHTML = `<div class="doc">${DOC[P.topic].replace(/\{\{dia:(\w+)\}\}/g, (m, id) => diaBlock(id))}</div>`;
   } else if (P.tab === 'skizzen') {
     const d = DIAGRAMS[D.id], act = activeBlanks(), n = count(D.placed), complete = D.mode === 'practice' && act.length && !firstOpen();
     let h = `<div class="st-head"><h2 class="st-title">${esc(d.title)}</h2>${D.mode === 'practice' ? `<span class="meta" style="display:inline">${n}/${act.length} · ${D.mistakes} Fehler</span>` : ''}</div>`;
-    h += `<div class="st-body"><div class="dia">${diagramSVG(D.id, { practice: D.mode === 'practice', level: D.level, placed: D.placed, sel: D.sel, flash: D.flash })}</div>`;
+    h += `<div class="st-body"><div class="dia">${diagramSVG(D.id, { practice: D.mode === 'practice', level: D.level, placed: D.placed, sel: D.sel, flash: D.flash, pop: D.pop, wave: D.celebrate })}</div>`;
     if (complete && D.solved) h += `<p class="note"><span class="msr" aria-hidden="true">visibility</span>Die Lösung wird angezeigt. Starte neu, um selbst zu beschriften.</p>`;
-    else if (complete) h += `<p class="note ok"><span class="msr" aria-hidden="true">check_circle</span>Geschafft: alle ${act.length} Lücken gefüllt, ${D.mistakes} Fehlversuche.</p>`;
+    else if (complete) h += `<p class="note ok pop-in"><span class="msr" aria-hidden="true">check_circle</span>Geschafft: alle ${act.length} Lücken gefüllt, ${D.mistakes} Fehlversuche.</p>`;
     else if (D.mode === 'practice') h += `<div class="bank" id="bank">${D.bank.filter(a => !act.some(b => b.ans === a && D.placed[b.id])).map(a => `<button draggable="true" data-chip="${esc(a)}"${D.flash && D.flash.chip === a ? ' class="wrong"' : ''}>${esc(a)}</button>`).join('')}</div>`;
     st.innerHTML = h + '</div>';
+    const dia = st.querySelector('.dia');
+    if (keep) dia.scrollLeft = keep;
+    const sg = dia.querySelector('g.blank.sel');
+    if (sg && dia.scrollWidth > dia.clientWidth) { const r = sg.getBoundingClientRect(), c = dia.getBoundingClientRect(); dia.scrollTo({ left: dia.scrollLeft + r.left + r.width / 2 - (c.left + c.width / 2), behavior: keep == null ? 'auto' : 'smooth' }); }
   } else if (P.tab === 'fragen') st.innerHTML = renderQuiz();
   else st.innerHTML = renderCards();
 }
@@ -881,8 +990,8 @@ function renderQuiz() {
   if (Q.finished) {
     const n = Q.list.length, ok = Q.list.filter(q => Q.results[q.id]).length, wrong = Q.list.filter(q => !Q.results[q.id]);
     return `<div class="result"><div class="st-head"><h2 class="st-title">Ergebnis</h2></div>
-      <div class="score"><b>${ok} / ${n}</b><span>${Math.round(ok / n * 100)} % richtig</span></div>
-      <div class="bar-track"><div class="bar-fill" style="width:${ok / n * 100}%"></div></div>
+      <div class="score${ok / n >= .8 ? ' good' : ''}"><b>${ok} / ${n}</b><span>${Math.round(ok / n * 100)} % richtig</span></div>
+      <div class="segs" aria-hidden="true">${Q.list.map(x => `<i class="${Q.results[x.id] ? 'ok' : 'no'}"></i>`).join('')}</div>
       ${wrong.length ? `<h3 class="label">Nochmal anschauen</h3><div class="wrong-list">${wrong.map(q => `<div class="wrong-item"><b>${esc(q.q)}</b><span>${esc(q.e)}</span></div>`).join('')}</div>` : `<p class="note ok"><span class="msr" aria-hidden="true">check_circle</span>Alles richtig.</p>`}
       <div class="q-actions">${wrong.length ? `<button class="primary" data-act="qwrong"><span class="msr" aria-hidden="true">replay</span>Falsche wiederholen</button>` : ''}<button data-act="qrestart"><span class="msr" aria-hidden="true">restart_alt</span>Neu starten</button></div></div>`;
   }
@@ -894,7 +1003,7 @@ function renderQuiz() {
       const picked = q.k === 'mc' ? Q.sel === i : !!Q.picks[i], right = q.k === 'mc' ? q.a === i : q.a.includes(i);
       let cls = 'opt', icon = '';
       if (Q.checked) { if (right) { cls += picked ? ' right' : ' right-hint'; if (picked) icon = 'check'; } else if (picked) { cls += ' miss'; icon = 'close'; } }
-      return `<button class="${cls}" data-act="opt" data-i="${i}" aria-pressed="${picked}"${Q.checked ? ' disabled' : ''}><span class="k">${i + 1}</span><span>${esc(t)}</span>${icon ? `<span class="msr" aria-hidden="true">${icon}</span>` : ''}</button>`;
+      return `<button class="${cls}" data-act="opt" data-i="${i}" aria-pressed="${picked}"${Q.checked ? ' disabled' : ''}><span class="k">${icon ? `<span class="msr" aria-hidden="true">${icon}</span>` : i + 1}</span><span>${esc(t)}</span></button>`;
     }).join('')}</div>`;
   } else {
     body = `<div class="pairs">${q.items.map((it, i) => {
@@ -904,24 +1013,32 @@ function renderQuiz() {
   }
   const canCheck = q.k === 'multi' ? Object.values(Q.picks).some(Boolean) : q.items && q.items.every((_, i) => Q.pm[i]);
   const last = Q.i + 1 >= n;
-  return `<div class="q-wrap"><div class="st-head"><h2 class="st-title">Frage ${Q.i + 1} von ${n}</h2><span class="meta" style="display:inline">${topicName(q.topic)}</span></div>
-    <div class="q-prog"><div class="bar-track"><div class="bar-fill" style="width:${(Q.i + (Q.checked ? 1 : 0)) / n * 100}%"></div></div></div>
+  return `<div class="q-wrap"><div class="st-head"><h2 class="st-title">Frage ${Q.i + 1} von ${n}</h2>${Q.streak >= 2 ? `<span class="streak" aria-label="${Q.streak} richtig in Folge"><span class="msr" aria-hidden="true">bolt</span>${Q.streak} in Folge</span>` : ''}<span class="meta" style="display:inline">${topicName(q.topic)}</span></div>
+    <div class="segs" role="img" aria-label="Frage ${Q.i + 1} von ${n}">${Q.list.map((x, j) => `<i class="${j === Q.i ? 'cur' : Q.results[x.id] === true ? 'ok' : Q.results[x.id] === false ? 'no' : ''}"></i>`).join('')}</div>
     <div class="q-kind">${kind}</div><p class="q-text">${esc(q.q)}</p>${body}
-    ${Q.checked ? `<p class="note ${Q.ok ? 'ok' : 'bad'}"><span class="msr" aria-hidden="true">${Q.ok ? 'check_circle' : 'cancel'}</span><span><b>${Q.ok ? 'Richtig.' : 'Nicht ganz.'}</b> ${esc(q.e)}</span></p>` : ''}
+    ${Q.checked ? `<p class="note pop-in ${Q.ok ? 'ok' : 'bad'}"><span class="msr" aria-hidden="true">${Q.ok ? 'check_circle' : 'cancel'}</span><span><b>${Q.ok ? 'Richtig.' : 'Nicht ganz.'}</b> ${esc(q.e)}</span></p>` : ''}
     <div class="q-actions">${Q.checked ? `<button class="primary" data-act="next">${last ? 'Ergebnis' : 'Weiter'}<span class="msr" aria-hidden="true">arrow_forward</span></button>` : (q.k === 'mc' ? '' : `<button class="primary" id="qCheck" data-act="check"${canCheck ? '' : ' disabled'}>Prüfen</button>`)}</div></div>`;
 }
 
+function cardAnswer(known) {
+  if (F.busy || !F.queue.length) return;
+  F.busy = true; const el = $('fc'); if (el) el.classList.add(known ? 'out-ok' : 'out-again');
+  setTimeout(() => {
+    if (known) { P.c[F.queue[0]] = 1; save(); F.queue.shift(); } else F.queue.push(F.queue.shift());
+    F.flipped = false; F.busy = false; F.fresh = true; render();
+  }, 260);
+}
 function renderCards() {
   if (!F.queue.length) return `<div class="empty"><span class="msr" style="font-size:32px;color:#7fd99a" aria-hidden="true">done_all</span><div class="big">Alle Karten gewusst</div><div>In dieser Auswahl ist nichts mehr offen.</div><button class="primary" data-act="freset">Alle wieder offen</button></div>`;
   const c = cardById(F.queue[0]);
   return `<div class="st-head"><h2 class="st-title">Karteikarten</h2><span class="meta" style="display:inline">${F.queue.length} offen</span></div>
-    <div class="fc-wrap"><div class="fc${F.flipped ? ' flipped' : ''}" id="fc" data-act="fflip" role="button" tabindex="0" aria-label="Karte umdrehen"><div class="fc-in">
+    <div class="fc-wrap"><div class="fc${F.flipped ? ' flipped' : ''}${F.fresh ? ' in' : ''}" id="fc" data-act="fflip" role="button" tabindex="0" aria-label="Karte umdrehen"><div class="fc-in">
       <div class="fc-face"><span class="fc-tag">${esc(topicName(c.topic))}</span><div class="fc-term">${esc(c.front)}</div><span class="fc-hint">Tippen zum Umdrehen</span></div>
       <div class="fc-face fc-back"><span class="fc-tag">${esc(c.front)}</span><div class="fc-def">${esc(c.back)}</div></div></div></div>
     <div class="fc-actions"><button data-act="fagain"><span class="msr" aria-hidden="true">replay</span>Nochmal</button><button class="primary" data-act="fknown"><span class="msr" aria-hidden="true">check</span>Gewusst</button></div></div>`;
 }
 
-function render() { renderMeta(); renderPanel(); renderStage(); }
+function render() { renderMeta(); renderPanel(); renderStage(); F.fresh = false; }
 
 // ---------- actions ----------
 const resetTimers = new WeakMap();
@@ -930,8 +1047,11 @@ function confirmThen(btn, fn) {
   btn.classList.add('confirm'); const txt = btn.lastChild; const old = txt.textContent; txt.textContent = 'Wirklich?';
   clearTimeout(resetTimers.get(btn)); resetTimers.set(btn, setTimeout(() => { btn.classList.remove('confirm'); txt.textContent = old; }, 3000));
 }
+function setSheet(open) {
+  $('inspector').classList.toggle('open', open); $('sheetToggle').setAttribute('aria-expanded', open); $('scrim').classList.toggle('show', open);
+}
 function setTab(t) {
-  P.tab = t; save();
+  P.tab = t; save(); setSheet(false);
   if (t === 'fragen' && !Q.list.length && !Q.finished) startQuiz();
   if (t === 'karten' && !F.queue.length) startCards();
   render(); window.scrollTo({ top: 0 });
@@ -960,8 +1080,8 @@ document.addEventListener('click', e => {
   else if (a === 'qwrong') { startQuiz(true); render(); }
   else if (a === 'qall') { Q.only = 'all'; startQuiz(); render(); }
   else if (a === 'fflip') { F.flipped = !F.flipped; $('fc').classList.toggle('flipped', F.flipped); }
-  else if (a === 'fknown') { P.c[F.queue[0]] = 1; save(); F.queue.shift(); F.flipped = false; render(); }
-  else if (a === 'fagain') { F.queue.push(F.queue.shift()); F.flipped = false; render(); }
+  else if (a === 'fknown') cardAnswer(true);
+  else if (a === 'fagain') cardAnswer(false);
   else if (a === 'fshuffle') { startCards(); render(); }
   else if (a === 'freset') { CARDS.forEach(c => { if (F.scope === 'all' || c.topic === F.scope) delete P.c[c.id]; }); save(); startCards(); render(); }
 });
@@ -986,6 +1106,7 @@ document.addEventListener('drop', e => { const b = e.target.closest && e.target.
 // keyboard
 document.addEventListener('keydown', e => {
   if (document.querySelector('dialog[open]')) return;
+  if (e.key === 'Escape' && $('inspector').classList.contains('open')) { setSheet(false); return; }
   const inField = e.target.closest && e.target.closest('select, input, textarea');
   const onBtn = e.target.closest && e.target.closest('button, [role=tab]');
   if (e.target.matches && e.target.matches('g.blank') && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); e.target.dispatchEvent(new MouseEvent('click', { bubbles: true })); return; }
@@ -996,12 +1117,14 @@ document.addEventListener('keydown', e => {
     else if (e.key === 'Enter' && !onBtn) { if (Q.checked) nextQ(); else if (q.k === 'multi' ? Object.values(Q.picks).some(Boolean) : q.k === 'match' && q.items.every((_, i) => Q.pm[i])) checkQ(); }
   } else if (P.tab === 'karten' && F.queue.length) {
     if (e.key === ' ' && !onBtn) { e.preventDefault(); F.flipped = !F.flipped; $('fc').classList.toggle('flipped', F.flipped); }
-    else if (e.key === 'ArrowLeft') { F.queue.push(F.queue.shift()); F.flipped = false; render(); }
-    else if (e.key === 'ArrowRight') { P.c[F.queue[0]] = 1; save(); F.queue.shift(); F.flipped = false; render(); }
+    else if (e.key === 'ArrowLeft') cardAnswer(false);
+    else if (e.key === 'ArrowRight') cardAnswer(true);
   }
 });
 
-// ---------- header, help ----------
+// ---------- bottom sheet (small screens), header, help ----------
+$('sheetToggle').onclick = () => setSheet(!$('inspector').classList.contains('open'));
+$('scrim').onclick = () => setSheet(false);
 $('quickQuiz').onclick = () => { Q.scope = 'all'; Q.only = 'all'; startQuiz(); setTab('fragen'); };
 const dlg = $('howtoDlg');
 $('openHelp').onclick = () => dlg.showModal();
