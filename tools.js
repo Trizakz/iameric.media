@@ -141,5 +141,25 @@ export const TOOLS = [
         ]
       }
     ]
+  },
+  {
+    "id": "wl-lerntool",
+    "title": "WL Lerntool",
+    "description": "Wirtschaftslehre lernen: Themen lesen, Skizzen beschriften, Fragen beantworten und Karteikarten üben.",
+    "version": "0.1",
+    "date": "2026-11-11",
+    "href": "tools/wl-lerntool/",
+    "thumb": null,
+    "changelog": [
+      {
+        "version": "0.1",
+        "date": "2026-11-11",
+        "title": "Erste Version",
+        "changes": [
+          "Unternehmen und ihre Umwelt, Abteilungen in einem Unternehmen",
+          "Zwei Skizzen zum Beschriften, Fragen mit Erklärung, Karteikarten"
+        ]
+      }
+    ]
   }
 ];

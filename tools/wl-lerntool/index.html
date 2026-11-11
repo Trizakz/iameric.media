@@ -1,0 +1,1025 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>WL Lerntool</title>
+<link rel="icon" href="../../favicon.svg">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Fira+Mono:wght@400;500&family=Unbounded:wght@600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@48,500,1,0&display=block">
+<style>
+/* Layout: a neutral-gray editor. Header with export on top; the 630x824 stage on the left, sized to fit the viewport; a tabbed inspector on the right. Stacks on phones. */
+:root {
+  /* iameric.media's "cobalt print" palette: ink and paper, cobalt for fills, coral for the logo */
+  --bg: #0d0e11;
+  --chrome: #17181c;    /* cards: header, inspector, dialogs */
+  --raised: #24262c;    /* the thumb of a choice, a secondary button */
+  --raised-hover: #2c2f36;
+  --field: #202227;     /* the track under fields and choices */
+  --field-hover: #272a30;
+  --line: #26282d;
+  --line-strong: #3d4048;
+  --fg: #eeeae0;
+  --muted: #a3a09a;
+  --faint: #77756f;
+  --accent: #4a6dff; /* the site's cobalt, a step lighter so white text and thin lines read on it */
+  --accent-hover: #5f80ff;
+  --accent-ink: #ffffff;
+  --accent-text: #8ea3ff; /* cobalt as text on the dark ground */
+  --accent-soft: rgba(74, 109, 255, .14);
+  --coral: #ff6b57;
+  --danger: #ff6b57;
+  /* a card: a hairline of light round it and a soft shadow under it; a thumb: the same, tighter */
+  --ring-card: 0 0 0 1px rgba(255, 255, 255, .07), 0 1px 2px rgba(0, 0, 0, .2), 0 4px 16px rgba(0, 0, 0, .16);
+  --shadow-pop: 0 0 0 1px rgba(255, 255, 255, .06), 0 2px 4px rgba(0, 0, 0, .2), 0 8px 24px rgba(0, 0, 0, .28), 0 24px 48px rgba(0, 0, 0, .2);
+  --ring-thumb: 0 0 0 1px rgba(255, 255, 255, .1), 0 1px 2px rgba(0, 0, 0, .3);
+  --r-card: 12px; --r-ctl: 8px; --r-chip: 6px;
+  --font-ui: "DM Sans", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "Fira Mono", ui-monospace, Menlo, Consolas, monospace;
+  --font-brand: "Unbounded", var(--font-mono); /* iameric's wordmark face: the tool's name only */
+  /* spacing scale (4-unit base) */
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 24px; --s6: 32px; --s7: 48px;
+  --top: calc(env(safe-area-inset-top, 0px) + 16px);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+/* stable gutters: the page and the inspector reserve their scrollbar's room, so nothing shifts when one appears */
+html { scrollbar-color: #3d4048 transparent; scrollbar-gutter: stable; }
+::selection { background: rgba(74, 109, 255, .4); color: #fff; }
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  line-height: 1.4;
+  caret-color: var(--accent);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 16px 24px;
+}
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.msr { font-family: "Material Symbols Rounded"; font-size: 18px; line-height: 1; font-weight: normal; font-style: normal; letter-spacing: normal; text-transform: none; white-space: nowrap; font-feature-settings: "liga"; -webkit-font-smoothing: antialiased; -webkit-user-select: none; user-select: none; }
+
+/* Header */
+.bar { max-width: 1160px; margin: 0 auto var(--s4); display: flex; flex-wrap: wrap; align-items: center; gap: var(--s2) var(--s4);
+  background: var(--chrome); border-radius: var(--r-card); box-shadow: var(--ring-card); padding: 8px 8px 8px 16px; }
+.brand { display: flex; align-items: center; gap: var(--s3); margin-right: auto; min-width: 0; }
+h1 { font-family: var(--font-brand); font-size: 14px; font-weight: 600; letter-spacing: -0.01em; line-height: 1; margin: 0; white-space: nowrap; }
+/* file names from steam.design, always in the accent so they read as "this exact file" */
+.file { font-family: var(--font-mono); font-weight: 500; color: var(--fg); overflow-wrap: anywhere; }
+.version { font-family: var(--font-mono); font-size: 11px; line-height: 1; color: var(--muted); border: 1px solid var(--line-strong); border-radius: 4px; padding: 3px 4px; }
+.brand { gap: var(--s2) var(--s3); }
+.brand h1 + .version { margin-left: calc(var(--s2) - var(--s3)); }
+.meta { font-family: var(--font-mono); font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.export { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s2); }
+.toast { position: fixed; z-index: 50; left: 50%; bottom: 24px; transform: translateX(-50%); max-width: min(440px, calc(100vw - 32px));
+  padding: 12px 16px; border-radius: var(--r-ctl); background: var(--raised); border: 1px solid var(--danger); color: var(--fg); font-size: 13px;
+  box-shadow: var(--shadow-pop); animation: hint-in .25s cubic-bezier(.22, 1, .36, 1); }
+.toast:empty { display: none; }
+.inspector { position: sticky; top: var(--top); max-height: max(420px, calc(100dvh - 88px)); display: flex; flex-direction: column; min-width: 0;
+  background: var(--chrome); border-radius: var(--r-card); box-shadow: var(--ring-card); overflow: hidden; }
+.tabs { display: flex; gap: 2px; margin: 16px 16px 0; padding: 2px; border-radius: var(--r-ctl); background: var(--field); }
+.tabs button { flex: 1 1 0; display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 28px; padding: 0 8px; border: 0;
+  border-radius: var(--r-chip); background: transparent; box-shadow: none; color: var(--muted); font-weight: 500; font-size: 13px; transition: color .2s, background-color .2s, box-shadow .2s; }
+.tabs button:hover { color: var(--fg); background: transparent; }
+.tabs button[aria-selected="true"] { color: var(--fg); background: var(--raised); box-shadow: var(--ring-thumb); }
+.panel { overflow: auto; overscroll-behavior: contain; scrollbar-gutter: stable; padding: var(--s4); display: flex; flex-direction: column; }
+.group { display: flex; flex-direction: column; gap: var(--s4); }
+.group > .label:first-child { margin-bottom: calc(var(--s2) - var(--s4)); } /* a section's name sits 8 above what it names */
+.group + .group, .panel-body > .group + .group { margin-top: var(--s7); padding-top: 0; border-top: 0; }
+.label { font-size: 13px; font-weight: 600; color: var(--fg); margin: 0; }
+.hint { color: var(--muted); font-size: 13px; margin: 0; max-width: 60ch; }
+
+/* Controls */
+button, select, input[type=text], textarea { font: inherit; color: var(--fg); }
+textarea { width: 100%; min-height: 28px; background: var(--field); border: 0; border-radius: var(--r-chip); padding: 4px 8px; resize: vertical; line-height: 1.4; font-size: 13px; transition: background-color .15s; }
+textarea:hover { background: var(--field-hover); }
+textarea::placeholder { color: var(--faint); }
+textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+/* every button lays its icon and label out on one optical middle line; lists of choices align their labels to the left */
+button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; line-height: 1.15;
+  background: var(--raised); border: 0; border-radius: 999px; padding: 0 12px; min-height: 28px; cursor: pointer; font-weight: 500; font-size: 13px;
+  box-shadow: var(--ring-thumb); transition: background-color .15s ease-out, box-shadow .15s ease-out, color .15s ease-out; }
+button .msr { flex: none; }
+button:hover { background: var(--raised-hover); }
+button:active { background: var(--raised); translate: 0 .5px; }
+button:disabled { opacity: .45; cursor: not-allowed; }
+button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+button.primary { background: var(--accent); color: var(--accent-ink); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .16), 0 1px 2px rgba(0, 0, 0, .3); }
+button.primary:hover { background: var(--accent-hover); }
+button.danger { color: var(--danger); }
+button.danger.confirm { background: var(--danger); color: #0d0e11; box-shadow: 0 0 0 3px rgba(255,107,87,.3); }
+.icon-btn { width: 28px; height: 28px; min-height: 28px; padding: 0; display: inline-grid; place-items: center; border-radius: var(--r-ctl); }
+.icon-btn[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent-text); box-shadow: inset 0 0 0 1px rgba(74, 109, 255, .5); }
+.flip-v .msr { transform: rotate(90deg); }
+input[type=text], select { width: 100%; min-height: 28px; background: var(--field); border: 0; border-radius: var(--r-chip); padding: 4px 8px; font-size: 13px; transition: background-color .15s; }
+input[type=text]:hover, select:hover { background: var(--field-hover); }
+input[type=text]::placeholder { color: var(--faint); }
+/* a slim track on the field colour, cobalt up to the thumb (--fill, kept current by the script at the end), a paper thumb */
+input[type=range] { width: 100%; height: 16px; margin: 0; background: transparent; appearance: none; -webkit-appearance: none; cursor: pointer; }
+input[type=range]::-webkit-slider-runnable-track { height: 4px; border-radius: 4px; background: linear-gradient(90deg, var(--muted) var(--fill, 0%), var(--field-hover) var(--fill, 0%)); }
+input[type=range]::-moz-range-track { height: 4px; border-radius: 4px; background: var(--field-hover); }
+input[type=range]::-moz-range-progress { height: 4px; border-radius: 4px; background: var(--muted); }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; margin-top: -4px; border-radius: 50%; background: var(--fg); box-shadow: 0 0 0 1px rgba(0,0,0,.25), 0 1px 3px rgba(0,0,0,.4); transition: scale .15s; }
+input[type=range]::-moz-range-thumb { width: 14px; height: 14px; border: 0; border-radius: 50%; background: var(--fg); box-shadow: 0 0 0 1px rgba(0,0,0,.25), 0 1px 3px rgba(0,0,0,.4); }
+input[type=range]:hover::-webkit-slider-thumb { scale: 1.1; }
+/* the reset dot sits under the track at the default value (left set in JS, thumb half-width 8px) */
+.range { position: relative; padding-bottom: 12px; }
+.reset-dot { position: absolute; bottom: 0; width: 6px; height: 6px; min-height: 0; padding: 0; border: 0; border-radius: 50%; box-shadow: none;
+  background: var(--line-strong); transform: translateX(-50%); }
+.reset-dot::before { content: ""; position: absolute; inset: -6px; }
+.reset-dot.changed { background: var(--accent); }
+.reset-dot:hover:not(:disabled) { background: var(--accent-hover); transform: translateX(-50%) scale(1.3); }
+.reset-dot:disabled { opacity: .35; cursor: default; }
+input[type=color] { width: 30px; height: 28px; padding: 3px; border: 0; border-radius: var(--r-chip); background: var(--field); cursor: pointer; }
+.field { display: flex; flex-direction: column; gap: var(--s2); min-width: 0; } /* a label sits 8 from its field */
+.field > label, .field-head label { color: var(--muted); font-size: 12px; }
+.field-head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--s2); }
+output { font-family: var(--font-mono); font-size: 12px; color: var(--fg); font-variant-numeric: tabular-nums; }
+.pair { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--s2); }
+.check { display: flex; gap: var(--s2); align-items: center; cursor: pointer; }
+.check input { accent-color: var(--accent); width: 15px; height: 15px; margin: 0; }
+.row { display: flex; gap: var(--s2); flex-wrap: wrap; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+
+a { color: var(--accent-text); text-decoration: none; transition: color .15s; } /* no underlines, as on the website */
+a:hover { color: var(--fg); }
+code { font-family: var(--font-mono); font-size: 12px; }
+
+/* Export result */
+dialog { width: min(420px, calc(100vw - 32px)); margin-top: max(16px, 6dvh); max-height: calc(94dvh - 16px); padding: var(--s5); border: 0; border-radius: var(--r-card);
+  background: var(--chrome); color: var(--fg); box-shadow: var(--shadow-pop); }
+dialog[open] { display: flex; flex-direction: column; gap: var(--s3); }
+dialog::backdrop { background: rgba(0,0,0,.6); }
+dialog[open] { animation: pop-in .2s cubic-bezier(.22, 1, .36, 1); }
+dialog[open]::backdrop { animation: fade-in .2s ease-out; }
+@keyframes fade-in { from { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { dialog[open], dialog[open]::backdrop, .hint-pop { animation: none; } }
+.dlg-head { display: flex; align-items: center; gap: var(--s2); }
+.dlg-head h2 { font-size: 14px; font-weight: 600; letter-spacing: -0.01em; margin: 0 auto 0 0; }
+dialog img { width: 100%; border-radius: 4px; display: block; border: 1px solid var(--line); }
+dialog p { margin: 0; }
+.mono { font-family: var(--font-mono); font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 2px; padding: 2px; border-radius: var(--r-ctl); background: var(--field); }
+.seg label { position: relative; text-align: center; padding: 4px 0; border-radius: var(--r-chip); cursor: pointer; color: var(--muted); font-weight: 500; font-size: 13px; transition: color .2s, background-color .2s, box-shadow .2s; }
+
+.seg input { position: absolute; opacity: 0; pointer-events: none; }
+.seg label:hover { color: var(--fg); }
+.seg label:has(input:checked) { background: var(--raised); color: var(--fg); box-shadow: var(--ring-thumb); }
+.seg label:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: -2px; }
+.size-note { font-size: 13px; min-height: 1.4em; }
+.error { color: var(--danger); font-size: 13px; }
+.error:empty { display: none; }
+/* View switch in the header and the How to use page */
+/* the "?" in the header and the hint that points at it once the tool has opened */
+.help-wrap { position: relative; display: flex; }
+.hint-pop { position: absolute; z-index: 20; top: calc(100% + 10px); left: 0; width: max-content; max-width: min(280px, calc(100vw - 32px));
+  display: flex; align-items: center; gap: var(--s2); padding: 8px 8px 8px 12px; border-radius: var(--r-ctl);
+  background: var(--accent); color: var(--accent-ink); font-weight: 600; font-size: 13px; line-height: 1.3;
+  box-shadow: var(--shadow-pop); transform-origin: 15px 0; animation: pop-in .22s cubic-bezier(.22, 1, .36, 1); }
+.hint-pop::before { content: ""; position: absolute; top: -5px; left: 10px; width: 10px; height: 10px; background: var(--accent); transform: rotate(45deg); }
+.hint-pop button { position: relative; border: 0; width: 24px; height: 24px; min-height: 24px; color: var(--accent-ink); background: transparent; box-shadow: none; }
+.hint-pop button:hover { background: rgba(20,18,24,.12); }
+.hint-pop .go { width: auto; padding: 0; text-decoration: none; font-weight: 700; }
+.hint-pop .go:hover { background: none; }
+#openHelp.calling { border-color: var(--accent); color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+@keyframes hint-in { from { opacity: 0; transform: translateY(4px); } }
+@keyframes pop-in { from { opacity: 0; scale: .94; } }
+#howtoDlg { width: min(880px, calc(100vw - 32px)); padding: 0; }
+#howtoDlg[open] { display: block; }
+/* How it works: the title, a line and the button on the left; the steps on the right as one numbered line, each
+   number on a small disc, the discs joined by a hairline */
+.howto { position: relative; display: grid; grid-template-columns: minmax(0, 260px) minmax(0, 1fr); gap: var(--s6); padding: var(--s6); font-size: 14px; line-height: 1.5; }
+#closeHelp { position: absolute; top: var(--s4); right: var(--s4); }
+.howto-head { display: flex; flex-direction: column; align-items: flex-start; gap: var(--s3); }
+.howto h2 { font: 600 22px/1.15 var(--font-brand); letter-spacing: -0.03em; margin: 0; text-wrap: balance; }
+.lede { margin: 0 0 var(--s2); color: var(--muted); font-size: 14px; }
+#startEditing { min-height: 36px; padding-inline: 16px; }
+.steps { position: relative; margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: var(--s5); }
+.steps > li { position: relative; display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: var(--s3); }
+.steps > li:not(:last-child)::before { content: ""; position: absolute; left: 13.5px; top: 32px; bottom: calc(-1 * var(--s5) + 4px); width: 1px; background: var(--line-strong); }
+.step-n { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--raised); box-shadow: var(--ring-thumb); color: var(--fg); font: 500 12px/1 var(--font-mono); }
+.howto h3 { font-size: 14px; font-weight: 600; margin: 4px 0 var(--s1); }
+.howto p { margin: 0; color: var(--muted); max-width: 60ch; }
+.howto b { color: var(--fg); font-weight: 600; }
+.kinds { display: grid; gap: var(--s1); margin: var(--s3) 0 0; padding: var(--s3); border-radius: var(--r-ctl); background: var(--field); }
+.kinds > div { display: grid; grid-template-columns: 140px minmax(0, 1fr); gap: var(--s3); align-items: baseline; }
+.kinds dt { color: var(--fg); font-size: 13px; }
+.kinds dd { margin: 0; display: flex; flex-wrap: wrap; gap: 4px var(--s2); font-size: 12px; }
+@media (max-width: 760px) { .howto { grid-template-columns: minmax(0, 1fr); padding: var(--s5) var(--s4); } .kinds > div { grid-template-columns: minmax(0, 1fr); gap: 0; } }
+@media (prefers-reduced-motion: reduce) { button, .chev { transition: none; }  }
+
+/* the website rail (only when the editor runs on iameric.media, see the script at the end): a slim bar on the left
+   with the way back to the home page and to all tools */
+.rail { position: fixed; z-index: 60; left: 0; top: 0; bottom: 0; width: 56px; display: flex; flex-direction: column; align-items: center;
+  gap: var(--s2); padding: calc(env(safe-area-inset-top, 0px) + 12px) 0 12px; background: var(--chrome); border-right: 1px solid var(--line); }
+.rail a { position: relative; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 10px; color: var(--muted); text-decoration: none;
+  transition: background-color .2s, color .2s; }
+.rail a .msr { font-size: 22px; transition: transform .45s cubic-bezier(.16, 1, .3, 1); }
+.rail a:hover, .rail a:focus-visible { background: var(--raised); color: var(--fg); }
+.rail a:hover .msr { transform: scale(1.12); }
+.rail a:active .msr { transform: scale(.92); }
+/* the label slides out to the right on hover */
+.rail a::after { content: attr(data-label); position: absolute; left: calc(100% + 10px); top: 50%; translate: -6px -50%; opacity: 0; pointer-events: none;
+  background: var(--accent); color: var(--accent-ink); font: 600 12px/1 var(--font-ui); padding: 8px 8px; border-radius: 6px; white-space: nowrap;
+  transition: opacity .2s, translate .35s cubic-bezier(.16, 1, .3, 1); }
+.rail a:hover::after, .rail a:focus-visible::after { opacity: 1; translate: 0 -50%; }
+.rail-line { width: 24px; height: 1px; background: var(--line); }
+/* the iameric logo at the rail's top leads home */
+.rail-mark { width: 22px; height: 22px; fill: currentColor; transition: scale .45s cubic-bezier(.16, 1, .3, 1); }
+.rail .rail-home { color: var(--coral); }
+.rail .rail-home:hover, .rail .rail-home:focus-visible { color: var(--coral); }
+.rail .rail-home:active .rail-mark { scale: .92; }
+/* Ko-fi at the rail's foot, lit in its own red on hover */
+.rail-foot { margin-top: auto; display: flex; flex-direction: column; align-items: center; gap: var(--s2); }
+.rail-logo { width: 18px; height: 18px; fill: currentColor; transition: transform .45s cubic-bezier(.16, 1, .3, 1); }
+.rail a:hover .rail-logo { transform: scale(1.12); }
+.rail a:active .rail-logo { transform: scale(.92); }
+.rail .rail-kofi:hover, .rail .rail-kofi:focus-visible { color: #ff5e5b; }
+/* the Ko-fi notice: the help hint's pill, beside the Ko-fi button, its arrow pointing left at it */
+.rail-foot { position: relative; }
+.kofi-pop { top: auto; bottom: 8px; left: calc(100% + 12px); transform-origin: 0 calc(100% - 15px); }
+.kofi-pop::before { top: auto; bottom: 10px; left: -5px; }
+.rail .kofi-pop .go { display: inline; width: auto; height: auto; border-radius: 0; color: inherit; background: none; } /* not one of the rail's icon links */
+.rail .kofi-pop .go::after { content: none; }
+.rail-kofi.calling { color: #ff5e5b; box-shadow: 0 0 0 3px rgba(255, 94, 91, .25); }
+body.has-rail { padding-left: calc(56px + max(16px, env(safe-area-inset-left, 0px))); }
+
+/* WL Lerntool: layout and parts that belong to this tool (the base is taken from the tool UI blueprint) */
+.workspace { max-width: 1160px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: var(--s4); align-items: start; }
+.stage-wrap { min-width: 0; display: flex; flex-direction: column; gap: var(--s4); padding: var(--s4); background: #0a0b0d; border-radius: var(--r-card); box-shadow: var(--ring-card); min-height: 480px; }
+.inspector { position: sticky; top: var(--top); max-height: max(420px, calc(100dvh - 88px)); }
+.tabs button { flex: 1 1 auto; padding: 0 6px; gap: 4px; }
+.panel { gap: 0; }
+.panel .group + .group { margin-top: var(--s6); }
+.help-wrap .icon-btn { flex: none; }
+button.ghost { background: transparent; box-shadow: none; color: var(--muted); }
+button.ghost:hover { background: var(--raised); color: var(--fg); }
+
+/* stage header: what is shown and its actions */
+.st-head { display: flex; align-items: center; gap: var(--s2); flex-wrap: wrap; }
+.st-title { margin: 0 auto 0 0; font-size: 16px; font-weight: 700; letter-spacing: -0.01em; min-width: 0; }
+.st-sub { margin: 0; color: var(--muted); font-size: 13px; }
+.st-body { display: flex; flex-direction: column; gap: var(--s4); min-width: 0; }
+
+/* reading view */
+.doc { display: flex; flex-direction: column; gap: var(--s4); max-width: 760px; width: 100%; margin: 0 auto; }
+.doc h2 { font: 600 22px/1.15 var(--font-brand); letter-spacing: -0.03em; margin: var(--s2) 0 0; text-wrap: balance; }
+.doc .lede { margin: 0; color: var(--muted); font-size: 14px; }
+.card { padding: var(--s4); border-radius: var(--r-card); background: var(--chrome); box-shadow: var(--ring-card); display: flex; flex-direction: column; gap: var(--s3); min-width: 0; }
+.card > .label { font-size: 14px; }
+.card p { margin: 0; font-size: 14px; line-height: 1.5; color: var(--muted); }
+.card p b, .card li b { color: var(--fg); font-weight: 600; }
+.card ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: var(--s2); }
+.card li { font-size: 14px; line-height: 1.5; color: var(--muted); padding-left: var(--s4); position: relative; }
+.card li::before { content: ""; position: absolute; left: 2px; top: .62em; width: 5px; height: 5px; border-radius: 50%; background: var(--line-strong); }
+.card li ul { margin-top: var(--s2); }
+.quote { margin: 0; padding: var(--s3) var(--s4); border-radius: var(--r-ctl); background: var(--accent-soft); box-shadow: inset 0 0 0 1px rgba(74, 109, 255, .35); color: var(--fg); font-size: 14px; line-height: 1.5; }
+.def { margin: 0; padding: var(--s3) var(--s4); border-radius: var(--r-ctl); background: var(--field); color: var(--fg); font-size: 14px; line-height: 1.5; }
+.tag { display: inline-block; padding: 3px 8px; border-radius: var(--r-chip); background: var(--field); color: var(--fg); font-size: 13px; }
+.cmp { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 14px; }
+.cmp th, .cmp td { text-align: left; padding: var(--s3) var(--s3); vertical-align: top; line-height: 1.4; }
+.cmp thead th { color: var(--muted); font-weight: 500; font-size: 12px; }
+.cmp tbody th { color: var(--muted); font-weight: 500; width: 28%; }
+.cmp tbody td { color: var(--fg); }
+.cmp tbody tr + tr > * { box-shadow: inset 0 1px 0 var(--line); }
+.table-wrap { overflow-x: auto; margin: 0 calc(-1 * var(--s1)); }
+
+/* diagrams */
+.dia { overflow-x: auto; border-radius: var(--r-card); background: var(--chrome); box-shadow: var(--ring-card); padding: var(--s2); }
+.dia svg { display: block; width: 100%; min-width: 640px; height: auto; font-family: var(--font-ui); user-select: none; }
+.dia .ln { stroke: var(--line-strong); stroke-width: 1.5; fill: none; }
+.dia .ln.heavy { stroke: #5a5e68; stroke-width: 2; }
+.dia .arr { fill: var(--muted); }
+.dia .box { fill: #1c1e23; stroke: #5a5e68; stroke-width: 1.5; }
+.dia .box.soft { fill: #1c1e23; stroke: var(--line-strong); }
+.dia .t { fill: var(--fg); font-size: 15px; }
+.dia .t.b { font-weight: 700; }
+.dia .t.big { font-size: 17px; }
+.dia .t.sm { font-size: 13px; }
+.dia .t.mu { fill: var(--muted); font-size: 12.5px; }
+.dia .t.mid { text-anchor: middle; }
+.dia g.blank { cursor: pointer; }
+.dia g.blank .bg { fill: var(--accent-soft); stroke: rgba(74, 109, 255, .6); stroke-width: 1.5; stroke-dasharray: 5 4; transition: fill .15s, stroke .15s; }
+.dia g.blank:hover .bg { fill: rgba(74, 109, 255, .24); }
+.dia g.blank.sel .bg { stroke: var(--accent); stroke-dasharray: none; stroke-width: 2; fill: rgba(74, 109, 255, .26); }
+.dia g.blank .q { fill: var(--accent-text); font-size: 15px; font-weight: 600; text-anchor: middle; }
+.dia g.blank.done .bg { fill: rgba(127, 217, 154, .08); stroke: rgba(127, 217, 154, .55); stroke-dasharray: none; }
+.dia g.blank.static { cursor: default; }
+.dia g.blank.static .bg { display: none; }
+.dia g.blank.wrong .bg { stroke: var(--danger); fill: rgba(255, 107, 87, .16); }
+.dia g.blank.drop .bg { stroke: var(--accent); stroke-dasharray: none; fill: rgba(74, 109, 255, .3); }
+.dia g.blank:focus-visible { outline: none; }
+.dia g.blank:focus-visible .bg { stroke: var(--accent-text); stroke-width: 2.5; }
+.bank { display: flex; flex-wrap: wrap; gap: var(--s2); align-items: center; }
+.bank button { cursor: grab; }
+.bank button[aria-pressed="true"] { background: var(--accent-soft); box-shadow: inset 0 0 0 1px rgba(74, 109, 255, .6); color: var(--accent-text); }
+.bank button.wrong { animation: shake .35s cubic-bezier(.22, 1, .36, 1); box-shadow: inset 0 0 0 1px var(--danger); color: var(--danger); }
+@keyframes shake { 20% { translate: -4px 0; } 40% { translate: 4px 0; } 60% { translate: -3px 0; } 80% { translate: 2px 0; } }
+.note { display: flex; gap: var(--s2); align-items: flex-start; margin: 0; padding: var(--s3); border-radius: var(--r-ctl); background: var(--field); font-size: 13px; color: var(--muted); }
+.note .msr { font-size: 16px; color: var(--muted); flex: none; }
+.note.ok { background: rgba(127, 217, 154, .1); box-shadow: inset 0 0 0 1px rgba(127, 217, 154, .4); color: var(--fg); }
+.note.ok .msr { color: #7fd99a; }
+.note.bad { background: rgba(255, 107, 87, .1); box-shadow: inset 0 0 0 1px rgba(255, 107, 87, .4); color: var(--fg); }
+.note.bad .msr { color: var(--danger); }
+
+/* questions */
+.q-wrap { display: flex; flex-direction: column; gap: var(--s4); max-width: 760px; width: 100%; margin: 0 auto; }
+.q-prog { display: flex; align-items: center; gap: var(--s3); }
+.bar-track { flex: 1; height: 4px; border-radius: 4px; background: var(--field-hover); overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 4px; background: var(--muted); transition: width .3s cubic-bezier(.22, 1, .36, 1); }
+.q-text { margin: 0; font-size: 18px; font-weight: 600; line-height: 1.35; letter-spacing: -0.01em; text-wrap: pretty; }
+.q-kind { font-size: 12px; color: var(--muted); }
+.opts { display: flex; flex-direction: column; gap: var(--s2); }
+.opt { display: flex; align-items: center; gap: var(--s3); width: 100%; min-height: 44px; padding: var(--s2) var(--s3); border-radius: var(--r-ctl); background: var(--chrome); box-shadow: var(--ring-card); text-align: left; justify-content: flex-start; font-size: 14px; font-weight: 500; line-height: 1.35; }
+.opt:hover { background: #1d1f24; }
+.opt .k { flex: none; display: grid; place-items: center; width: 24px; height: 24px; border-radius: 6px; background: var(--field); color: var(--muted); font: 500 12px/1 var(--font-mono); }
+.opt .msr { margin-left: auto; flex: none; }
+.opt[aria-pressed="true"] { background: var(--accent-soft); box-shadow: inset 0 0 0 1px rgba(74, 109, 255, .6); }
+.opt[aria-pressed="true"] .k { background: var(--accent); color: var(--accent-ink); }
+.opt.right { background: rgba(127, 217, 154, .1); box-shadow: inset 0 0 0 1px rgba(127, 217, 154, .55); }
+.opt.right .k { background: #7fd99a; color: #0d0e11; }
+.opt.right .msr { color: #7fd99a; }
+.opt.miss { background: rgba(255, 107, 87, .1); box-shadow: inset 0 0 0 1px rgba(255, 107, 87, .55); }
+.opt.miss .k { background: var(--danger); color: #0d0e11; }
+.opt.miss .msr { color: var(--danger); }
+.opt.right-hint { box-shadow: inset 0 0 0 1px rgba(127, 217, 154, .55); }
+.opt:disabled { opacity: 1; cursor: default; }
+.pairs { display: flex; flex-direction: column; gap: var(--s2); }
+.pair-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--s3); align-items: center; padding: var(--s2) var(--s3); border-radius: var(--r-ctl); background: var(--chrome); box-shadow: var(--ring-card); font-size: 14px; }
+.pair-row.right { background: rgba(127, 217, 154, .1); box-shadow: inset 0 0 0 1px rgba(127, 217, 154, .55); }
+.pair-row.miss { background: rgba(255, 107, 87, .1); box-shadow: inset 0 0 0 1px rgba(255, 107, 87, .55); }
+.pair-row select { background: var(--field); }
+.pair-row .fix { grid-column: 1 / -1; font-size: 12px; color: var(--muted); }
+.pair-row .fix b { color: #7fd99a; font-weight: 600; }
+select { appearance: none; -webkit-appearance: none; padding-right: 28px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M3 4.5 6 7.5 9 4.5' fill='none' stroke='%23a3a09a' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; }
+select:disabled { opacity: 1; }
+.q-actions { display: flex; gap: var(--s2); align-items: center; flex-wrap: wrap; }
+.q-actions .spacer { margin-left: auto; }
+.q-actions button { min-height: 36px; padding-inline: 16px; }
+.result { display: flex; flex-direction: column; gap: var(--s4); max-width: 760px; width: 100%; margin: 0 auto; }
+.score { display: flex; align-items: baseline; gap: var(--s3); }
+.score b { font: 600 40px/1 var(--font-brand); letter-spacing: -0.04em; }
+.score span { color: var(--muted); font-size: 14px; }
+.wrong-list { display: flex; flex-direction: column; gap: var(--s2); }
+.wrong-item { padding: var(--s3) var(--s4); border-radius: var(--r-ctl); background: var(--chrome); box-shadow: var(--ring-card); font-size: 14px; line-height: 1.45; }
+.wrong-item b { display: block; font-weight: 600; margin-bottom: var(--s1); }
+.wrong-item span { color: var(--muted); }
+
+/* flashcards */
+.fc-wrap { display: flex; flex-direction: column; gap: var(--s4); align-items: center; width: 100%; }
+.fc { perspective: 1200px; width: min(560px, 100%); aspect-ratio: 3 / 2; min-height: 220px; cursor: pointer; border-radius: var(--r-card); }
+.fc:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+.fc-in { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; transition: transform .45s cubic-bezier(.22, 1, .36, 1); }
+.fc.flipped .fc-in { transform: rotateY(180deg); }
+.fc-face { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; display: flex; flex-direction: column; gap: var(--s3); justify-content: center; align-items: center; text-align: center; padding: var(--s5); border-radius: var(--r-card); background: var(--chrome); box-shadow: var(--ring-card), 0 8px 24px rgba(0, 0, 0, .3), 0 24px 64px rgba(0, 0, 0, .25); overflow: auto; }
+.fc-back { transform: rotateY(180deg); background: #1c1e23; }
+.fc-tag { font-size: 12px; color: var(--faint); letter-spacing: .02em; }
+.fc-term { font-size: 24px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.2; text-wrap: balance; }
+.fc-def { font-size: 16px; line-height: 1.5; color: var(--fg); max-width: 44ch; text-wrap: pretty; }
+.fc-hint { position: absolute; bottom: var(--s3); font-size: 12px; color: var(--faint); }
+.fc-actions { display: flex; gap: var(--s2); flex-wrap: wrap; justify-content: center; }
+.fc-actions button { min-height: 36px; padding-inline: 16px; }
+@media (prefers-reduced-motion: reduce) { .fc-in { transition: none; } .bank button.wrong { animation: none; } .bar-fill { transition: none; } }
+
+/* inspector pieces */
+.rows { display: flex; flex-direction: column; gap: var(--s2); }
+.row-btn { display: flex; align-items: center; gap: var(--s2); width: 100%; justify-content: flex-start; padding: 8px 12px; min-height: 36px; border-radius: var(--r-ctl); background: var(--field); box-shadow: none; text-align: left; }
+.row-btn:hover { background: var(--field-hover); }
+.row-btn[aria-pressed="true"] { background: var(--accent-soft); box-shadow: inset 0 0 0 1px rgba(74, 109, 255, .6); }
+.row-btn .msr { color: var(--muted); }
+.row-btn .mono { margin-left: auto; white-space: nowrap; }
+.row-btn.done .mono { color: #7fd99a; }
+.stat { display: flex; flex-direction: column; gap: var(--s2); }
+.stat-head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--s2); }
+.stat-head span:first-child { color: var(--muted); font-size: 12px; }
+.seg label { white-space: nowrap; }
+.btn-col { display: flex; flex-direction: column; gap: var(--s2); align-items: stretch; }
+.btn-col button { justify-content: flex-start; }
+.empty { display: flex; flex-direction: column; align-items: center; gap: var(--s3); padding: var(--s6) var(--s4); text-align: center; color: var(--muted); font-size: 14px; }
+.empty .big { font-size: 18px; font-weight: 600; color: var(--fg); }
+.empty button { min-height: 36px; padding-inline: 16px; }
+
+@media (max-width: 1100px) {
+  .workspace { grid-template-columns: minmax(0, 1fr); }
+  .stage-wrap { padding: var(--s2); min-height: 0; }
+  .st-head, .st-body > .st-sub { padding-inline: var(--s2); }
+  .inspector { display: contents; }
+  .tabs { order: -1; margin: 0; padding: 4px; background: var(--chrome); box-shadow: var(--ring-card); border-radius: var(--r-card); position: sticky; top: var(--top); z-index: 5; }
+  .tabs button { min-height: 32px; }
+  .panel { overflow: visible; background: var(--chrome); border-radius: var(--r-card); box-shadow: var(--ring-card); }
+  .meta { display: none; }
+  .export { flex: 1 1 100%; }
+  .export button.fill { flex: 1 1 0; }
+  .doc, .q-wrap, .result { padding: var(--s2); }
+  .fc-term { font-size: 20px; }
+}
+.dia .t.end { text-anchor: end; }
+
+</style>
+</head>
+<body>
+<nav class="rail" id="rail" aria-label="iameric" hidden>
+  <a class="rail-home" href="../../index.html" data-label="iameric" aria-label="iameric home"><svg class="rail-mark" viewBox="14.05 14.05 171.9 171.9" aria-hidden="true"><path d="M39.52 58.45a18.93 18.93 0 1 0 37.86 0a18.93 18.93 0 1 0 -37.86 0Z"/><path d="M105.15 58.45A36.4 36.4 0 1 1 141.55 94.85A46.7 46.7 0 0 0 94.85 141.55A36.4 36.4 0 1 1 58.45 105.15A46.7 46.7 0 0 0 105.15 58.45Z"/><path fill-rule="evenodd" d="M105.15 141.55a36.4 36.4 0 1 0 72.8 0a36.4 36.4 0 1 0 -72.8 0ZM117.53 134.27a16.74 16.74 0 1 0 33.49 0a16.74 16.74 0 1 0 -33.49 0Z"/></svg></a>
+  <span class="rail-line" aria-hidden="true"></span>
+  <a href="../../tools.html" data-label="all tools" aria-label="all tools"><span class="msr" aria-hidden="true">deployed_code</span></a>
+  <!-- at the foot: Ko-fi to support the tools (logo: Simple Icons, CC0), and the notice that points to it once -->
+  <div class="rail-foot">
+    <a class="rail-kofi" href="https://ko-fi.com/ericleutemann" target="_blank" rel="noopener" data-label="ko-fi @ericleutemann" aria-label="support me on Ko-fi"><svg class="rail-logo" viewBox="0 0 24 24" aria-hidden="true"><path d="M23.881 8.948c-.773-4.085-4.859-4.593-4.859-4.593H.723c-.604 0-.679.798-.679.798s-.082 7.324-.022 11.822c.164 2.424 2.586 2.672 2.586 2.672s8.267-.023 11.966-.049c2.438-.426 2.683-2.566 2.658-3.734 4.352.24 7.422-2.831 6.649-6.916zm-11.062 3.511c-1.246 1.453-4.011 3.976-4.011 3.976s-.121.119-.31.023c-.076-.057-.108-.09-.108-.09-.443-.441-3.368-3.049-4.034-3.954-.709-.965-1.041-2.7-.091-3.71.951-1.01 3.005-1.086 4.363.407 0 0 1.565-1.782 3.468-.963 1.904.82 1.832 3.011.723 4.311zm6.173.478c-.928.116-1.682.028-1.682.028V7.284h1.77s1.971.551 1.971 2.638c0 1.913-.985 2.667-2.059 3.015z"/></svg></a>
+  </div>
+</nav>
+
+
+<header class="bar">
+  <div class="brand">
+    <h1>WL Lerntool</h1>
+    <span class="version">v0.1</span>
+  </div>
+  <span class="meta" id="meta"></span>
+  <div class="export" role="group" aria-label="Hilfe und Quiz">
+    <button class="icon-btn" id="openHelp" aria-label="So funktioniert's"><span class="msr" aria-hidden="true">question_mark</span></button>
+    <button class="primary fill" id="quickQuiz"><span class="msr" aria-hidden="true">quiz</span>Quiz starten</button>
+  </div>
+</header>
+
+<main class="workspace">
+  <section class="stage-wrap" id="stage" aria-live="polite"></section>
+  <aside class="inspector">
+    <div class="tabs" role="tablist">
+      <button role="tab" data-tab="lernen"><span class="msr" aria-hidden="true">menu_book</span>Lernen</button>
+      <button role="tab" data-tab="skizzen"><span class="msr" aria-hidden="true">account_tree</span>Skizzen</button>
+      <button role="tab" data-tab="fragen"><span class="msr" aria-hidden="true">quiz</span>Fragen</button>
+      <button role="tab" data-tab="karten"><span class="msr" aria-hidden="true">style</span>Karten</button>
+    </div>
+    <div class="panel" id="panel"></div>
+  </aside>
+</main>
+
+<dialog id="howtoDlg" aria-labelledby="howtoTitle">
+<section class="howto">
+  <button class="icon-btn" id="closeHelp" aria-label="Schließen"><span class="msr" aria-hidden="true">close</span></button>
+  <div class="howto-head">
+    <h2 id="howtoTitle">So funktioniert's</h2>
+    <p class="lede">Der Stoff aus Wirtschaftslehre in vier Schritten: lesen, Skizzen beschriften, Fragen beantworten, Karten lernen.</p>
+    <button class="primary" id="startEditing">Loslegen<span class="msr" aria-hidden="true">arrow_forward</span></button>
+  </div>
+  <ol class="steps">
+    <li><span class="step-n">1</span><div><h3>Lernen</h3><p>Lies ein Thema in Ruhe durch. Die Skizzen sind direkt eingebaut. Mit <b>Beschriften üben</b> springst du zur Übung.</p></div></li>
+    <li><span class="step-n">2</span><div><h3>Skizzen</h3><p>Im Modus <b>Üben</b> sind die Beschriftungen ausgeblendet. Wähle eine Lücke und tippe das passende Wort, oder ziehe es hinein. <b>Wichtigstes</b> zeigt nur die großen Teile, <b>Alles</b> auch die Details.</p></div></li>
+    <li><span class="step-n">3</span><div><h3>Fragen</h3><p>Einzelauswahl, Mehrfachauswahl und Zuordnen. Nach jeder Antwort steht eine kurze Erklärung da. Am Ende wiederholst du nur die falschen Fragen.</p></div></li>
+    <li><span class="step-n">4</span><div><h3>Karten</h3><p>Karte umdrehen, dann <b>Gewusst</b> oder <b>Nochmal</b>. Gewusste Karten verschwinden. Tasten: Leertaste, Pfeil links und rechts.</p></div></li>
+  </ol>
+</section>
+</dialog>
+
+<script>
+// Learning material for WL (Wirtschaftslehre): everything the tool shows. Source: the notes "01 Unternehmen und ihre Umwelt"
+// and "02 Abteilungen in einem Unternehmen" (+ the sketch Unternehmen_Skizze.png), redrawn as SVG so it can be practised.
+const TOPICS = [
+  { id: 'u', short: 'Unternehmen', title: 'Unternehmen und ihre Umwelt', date: '30.10.2026' },
+  { id: 'a', short: 'Abteilungen', title: 'Abteilungen in einem Unternehmen', date: '06.11.2026' },
+];
+
+// ---------- diagrams ----------
+// shapes: rect, ell, line (d, arrow end|both), text, blank (a label you can hide and practise)
+const DIAGRAMS = {
+  wirtschaft: {
+    title: 'Wirtschaftssysteme im Überblick', topic: 'u', vb: [800, 456],
+    shapes: [
+      { k: 'rect', x: 275, y: 20, w: 250, h: 64, r: 8, c: 'box' },
+      { k: 'text', x: 400, y: 47, s: 'Betrieb', c: 't b big mid' },
+      { k: 'text', x: 400, y: 68, s: 'eine Güter herstellende Orga-Einheit', c: 't mu mid' },
+      { k: 'line', d: 'M400 84 V112 H180 V138', arrow: 'end' },
+      { k: 'line', d: 'M400 84 V112 H620 V138', arrow: 'end' },
+      { k: 'blank', id: 'plan', lvl: 1, x: 60, y: 140, w: 240, h: 54, ans: 'zentralistische Planwirtschaft', lines: ['zentralistische', 'Planwirtschaft'], shape: 'node', tc: 't b' },
+      { k: 'blank', id: 'markt', lvl: 1, x: 500, y: 140, w: 240, h: 54, ans: 'marktwirtschaftliche Systeme', lines: ['marktwirtschaftliche', 'Systeme'], shape: 'node', tc: 't b' },
+      { k: 'line', d: 'M180 194 V248', arrow: 'end' },
+      { k: 'line', d: 'M620 194 V222 H480 V248', arrow: 'end' },
+      { k: 'line', d: 'M620 194 V222 H680 V248', arrow: 'end' },
+      { k: 'blank', id: 'staat', lvl: 1, x: 90, y: 250, w: 180, h: 46, ans: 'Staatsbetrieb', shape: 'pill', tc: 't b' },
+      { k: 'blank', id: 'oeff', lvl: 1, x: 400, y: 250, w: 160, h: 46, ans: 'öffentl. Unt.', shape: 'pill', tc: 't b' },
+      { k: 'blank', id: 'priv', lvl: 1, x: 600, y: 250, w: 160, h: 46, ans: 'priv. Unt.', shape: 'node', tc: 't b' },
+      { k: 'line', d: 'M180 296 V354', arrow: 'end' },
+      { k: 'line', d: 'M480 296 V354', arrow: 'end' },
+      { k: 'line', d: 'M680 296 V354', arrow: 'end' },
+      { k: 'rect', x: 60, y: 356, w: 440, h: 86, r: 8, c: 'box soft' },
+      { k: 'text', x: 280, y: 386, s: 'Öffentl. Unt. arbeiten gemäß des', c: 't mid' },
+      { k: 'blank', id: 'kd', lvl: 1, x: 120, y: 398, w: 320, h: 32, ans: 'Kostendeckungsprinzip', shape: 'plain', tc: 't b mid' },
+      { k: 'rect', x: 520, y: 356, w: 260, h: 86, r: 8, c: 'box soft' },
+      { k: 'text', x: 650, y: 386, s: 'Private Unt. wirtschaften nach dem', c: 't sm mid' },
+      { k: 'blank', id: 'ew', lvl: 1, x: 528, y: 398, w: 244, h: 32, ans: 'Ertragswirtschaftliches Prinzip', shape: 'plain', tc: 't b sm' },
+    ],
+  },
+  abteilungen: {
+    title: 'Abteilungen in einem Unternehmen', topic: 'a', vb: [1000, 610],
+    shapes: [
+      // state
+      { k: 'blank', id: 'staat', lvl: 1, x: 433, y: 51, w: 134, h: 43, ans: 'Staat', shape: 'node', tc: 't b big' },
+      { k: 'text', x: 248, y: 79, s: 'Taxes = T', c: 't sm' },
+      { k: 'line', d: 'M325 141 C325 96 360 74 430 74', arrow: 'end' },
+      { k: 'line', d: 'M570 74 C640 74 682 92 683 138', arrow: 'end' },
+      { k: 'blank', id: 'subv', lvl: 1, x: 652, y: 40, w: 112, h: 26, ans: 'Subventionen', shape: 'plain', tc: 't sm' },
+      // company: the process line
+      { k: 'rect', x: 250, y: 141, w: 500, h: 301, r: 0, c: 'box' },
+      { k: 'line', d: 'M366 141 V242 M445 141 V242 M554 141 V242 M641 141 V242 M250 242 H750' },
+      { k: 'line', d: 'M350 223 H382', arrow: 'end' }, { k: 'line', d: 'M429 223 H461', arrow: 'end' },
+      { k: 'line', d: 'M537 223 H570', arrow: 'end' }, { k: 'line', d: 'M625 223 H658', arrow: 'end' },
+      { k: 'blank', id: 'einkauf', lvl: 1, x: 254, y: 156, w: 108, h: 46, ans: 'Einkaufsabteilung', lines: ['Einkaufs-', 'abteilung'], shape: 'plain', tc: 't b' },
+      { k: 'blank', id: 'lager', lvl: 1, x: 370, y: 171, w: 71, h: 26, ans: 'Lager', shape: 'plain', tc: 't b' },
+      { k: 'blank', id: 'produktion', lvl: 1, x: 449, y: 171, w: 101, h: 26, ans: 'Produktion', shape: 'plain', tc: 't b' },
+      { k: 'blank', id: 'lager2', lvl: 1, x: 558, y: 171, w: 79, h: 26, ans: 'Lager 2', shape: 'plain', tc: 't b' },
+      { k: 'blank', id: 'absatz', lvl: 1, x: 645, y: 171, w: 101, h: 26, ans: 'Absatz', shape: 'plain', tc: 't b' },
+      // administration
+      { k: 'text', x: 270, y: 287, s: '-', c: 't' }, { k: 'blank', id: 'personal', lvl: 2, x: 281, y: 270, w: 100, h: 26, ans: 'Personal', shape: 'plain', tc: 't' },
+      { k: 'text', x: 270, y: 321, s: '-', c: 't' }, { k: 'blank', id: 'facility', lvl: 2, x: 281, y: 304, w: 100, h: 26, ans: 'Facility', shape: 'plain', tc: 't' },
+      { k: 'text', x: 270, y: 354, s: '-', c: 't' }, { k: 'blank', id: 'statistik', lvl: 2, x: 281, y: 337, w: 100, h: 26, ans: 'Statistik', shape: 'plain', tc: 't' },
+      { k: 'text', x: 609, y: 287, s: '-', c: 't' }, { k: 'blank', id: 'recht', lvl: 2, x: 619, y: 270, w: 90, h: 26, ans: 'Recht', shape: 'plain', tc: 't' },
+      { k: 'text', x: 609, y: 321, s: '-', c: 't' }, { k: 'blank', id: 'rechnungswesen', lvl: 2, x: 619, y: 301, w: 110, h: 44, ans: 'Rechnungswesen', lines: ['Rechnungs-', 'wesen'], shape: 'plain', tc: 't' },
+      { k: 'ell', cx: 500, cy: 320, rx: 77, ry: 49, c: 'box soft' },
+      { k: 'text', x: 500, y: 312, s: 'Unternehmens-/', c: 't sm mid' },
+      { k: 'blank', id: 'gl', lvl: 1, x: 436, y: 318, w: 128, h: 26, ans: 'Geschäftsleitung', shape: 'plain', tc: 't sm' },
+      { k: 'blank', id: 'verwaltung', lvl: 1, x: 430, y: 404, w: 140, h: 30, ans: 'Verwaltung', shape: 'plain', tc: 't b big' },
+      // procurement market
+      { k: 'rect', x: 20, y: 166, w: 160, h: 192, r: 0, c: 'box' },
+      { k: 'blank', id: 'beschaffungsmarkt', lvl: 1, x: 28, y: 178, w: 144, h: 50, ans: 'Beschaffungsmarkt', lines: ['Beschaffungs-', 'markt'], shape: 'plain', tc: 't b big' },
+      { k: 'text', x: 36, y: 258, s: '-', c: 't' }, { k: 'blank', id: 'pf', lvl: 2, x: 48, y: 236, w: 124, h: 48, ans: 'Produktionsfaktoren', lines: ['Produktions-', 'faktoren'], shape: 'plain', tc: 't' },
+      { k: 'line', d: 'M182 191 H246', arrow: 'end' }, { k: 'text', x: 214, y: 181, s: 'PF', c: 't b mid' },
+      { k: 'line', d: 'M248 333 H184', arrow: 'end' }, { k: 'text', x: 216, y: 322, s: 'K', c: 't b mid' },
+      { k: 'text', x: 182, y: 354, s: 'K =', c: 't mu' }, { k: 'blank', id: 'kosten', lvl: 2, x: 204, y: 340, w: 44, h: 20, ans: 'Kosten', shape: 'plain', tc: 't mu' },
+      // sales market
+      { k: 'rect', x: 820, y: 166, w: 160, h: 192, r: 28, c: 'box' },
+      { k: 'blank', id: 'absatzmarkt', lvl: 1, x: 828, y: 184, w: 144, h: 30, ans: 'Absatzmarkt', shape: 'plain', tc: 't b big' },
+      { k: 'text', x: 838, y: 250, s: '-', c: 't' }, { k: 'blank', id: 'nachfrager', lvl: 2, x: 850, y: 233, w: 112, h: 26, ans: 'Nachfrager', shape: 'plain', tc: 't' },
+      { k: 'text', x: 838, y: 279, s: '-', c: 't' }, { k: 'blank', id: 'konkurrenz', lvl: 2, x: 850, y: 262, w: 112, h: 26, ans: 'Konkurrenz', shape: 'plain', tc: 't' },
+      { k: 'line', d: 'M752 191 H818', arrow: 'end' }, { k: 'text', x: 785, y: 181, s: 'x', c: 't b mid' },
+      { k: 'text', x: 838, y: 154, s: 'x =', c: 't mu' }, { k: 'blank', id: 'absatzx', lvl: 2, x: 858, y: 140, w: 88, h: 20, ans: 'Absatz (Menge)', shape: 'plain', tc: 't mu' },
+      { k: 'line', d: 'M818 333 H754', arrow: 'end' }, { k: 'text', x: 786, y: 322, s: 'E', c: 't b mid' },
+      { k: 'text', x: 754, y: 354, s: 'E =', c: 't mu' }, { k: 'blank', id: 'erloese', lvl: 2, x: 774, y: 340, w: 46, h: 20, ans: 'Erlöse', shape: 'plain', tc: 't mu' },
+      // capital market
+      { k: 'line', d: 'M400 447 V500', arrow: 'both' }, { k: 'text', x: 392, y: 478, s: 'E-Kap', c: 't b end' },
+      { k: 'line', d: 'M600 447 V500', arrow: 'both' }, { k: 'text', x: 612, y: 468, s: 'F-Kap', c: 't b' },
+      { k: 'text', x: 612, y: 490, s: 'i =', c: 't mu' }, { k: 'blank', id: 'zinsen', lvl: 2, x: 630, y: 476, w: 50, h: 20, ans: 'Zinsen', shape: 'plain', tc: 't mu' },
+      { k: 'rect', x: 366, y: 503, w: 268, h: 89, r: 0, c: 'box' }, { k: 'line', d: 'M500 503 V545' },
+      { k: 'blank', id: 'eigen', lvl: 2, x: 390, y: 515, w: 86, h: 26, ans: 'eigen', shape: 'plain', tc: 't' },
+      { k: 'blank', id: 'fremd', lvl: 2, x: 524, y: 515, w: 86, h: 26, ans: 'fremd', shape: 'plain', tc: 't' },
+      { k: 'blank', id: 'kapitalmarkt', lvl: 1, x: 430, y: 554, w: 140, h: 28, ans: 'Kapitalmarkt', shape: 'plain', tc: 't b big' },
+    ],
+  },
+};
+
+// ---------- reading ----------
+const DOC = {
+  u: `
+<h2>Unternehmen und ihre Umwelt</h2>
+<p class="lede">Welche Wirtschaftssysteme gibt es und nach welchem Prinzip arbeiten Betriebe darin?</p>
+<section class="card"><h3 class="label">Was ist ein Betrieb?</h3>
+  <p class="def"><b>Betrieb:</b> eine Güter herstellende Organisationseinheit</p></section>
+<section class="card"><h3 class="label">Wirtschaftssysteme im Überblick</h3>
+  {{dia:wirtschaft}}
+  <ul>
+    <li><b>Zentralistische Planwirtschaft</b> → Staatsbetrieb → Kostendeckungsprinzip</li>
+    <li><b>Marktwirtschaftliche Systeme</b> → öffentliche Unternehmen (Kostendeckungsprinzip) und private Unternehmen (Ertragswirtschaftliches Prinzip)</li>
+  </ul></section>
+<section class="card"><h3 class="label">Öffentliche Unternehmen</h3>
+  <p>Staatsbetriebe (Planwirtschaft) und öffentliche Unternehmen (Marktwirtschaft) arbeiten gemäß dem <b>Kostendeckungsprinzip</b>:</p>
+  <p class="quote">„Optimiere die <b>Leistung</b> unter der Nebenbedingung der Einhaltung des <b>Budgets</b>“</p></section>
+<section class="card"><h3 class="label">Private Unternehmen</h3>
+  <p>Private Unternehmen wirtschaften nach dem <b>Ertragswirtschaftlichen Prinzip</b>:</p>
+  <p class="quote">„Optimiere den <b>Gewinn</b> unter der Nebenbedingung der Aufrechterhaltung der Zahlungsfähigkeit (<b>Liquidität</b>)“</p></section>
+<section class="card"><h3 class="label">Vergleich</h3>
+  <div class="table-wrap"><table class="cmp"><thead><tr><th></th><th>Öffentliche Unt. / Staatsbetrieb</th><th>Private Unt.</th></tr></thead><tbody>
+    <tr><th>Prinzip</th><td>Kostendeckungsprinzip</td><td>Ertragswirtschaftliches Prinzip</td></tr>
+    <tr><th>Ziel (optimiere …)</th><td>die Leistung</td><td>den Gewinn</td></tr>
+    <tr><th>Nebenbedingung</th><td>Einhaltung des Budgets</td><td>Zahlungsfähigkeit (Liquidität)</td></tr>
+  </tbody></table></div></section>`,
+  a: `
+<h2>Abteilungen in einem Unternehmen</h2>
+<p class="lede">Wie ein Unternehmen aufgebaut ist und mit welchen Märkten es austauscht.</p>
+<section class="card"><h3 class="label">Skizze: Unternehmen und seine Märkte</h3>
+  {{dia:abteilungen}}
+  <ul>
+    <li><b>Beschaffungsmarkt:</b> liefert Produktionsfaktoren (PF), das Unternehmen zahlt Kosten (K)</li>
+    <li><b>Absatzmarkt:</b> Nachfrager und Konkurrenz; das Unternehmen liefert den Absatz (x, Menge) und erhält Erlöse (E)</li>
+    <li><b>Kapitalmarkt:</b> Eigenkapital (E-Kap) und Fremdkapital (F-Kap); für Fremdkapital fallen Zinsen (i) an</li>
+    <li><b>Staat:</b> Das Unternehmen zahlt Steuern (Taxes = T) und bekommt Subventionen</li>
+  </ul></section>
+<section class="card"><h3 class="label">Im Unternehmen</h3>
+  <ul>
+    <li><b>Prozess:</b> Einkaufsabteilung → Lager → Produktion → Lager 2 → Absatz</li>
+    <li><b>Verwaltung:</b> Personal, Facility, Statistik, Recht, Rechnungswesen, mit der Unternehmens-/Geschäftsleitung in der Mitte</li>
+  </ul></section>
+<section class="card"><h3 class="label">Weitere Umfelder (außerhalb des Unternehmens)</h3>
+  <div class="chips"><span class="tag">Technologie</span><span class="tag">Konjunktur</span><span class="tag">Außenhandel</span><span class="tag">Gesundheit</span><span class="tag">natürliche Umwelt</span><span class="tag">Gesellschaft</span><span class="tag">Ideologien</span><span class="tag">Gesetze (Recht)</span></div></section>
+<section class="card"><h3 class="label">Zur Beschaffung</h3>
+  <ul>
+    <li><b>Entscheidungen im Spannungsfeld zwischen Kosten und Qualität</b></li>
+    <li><b>ABC-Analyse:</b> Unterteilung der Produktionsfaktoren in <i>wichtige ∧ teure</i> (A) sowie in <i>unwichtige ∧ billige</i> (C); ∧ = logisches Und
+      <ul>
+        <li>⇒ Beschaffung von <b>C-Gütern</b> automatisieren</li>
+        <li>⇒ Beschaffung von <b>A-Gütern</b> hohe Aufmerksamkeit schenken, z. B. Nutzwertanalyse in Form der qualitativen Lieferantenauswahl</li>
+      </ul></li>
+    <li><b>Entscheidungen zwischen Lagerhaltung und Just in Time</b>
+      <ul>
+        <li>Lagerhaltung → Lagerhaltungskosten</li>
+        <li>Just in Time → Opportunitätskosten</li>
+      </ul></li>
+    <li><b>Optimale Bestellmenge</b> bzw. <b>Bestellintervalle</b></li>
+  </ul></section>`,
+};
+
+// ---------- flashcards ----------
+const CARDS = [
+  ['u', 'Betrieb', 'Eine Güter herstellende Organisationseinheit.'],
+  ['u', 'Zentralistische Planwirtschaft', 'Wirtschaftssystem, in dem es Staatsbetriebe gibt. Sie arbeiten nach dem Kostendeckungsprinzip.'],
+  ['u', 'Marktwirtschaftliche Systeme', 'Wirtschaftssysteme mit öffentlichen Unternehmen (Kostendeckungsprinzip) und privaten Unternehmen (Ertragswirtschaftliches Prinzip).'],
+  ['u', 'Staatsbetrieb', 'Betrieb der zentralistischen Planwirtschaft. Arbeitet nach dem Kostendeckungsprinzip.'],
+  ['u', 'Öffentliches Unternehmen', 'Unternehmen der Marktwirtschaft in öffentlicher Hand. Arbeitet nach dem Kostendeckungsprinzip.'],
+  ['u', 'Privates Unternehmen', 'Unternehmen der Marktwirtschaft. Wirtschaftet nach dem Ertragswirtschaftlichen Prinzip.'],
+  ['u', 'Kostendeckungsprinzip', '„Optimiere die Leistung unter der Nebenbedingung der Einhaltung des Budgets.“ Gilt für Staatsbetriebe und öffentliche Unternehmen.'],
+  ['u', 'Ertragswirtschaftliches Prinzip', '„Optimiere den Gewinn unter der Nebenbedingung der Aufrechterhaltung der Zahlungsfähigkeit (Liquidität).“ Gilt für private Unternehmen.'],
+  ['u', 'Liquidität', 'Zahlungsfähigkeit. Nebenbedingung bei privaten Unternehmen.'],
+  ['u', 'Budget', 'Nebenbedingung beim Kostendeckungsprinzip: Es muss eingehalten werden.'],
+  ['a', 'Beschaffungsmarkt', 'Markt der Produktionsfaktoren (PF). Das Unternehmen bekommt von ihm PF und zahlt dafür Kosten (K).'],
+  ['a', 'Absatzmarkt', 'Hier sitzen Nachfrager und Konkurrenz. Das Unternehmen liefert den Absatz (x, Menge) und erhält Erlöse (E).'],
+  ['a', 'Kapitalmarkt', 'Hier tauscht das Unternehmen Eigenkapital (E-Kap) und Fremdkapital (F-Kap) aus. Für Fremdkapital fallen Zinsen (i) an.'],
+  ['a', 'PF', 'Produktionsfaktoren: Sie fließen vom Beschaffungsmarkt ins Unternehmen.'],
+  ['a', 'K', 'Kosten: Sie fließen vom Unternehmen an den Beschaffungsmarkt.'],
+  ['a', 'E', 'Erlöse: Sie fließen vom Absatzmarkt ins Unternehmen.'],
+  ['a', 'x', 'Absatz (Menge): geht vom Unternehmen an den Absatzmarkt.'],
+  ['a', 'i', 'Zinsen, die für Fremdkapital (F-Kap) gezahlt werden.'],
+  ['a', 'Taxes (T)', 'Steuern, die das Unternehmen an den Staat zahlt.'],
+  ['a', 'Subventionen', 'Zahlungen, die das Unternehmen vom Staat erhält.'],
+  ['a', 'Reihenfolge der Abteilungen', 'Einkaufsabteilung → Lager → Produktion → Lager 2 → Absatz'],
+  ['a', 'Verwaltung', 'Personal, Facility, Statistik, Recht und Rechnungswesen. In der Mitte: die Unternehmens-/Geschäftsleitung.'],
+  ['a', 'Weitere Umfelder', 'Technologie, Konjunktur, Außenhandel, Gesundheit, natürliche Umwelt, Gesellschaft, Ideologien, Gesetze (Recht).'],
+  ['a', 'Spannungsfeld der Beschaffung', 'Entscheidungen zwischen Kosten und Qualität.'],
+  ['a', 'ABC-Analyse', 'Unterteilung der Produktionsfaktoren in wichtige ∧ teure (A) und unwichtige ∧ billige (C).'],
+  ['a', 'A-Güter', 'Wichtig und teuer. Hohe Aufmerksamkeit, z. B. Nutzwertanalyse (qualitative Lieferantenauswahl).'],
+  ['a', 'C-Güter', 'Unwichtig und billig. Die Beschaffung automatisieren.'],
+  ['a', 'Nutzwertanalyse', 'Qualitative Lieferantenauswahl, z. B. bei A-Gütern.'],
+  ['a', 'Lagerhaltung', 'Verursacht Lagerhaltungskosten.'],
+  ['a', 'Just in Time', 'Verursacht Opportunitätskosten.'],
+  ['a', 'Optimale Bestellmenge / Bestellintervalle', 'Weitere Entscheidung der Beschaffung.'],
+].map(([topic, front, back], i) => ({ id: 'c' + (i + 1), topic, front, back }));
+
+// ---------- questions ----------
+// mc: one answer (a = index) · multi: several (a = [indices]) · match: pairs (items [text, answer], opts)
+const QUESTIONS = [
+  { t: 'u', k: 'mc', q: 'Was ist ein Betrieb?', o: ['Eine Güter herstellende Organisationseinheit', 'Ein Markt, auf dem Güter gehandelt werden', 'Eine Behörde, die Preise festlegt', 'Ein Zusammenschluss von Kunden'], a: 0, e: 'Betrieb: eine Güter herstellende Organisationseinheit.' },
+  { t: 'u', k: 'mc', q: 'Welche zwei Wirtschaftssysteme unterscheidet das Schaubild?', o: ['Zentralistische Planwirtschaft und marktwirtschaftliche Systeme', 'Öffentliche und private Unternehmen', 'Staatsbetrieb und Kapitalmarkt', 'Beschaffungsmarkt und Absatzmarkt'], a: 0, e: 'Der Betrieb gehört entweder zur zentralistischen Planwirtschaft oder zu einem marktwirtschaftlichen System.' },
+  { t: 'u', k: 'mc', q: 'In welchem System gibt es Staatsbetriebe?', o: ['In der zentralistischen Planwirtschaft', 'In marktwirtschaftlichen Systemen', 'In beiden gleichermaßen', 'In keinem der beiden'], a: 0, e: 'Staatsbetriebe gehören zur Planwirtschaft. In der Marktwirtschaft heißen die Gegenstücke öffentliche Unternehmen.' },
+  { t: 'u', k: 'multi', q: 'Was gehört zu den marktwirtschaftlichen Systemen? (mehrere Antworten)', o: ['Öffentliche Unternehmen', 'Staatsbetriebe', 'Private Unternehmen', 'Zentralistische Planwirtschaft'], a: [0, 2], e: 'Marktwirtschaftlich: öffentliche und private Unternehmen. Staatsbetriebe gehören zur Planwirtschaft.' },
+  { t: 'u', k: 'mc', q: 'Nach welchem Prinzip arbeiten Staatsbetriebe und öffentliche Unternehmen?', o: ['Kostendeckungsprinzip', 'Ertragswirtschaftliches Prinzip', 'Liquiditätsprinzip', 'Gewinnmaximierung ohne Nebenbedingung'], a: 0, e: 'Beide arbeiten gemäß dem Kostendeckungsprinzip.' },
+  { t: 'u', k: 'mc', q: 'Nach welchem Prinzip wirtschaften private Unternehmen?', o: ['Ertragswirtschaftliches Prinzip', 'Kostendeckungsprinzip', 'Budgetprinzip', 'Planwirtschaftliches Prinzip'], a: 0, e: 'Private Unternehmen wirtschaften nach dem Ertragswirtschaftlichen Prinzip.' },
+  { t: 'u', k: 'mc', q: 'Was wird beim Kostendeckungsprinzip optimiert?', o: ['Die Leistung', 'Der Gewinn', 'Die Liquidität', 'Der Umsatz'], a: 0, e: '„Optimiere die Leistung unter der Nebenbedingung der Einhaltung des Budgets.“' },
+  { t: 'u', k: 'mc', q: 'Welche Nebenbedingung gilt beim Kostendeckungsprinzip?', o: ['Einhaltung des Budgets', 'Aufrechterhaltung der Zahlungsfähigkeit', 'Maximale Kosten', 'Möglichst hohe Erlöse'], a: 0, e: 'Die Nebenbedingung ist die Einhaltung des Budgets.' },
+  { t: 'u', k: 'mc', q: 'Was wird beim Ertragswirtschaftlichen Prinzip optimiert?', o: ['Der Gewinn', 'Die Leistung', 'Das Budget', 'Die Staatsquote'], a: 0, e: '„Optimiere den Gewinn unter der Nebenbedingung der Aufrechterhaltung der Zahlungsfähigkeit (Liquidität).“' },
+  { t: 'u', k: 'mc', q: 'Welche Nebenbedingung gilt für private Unternehmen?', o: ['Aufrechterhaltung der Zahlungsfähigkeit (Liquidität)', 'Einhaltung des Budgets', 'Kostendeckung', 'Staatliche Genehmigung'], a: 0, e: 'Der Gewinn wird optimiert, solange die Zahlungsfähigkeit (Liquidität) erhalten bleibt.' },
+  { t: 'u', k: 'mc', q: 'Welche Aussage über private Unternehmen stimmt?', o: ['Sie optimieren den Gewinn und müssen dabei zahlungsfähig bleiben.', 'Sie optimieren die Leistung und halten ihr Budget ein.', 'Sie arbeiten nach dem Kostendeckungsprinzip.', 'Sie gehören zur zentralistischen Planwirtschaft.'], a: 0, e: 'Private Unternehmen: Gewinn optimieren, Nebenbedingung Liquidität.' },
+  { t: 'u', k: 'match', q: 'Ordne jedem Betrieb sein Wirtschaftssystem zu.', items: [['Staatsbetrieb', 'Planwirtschaft'], ['Öffentliches Unternehmen', 'Marktwirtschaft'], ['Privates Unternehmen', 'Marktwirtschaft']], opts: ['Planwirtschaft', 'Marktwirtschaft'], e: 'Staatsbetrieb = Planwirtschaft; öffentliche und private Unternehmen = Marktwirtschaft.' },
+  { t: 'u', k: 'match', q: 'Ordne jedem Betrieb sein Prinzip zu.', items: [['Staatsbetrieb', 'Kostendeckungsprinzip'], ['Öffentliches Unternehmen', 'Kostendeckungsprinzip'], ['Privates Unternehmen', 'Ertragswirtschaftliches Prinzip']], opts: ['Kostendeckungsprinzip', 'Ertragswirtschaftliches Prinzip'], e: 'Staatsbetriebe und öffentliche Unternehmen: Kostendeckung. Private: Ertragswirtschaft.' },
+  { t: 'u', k: 'match', q: 'Ordne Ziel und Nebenbedingung dem passenden Prinzip zu.', items: [['Leistung optimieren', 'Kostendeckungsprinzip'], ['Budget einhalten', 'Kostendeckungsprinzip'], ['Gewinn optimieren', 'Ertragswirtschaftliches Prinzip'], ['Liquidität sichern', 'Ertragswirtschaftliches Prinzip']], opts: ['Kostendeckungsprinzip', 'Ertragswirtschaftliches Prinzip'], e: 'Leistung + Budget gehören zum Kostendeckungsprinzip, Gewinn + Liquidität zum Ertragswirtschaftlichen Prinzip.' },
+
+  { t: 'a', k: 'mc', q: 'In welcher Reihenfolge durchläuft der Prozess die Abteilungen (Skizze)?', o: ['Einkauf → Lager → Produktion → Lager 2 → Absatz', 'Einkauf → Produktion → Lager → Absatz → Lager 2', 'Produktion → Einkauf → Lager → Lager 2 → Absatz', 'Lager → Einkauf → Produktion → Absatz → Lager 2'], a: 0, e: 'Einkaufsabteilung, Lager, Produktion, Lager 2, Absatz.' },
+  { t: 'a', k: 'mc', q: 'Was fließt vom Beschaffungsmarkt ins Unternehmen?', o: ['Produktionsfaktoren (PF)', 'Erlöse (E)', 'Subventionen', 'Zinsen (i)'], a: 0, e: 'PF = Produktionsfaktoren.' },
+  { t: 'a', k: 'mc', q: 'Was fließt vom Unternehmen an den Beschaffungsmarkt?', o: ['Kosten (K)', 'Erlöse (E)', 'Absatz (x)', 'Steuern (T)'], a: 0, e: 'K = Kosten.' },
+  { t: 'a', k: 'mc', q: 'Wofür steht x in der Skizze?', o: ['Absatz (Menge)', 'Kosten', 'Zinsen', 'Produktionsfaktoren'], a: 0, e: 'x = Absatz (Menge), er geht an den Absatzmarkt.' },
+  { t: 'a', k: 'mc', q: 'Wofür steht E, das vom Absatzmarkt ins Unternehmen kommt?', o: ['Erlöse', 'Eigenkapital', 'Einkauf', 'Ertrag der Konkurrenz'], a: 0, e: 'E = Erlöse. (Eigenkapital heißt in der Skizze E-Kap.)' },
+  { t: 'a', k: 'multi', q: 'Was gehört zum Absatzmarkt? (mehrere Antworten)', o: ['Nachfrager', 'Konkurrenz', 'Produktionsfaktoren', 'Eigenkapital'], a: [0, 1], e: 'Absatzmarkt: Nachfrager und Konkurrenz. Produktionsfaktoren gehören zum Beschaffungsmarkt, Eigenkapital zum Kapitalmarkt.' },
+  { t: 'a', k: 'multi', q: 'Was gehört zur Verwaltung? (mehrere Antworten)', o: ['Personal', 'Facility', 'Statistik', 'Rechnungswesen', 'Lager', 'Produktion'], a: [0, 1, 2, 3], e: 'Verwaltung: Personal, Facility, Statistik, Recht, Rechnungswesen. Lager und Produktion liegen im Prozess darüber.' },
+  { t: 'a', k: 'mc', q: 'Wo sitzt die Unternehmens-/Geschäftsleitung in der Skizze?', o: ['In der Verwaltung, in der Mitte', 'Im Lager', 'Im Absatzmarkt', 'Beim Staat'], a: 0, e: 'Die Geschäftsleitung steht in der Mitte der Verwaltung.' },
+  { t: 'a', k: 'mc', q: 'Wofür fallen Zinsen (i) an?', o: ['Für Fremdkapital (F-Kap)', 'Für Eigenkapital (E-Kap)', 'Für Produktionsfaktoren', 'Für Subventionen'], a: 0, e: 'In der Skizze steht i = Zinsen beim F-Kap, dem Fremdkapital.' },
+  { t: 'a', k: 'mc', q: 'Was zahlt das Unternehmen an den Staat (Taxes = T)?', o: ['Steuern', 'Subventionen', 'Zinsen', 'Erlöse'], a: 0, e: 'Taxes = T = Steuern.' },
+  { t: 'a', k: 'mc', q: 'Was erhält das Unternehmen vom Staat?', o: ['Subventionen', 'Steuern', 'Fremdkapital', 'Produktionsfaktoren'], a: 0, e: 'Der Staat zahlt Subventionen an das Unternehmen.' },
+  { t: 'a', k: 'match', q: 'Ordne die Begriffe dem richtigen Markt zu.', items: [['Produktionsfaktoren', 'Beschaffungsmarkt'], ['Nachfrager', 'Absatzmarkt'], ['Konkurrenz', 'Absatzmarkt'], ['Eigenkapital', 'Kapitalmarkt'], ['Fremdkapital', 'Kapitalmarkt']], opts: ['Beschaffungsmarkt', 'Absatzmarkt', 'Kapitalmarkt'], e: 'PF → Beschaffungsmarkt; Nachfrager und Konkurrenz → Absatzmarkt; E-Kap und F-Kap → Kapitalmarkt.' },
+  { t: 'a', k: 'match', q: 'Ordne die Kürzel ihrer Bedeutung zu.', items: [['PF', 'Produktionsfaktoren'], ['K', 'Kosten'], ['E', 'Erlöse'], ['x', 'Absatz (Menge)'], ['i', 'Zinsen'], ['T', 'Steuern (Taxes)']], opts: ['Produktionsfaktoren', 'Kosten', 'Erlöse', 'Absatz (Menge)', 'Zinsen', 'Steuern (Taxes)'], e: 'PF Produktionsfaktoren · K Kosten · E Erlöse · x Absatz (Menge) · i Zinsen · T Steuern.' },
+  { t: 'a', k: 'multi', q: 'Welche gehören zu den weiteren Umfeldern außerhalb des Unternehmens? (mehrere Antworten)', o: ['Technologie', 'Konjunktur', 'Außenhandel', 'Gesundheit', 'Statistik', 'Lager'], a: [0, 1, 2, 3], e: 'Umfelder: Technologie, Konjunktur, Außenhandel, Gesundheit, natürliche Umwelt, Gesellschaft, Ideologien, Gesetze (Recht).' },
+  { t: 'a', k: 'mc', q: 'Zwischen welchen beiden Größen stehen Beschaffungsentscheidungen im Spannungsfeld?', o: ['Kosten und Qualität', 'Gewinn und Liquidität', 'Leistung und Budget', 'Angebot und Nachfrage'], a: 0, e: 'Beschaffung: Entscheidungen im Spannungsfeld zwischen Kosten und Qualität.' },
+  { t: 'a', k: 'mc', q: 'Was sind A-Güter in der ABC-Analyse?', o: ['Wichtig und teuer', 'Unwichtig und billig', 'Wichtig und billig', 'Unwichtig und teuer'], a: 0, e: 'A = wichtig ∧ teuer. C = unwichtig ∧ billig. (∧ = logisches Und)' },
+  { t: 'a', k: 'mc', q: 'Was sind C-Güter in der ABC-Analyse?', o: ['Unwichtig und billig', 'Wichtig und teuer', 'Wichtig und billig', 'Unwichtig und teuer'], a: 0, e: 'C = unwichtig ∧ billig.' },
+  { t: 'a', k: 'mc', q: 'Was tut man mit der Beschaffung von C-Gütern?', o: ['Sie automatisieren', 'Ihr hohe Aufmerksamkeit schenken', 'Eine Nutzwertanalyse durchführen', 'Sie ins Lager legen'], a: 0, e: 'C-Güter: Beschaffung automatisieren.' },
+  { t: 'a', k: 'mc', q: 'Was tut man bei der Beschaffung von A-Gütern?', o: ['Hohe Aufmerksamkeit, z. B. Nutzwertanalyse', 'Sie automatisieren', 'Sie ignorieren', 'Nur nach dem billigsten Preis kaufen'], a: 0, e: 'A-Güter bekommen hohe Aufmerksamkeit, z. B. eine Nutzwertanalyse in Form der qualitativen Lieferantenauswahl.' },
+  { t: 'a', k: 'mc', q: 'Wofür steht die Nutzwertanalyse in der Beschaffung?', o: ['Qualitative Lieferantenauswahl bei A-Gütern', 'Automatische Bestellung von C-Gütern', 'Berechnung der Zinsen', 'Auswahl der Abteilungen'], a: 0, e: 'Nutzwertanalyse = qualitative Lieferantenauswahl, z. B. für A-Güter.' },
+  { t: 'a', k: 'match', q: 'Ordne die Güter ihrer Beschaffungsstrategie zu.', items: [['A-Güter', 'Hohe Aufmerksamkeit / Nutzwertanalyse'], ['C-Güter', 'Beschaffung automatisieren']], opts: ['Hohe Aufmerksamkeit / Nutzwertanalyse', 'Beschaffung automatisieren'], e: 'A-Güter: hohe Aufmerksamkeit (z. B. Nutzwertanalyse). C-Güter: automatisieren.' },
+  { t: 'a', k: 'match', q: 'Welche Kosten entstehen bei welcher Entscheidung?', items: [['Lagerhaltung', 'Lagerhaltungskosten'], ['Just in Time', 'Opportunitätskosten']], opts: ['Lagerhaltungskosten', 'Opportunitätskosten'], e: 'Lagerhaltung → Lagerhaltungskosten. Just in Time → Opportunitätskosten.' },
+  { t: 'a', k: 'multi', q: 'Was gehört zu den Entscheidungen der Beschaffung? (mehrere Antworten)', o: ['Lagerhaltung oder Just in Time', 'Optimale Bestellmenge', 'Bestellintervalle', 'Höhe der Gewinnausschüttung'], a: [0, 1, 2], e: 'Beschaffung: Kosten vs. Qualität, Lagerhaltung vs. Just in Time, optimale Bestellmenge bzw. Bestellintervalle.' },
+  { t: 'a', k: 'mc', q: 'Was bedeutet das Zeichen ∧ in der ABC-Analyse?', o: ['Logisches Und', 'Logisches Oder', 'Größer als', 'Durchschnitt'], a: 0, e: '∧ = logisches Und: A-Güter sind wichtig UND teuer.' },
+].map((q, i) => ({ id: 'q' + (i + 1), topic: q.t, ...q }));
+
+</script>
+<script>
+(() => {
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+
+// ---------- saved progress (this browser only) ----------
+const KEY = 'wl-lerntool:v1';
+const P = { q: {}, c: {}, d: {}, tab: 'lernen', topic: 'u', seen: 0 };
+try { Object.assign(P, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) {}
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(P)); } catch (e) {} };
+
+// ---------- state of the three exercise kinds ----------
+const D = { id: 'wirtschaft', mode: 'view', level: 1, placed: {}, sel: null, mistakes: 0, flash: null, bank: [] };
+const Q = { scope: 'all', only: 'all', shuffle: true, list: [], i: 0, sel: null, picks: {}, pm: {}, checked: false, ok: false, results: {}, finished: false };
+const F = { scope: 'all', queue: [], flipped: false };
+
+const LEFT = new Set(['personal', 'facility', 'statistik', 'recht', 'rechnungswesen', 'pf', 'nachfrager', 'konkurrenz']);
+const topicName = id => TOPICS.find(t => t.id === id).short;
+
+// ---------- diagrams ----------
+const blanksOf = id => DIAGRAMS[id].shapes.filter(s => s.k === 'blank');
+const maxLevel = id => Math.max(...blanksOf(id).map(b => b.lvl));
+const activeBlanks = () => D.mode === 'practice' ? blanksOf(D.id).filter(b => b.lvl <= D.level) : [];
+const firstOpen = () => { const b = activeBlanks().find(b => !D.placed[b.id]); return b ? b.id : null; };
+function resetDia() {
+  D.placed = {}; D.mistakes = 0; D.flash = null; D.solved = false;
+  D.bank = shuffle(activeBlanks().map(b => b.ans));
+  D.sel = firstOpen();
+}
+const diaDone = id => !!P.d[id + ':' + maxLevel(id)];
+
+function diagramSVG(id, o) {
+  const d = DIAGRAMS[id], [W, H] = d.vb;
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(d.title)}"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" class="arr"/></marker></defs>`;
+  for (const sh of d.shapes) {
+    if (sh.k === 'rect') s += `<rect class="${sh.c}" x="${sh.x}" y="${sh.y}" width="${sh.w}" height="${sh.h}" rx="${sh.r || 0}"/>`;
+    else if (sh.k === 'ell') s += `<ellipse class="${sh.c}" cx="${sh.cx}" cy="${sh.cy}" rx="${sh.rx}" ry="${sh.ry}"/>`;
+    else if (sh.k === 'line') s += `<path class="ln" d="${sh.d}"${sh.arrow ? ' marker-end="url(#ah)"' : ''}${sh.arrow === 'both' ? ' marker-start="url(#ah)"' : ''}/>`;
+    else if (sh.k === 'text') s += `<text class="${sh.c}" x="${sh.x}" y="${sh.y}">${esc(sh.s)}</text>`;
+    else if (sh.k === 'blank') {
+      const act = o.practice && sh.lvl <= o.level, filled = !act || o.placed[sh.id];
+      const pill = sh.shape === 'pill', rx = pill ? sh.h / 2 : 6;
+      if (sh.shape === 'node' || pill) s += `<rect class="box" x="${sh.x}" y="${sh.y}" width="${sh.w}" height="${sh.h}" rx="${pill ? sh.h / 2 : 8}"/>`;
+      const cls = 'blank' + (act ? (filled ? ' done' : (o.sel === sh.id ? ' sel' : '')) : ' static') + (o.flash && o.flash.blank === sh.id ? ' wrong' : '');
+      const attrs = act && !filled ? ` tabindex="0" role="button" aria-label="Lücke ${esc(topicName(d.topic))}"` : '';
+      s += `<g class="${cls}" data-blank="${sh.id}"${attrs}><rect class="bg" x="${sh.x}" y="${sh.y}" width="${sh.w}" height="${sh.h}" rx="${rx}"/>`;
+      const cy = sh.y + sh.h / 2;
+      if (!filled) s += `<text class="q" x="${sh.x + sh.w / 2}" y="${cy + 5}">?</text>`;
+      else {
+        const lines = sh.lines || [sh.ans], size = / big/.test(' ' + sh.tc) ? 17 : / sm/.test(' ' + sh.tc) ? 13 : / mu/.test(' ' + sh.tc) ? 12.5 : 15, lh = size * 1.2;
+        const left = LEFT.has(sh.id), tx = left ? sh.x + 4 : sh.x + sh.w / 2;
+        lines.forEach((ln, i) => { s += `<text class="${sh.tc}${left ? '' : ' mid'}" x="${tx}" y="${(cy + (i - (lines.length - 1) / 2) * lh + size * 0.35).toFixed(1)}">${esc(ln)}</text>`; });
+      }
+      s += '</g>';
+    }
+  }
+  return s + '</svg>';
+}
+const diaBlock = id => `<div class="dia">${diagramSVG(id, { practice: false })}</div><div class="q-actions"><button data-act="gopractice" data-dia="${id}"><span class="msr" aria-hidden="true">edit_note</span>Beschriften üben</button></div>`;
+
+function attempt(ans, target) {
+  const b = activeBlanks().find(b => b.id === (target || D.sel || firstOpen()));
+  if (!b || D.placed[b.id]) return;
+  if (b.ans === ans) {
+    D.placed[b.id] = true; D.sel = firstOpen();
+    if (!D.sel) { const k = D.id + ':' + D.level, prev = P.d[k]; P.d[k] = { best: prev ? Math.min(prev.best, D.mistakes) : D.mistakes }; save(); }
+  } else {
+    D.mistakes++; D.flash = { chip: ans, blank: b.id };
+    setTimeout(() => { D.flash = null; renderStage(); }, 420);
+  }
+  render();
+}
+
+// ---------- questions ----------
+// answers sit first in the source data: shuffle the options of every question when a round starts
+function prep(q) {
+  if (q.k === 'match') return { ...q, opts: shuffle(q.opts) };
+  const idx = shuffle(q.o.map((_, i) => i));
+  return { ...q, o: idx.map(i => q.o[i]), a: q.k === 'mc' ? idx.indexOf(q.a) : q.a.map(x => idx.indexOf(x)).sort((x, y) => x - y) };
+}
+function startQuiz(wrongOnly) {
+  let list = QUESTIONS.filter(q => Q.scope === 'all' || q.topic === Q.scope);
+  if (wrongOnly) list = list.filter(q => Q.results[q.id] === false);
+  else if (Q.only === 'open') list = list.filter(q => P.q[q.id] !== 1);
+  Q.list = (Q.shuffle ? shuffle(list) : list).map(prep);
+  Q.i = 0; Q.finished = false; Q.results = {}; clearQ();
+}
+const clearQ = () => { Q.sel = null; Q.picks = {}; Q.pm = {}; Q.checked = false; Q.ok = false; };
+const cur = () => Q.list[Q.i];
+function checkQ() {
+  const q = cur();
+  let ok;
+  if (q.k === 'mc') ok = Q.sel === q.a;
+  else if (q.k === 'multi') { const p = Object.keys(Q.picks).filter(k => Q.picks[k]).map(Number).sort((a, b) => a - b); ok = p.length === q.a.length && p.every((v, i) => v === q.a[i]); }
+  else ok = q.items.every((it, i) => Q.pm[i] === it[1]);
+  Q.checked = true; Q.ok = ok; Q.results[q.id] = ok; P.q[q.id] = ok ? 1 : 0; save(); render();
+}
+function nextQ() { if (Q.i + 1 >= Q.list.length) Q.finished = true; else { Q.i++; clearQ(); } render(); }
+
+// ---------- flashcards ----------
+function startCards() {
+  F.queue = shuffle(CARDS.filter(c => (F.scope === 'all' || c.topic === F.scope) && !P.c[c.id])).map(c => c.id);
+  F.flipped = false;
+}
+const cardById = id => CARDS.find(c => c.id === id);
+
+// ---------- rendering ----------
+const count = o => Object.values(o).filter(Boolean).length;
+const qRight = () => QUESTIONS.filter(q => P.q[q.id] === 1).length;
+
+function bar(label, a, b) {
+  return `<div class="stat"><div class="stat-head"><span>${label}</span><output>${a} / ${b}</output></div><div class="bar-track"><div class="bar-fill" style="width:${b ? a / b * 100 : 0}%"></div></div></div>`;
+}
+const seg = (name, act, opts, val) => `<div class="seg" role="radiogroup">${opts.map(([v, l]) => `<label><input type="radio" name="${name}" data-act="${act}" value="${v}"${String(v) === String(val) ? ' checked' : ''}>${l}</label>`).join('')}</div>`;
+const group = (title, inner) => `<div class="group"><h3 class="label">${title}</h3>${inner}</div>`;
+
+function renderMeta() {
+  $('meta').textContent = `Fragen ${qRight()}/${QUESTIONS.length} · Karten ${count(P.c)}/${CARDS.length}`;
+  document.querySelectorAll('.tabs [data-tab]').forEach(b => b.setAttribute('aria-selected', b.dataset.tab === P.tab));
+}
+
+function renderPanel() {
+  let h = '';
+  if (P.tab === 'lernen') {
+    h += group('Thema', `<div class="rows">${TOPICS.map(t => `<button class="row-btn" data-act="topic" data-v="${t.id}" aria-pressed="${P.topic === t.id}"><span class="msr" aria-hidden="true">article</span>${esc(t.title)}<span class="mono">${t.date.slice(0, 5)}</span></button>`).join('')}</div>`);
+    h += group('Dein Stand', `<div class="stat" style="gap:16px">${bar('Fragen richtig', qRight(), QUESTIONS.length)}${bar('Karten gewusst', count(P.c), CARDS.length)}${bar('Skizzen beschriftet', Object.keys(DIAGRAMS).filter(diaDone).length, Object.keys(DIAGRAMS).length)}</div>`);
+    h += group('Fortschritt', `<div class="btn-col"><button class="danger" data-act="resetAll"><span class="msr" aria-hidden="true">restart_alt</span>Alles zurücksetzen</button></div>`);
+  } else if (P.tab === 'skizzen') {
+    h += group('Skizze', `<div class="rows">${Object.entries(DIAGRAMS).map(([id, d]) => `<button class="row-btn${diaDone(id) ? ' done' : ''}" data-act="dia" data-v="${id}" aria-pressed="${D.id === id}"><span class="msr" aria-hidden="true">account_tree</span>${esc(d.title)}<span class="mono">${diaDone(id) ? '✓' : ''}</span></button>`).join('')}</div>`);
+    h += group('Modus', seg('dmode', 'dmode', [['view', 'Ansehen'], ['practice', 'Üben']], D.mode));
+    if (maxLevel(D.id) > 1) h += group('Umfang', seg('dlevel', 'dlevel', [[1, 'Wichtigstes'], [2, 'Alles']], D.level));
+    if (D.mode === 'practice') {
+      const act = activeBlanks(), n = count(D.placed);
+      h += group('Stand', `<div class="stat" style="gap:16px">${bar('Lücken gefüllt', n, act.length)}<div class="stat-head"><span>Fehlversuche</span><output>${D.mistakes}</output></div></div>`);
+      h += group('Aktionen', `<div class="btn-col"><button data-act="solve"><span class="msr" aria-hidden="true">visibility</span>Lösung zeigen</button><button data-act="drestart"><span class="msr" aria-hidden="true">shuffle</span>Neu starten</button></div>`);
+    }
+  } else if (P.tab === 'fragen') {
+    h += group('Thema', seg('qscope', 'qscope', [['all', 'Alle'], ...TOPICS.map(t => [t.id, t.short])], Q.scope));
+    h += group('Auswahl', seg('qonly', 'qonly', [['all', 'Alle Fragen'], ['open', 'Noch nicht richtig']], Q.only));
+    h += group('Ablauf', `<label class="check"><input type="checkbox" data-act="qshuffle"${Q.shuffle ? ' checked' : ''}>Zufällige Reihenfolge</label><div class="btn-col"><button data-act="qrestart"><span class="msr" aria-hidden="true">restart_alt</span>Neu starten</button></div>`);
+    const done = Object.keys(Q.results).length, ok = Object.values(Q.results).filter(Boolean).length;
+    h += group('Diese Runde', `<div class="stat" style="gap:16px">${bar('Richtig', ok, done)}<div class="stat-head"><span>Beantwortet</span><output>${done} / ${Q.list.length}</output></div></div>`);
+  } else {
+    h += group('Thema', seg('fscope', 'fscope', [['all', 'Alle'], ...TOPICS.map(t => [t.id, t.short])], F.scope));
+    const inScope = CARDS.filter(c => F.scope === 'all' || c.topic === F.scope);
+    h += group('Stand', `<div class="stat" style="gap:16px">${bar('Gewusst', inScope.filter(c => P.c[c.id]).length, inScope.length)}</div>`);
+    h += group('Aktionen', `<div class="btn-col"><button data-act="fshuffle"><span class="msr" aria-hidden="true">shuffle</span>Neu mischen</button><button data-act="freset"><span class="msr" aria-hidden="true">restart_alt</span>Alle wieder offen</button></div>`);
+  }
+  $('panel').innerHTML = h;
+}
+
+function renderStage() {
+  const st = $('stage');
+  if (P.tab === 'lernen') {
+    st.innerHTML = `<div class="doc">${DOC[P.topic].replace(/\{\{dia:(\w+)\}\}/g, (m, id) => diaBlock(id))}</div>`;
+  } else if (P.tab === 'skizzen') {
+    const d = DIAGRAMS[D.id], act = activeBlanks(), n = count(D.placed), complete = D.mode === 'practice' && act.length && !firstOpen();
+    let h = `<div class="st-head"><h2 class="st-title">${esc(d.title)}</h2>${D.mode === 'practice' ? `<span class="meta" style="display:inline">${n}/${act.length} · ${D.mistakes} Fehler</span>` : ''}</div>`;
+    h += `<div class="st-body"><div class="dia">${diagramSVG(D.id, { practice: D.mode === 'practice', level: D.level, placed: D.placed, sel: D.sel, flash: D.flash })}</div>`;
+    if (complete && D.solved) h += `<p class="note"><span class="msr" aria-hidden="true">visibility</span>Die Lösung wird angezeigt. Starte neu, um selbst zu beschriften.</p>`;
+    else if (complete) h += `<p class="note ok"><span class="msr" aria-hidden="true">check_circle</span>Geschafft: alle ${act.length} Lücken gefüllt, ${D.mistakes} Fehlversuche.</p>`;
+    else if (D.mode === 'practice') h += `<div class="bank" id="bank">${D.bank.filter(a => !act.some(b => b.ans === a && D.placed[b.id])).map(a => `<button draggable="true" data-chip="${esc(a)}"${D.flash && D.flash.chip === a ? ' class="wrong"' : ''}>${esc(a)}</button>`).join('')}</div>`;
+    st.innerHTML = h + '</div>';
+  } else if (P.tab === 'fragen') st.innerHTML = renderQuiz();
+  else st.innerHTML = renderCards();
+}
+
+function renderQuiz() {
+  if (!Q.list.length) return `<div class="empty"><span class="msr" style="font-size:32px;color:#7fd99a" aria-hidden="true">done_all</span><div class="big">Nichts offen</div><div>In dieser Auswahl hast du alle Fragen schon richtig beantwortet.</div><button class="primary" data-act="qall">Alle Fragen üben</button></div>`;
+  if (Q.finished) {
+    const n = Q.list.length, ok = Q.list.filter(q => Q.results[q.id]).length, wrong = Q.list.filter(q => !Q.results[q.id]);
+    return `<div class="result"><div class="st-head"><h2 class="st-title">Ergebnis</h2></div>
+      <div class="score"><b>${ok} / ${n}</b><span>${Math.round(ok / n * 100)} % richtig</span></div>
+      <div class="bar-track"><div class="bar-fill" style="width:${ok / n * 100}%"></div></div>
+      ${wrong.length ? `<h3 class="label">Nochmal anschauen</h3><div class="wrong-list">${wrong.map(q => `<div class="wrong-item"><b>${esc(q.q)}</b><span>${esc(q.e)}</span></div>`).join('')}</div>` : `<p class="note ok"><span class="msr" aria-hidden="true">check_circle</span>Alles richtig.</p>`}
+      <div class="q-actions">${wrong.length ? `<button class="primary" data-act="qwrong"><span class="msr" aria-hidden="true">replay</span>Falsche wiederholen</button>` : ''}<button data-act="qrestart"><span class="msr" aria-hidden="true">restart_alt</span>Neu starten</button></div></div>`;
+  }
+  const q = cur(), n = Q.list.length;
+  const kind = { mc: 'Eine Antwort', multi: 'Mehrere Antworten', match: 'Zuordnen' }[q.k];
+  let body = '';
+  if (q.k !== 'match') {
+    body = `<div class="opts">${q.o.map((t, i) => {
+      const picked = q.k === 'mc' ? Q.sel === i : !!Q.picks[i], right = q.k === 'mc' ? q.a === i : q.a.includes(i);
+      let cls = 'opt', icon = '';
+      if (Q.checked) { if (right) { cls += picked ? ' right' : ' right-hint'; if (picked) icon = 'check'; } else if (picked) { cls += ' miss'; icon = 'close'; } }
+      return `<button class="${cls}" data-act="opt" data-i="${i}" aria-pressed="${picked}"${Q.checked ? ' disabled' : ''}><span class="k">${i + 1}</span><span>${esc(t)}</span>${icon ? `<span class="msr" aria-hidden="true">${icon}</span>` : ''}</button>`;
+    }).join('')}</div>`;
+  } else {
+    body = `<div class="pairs">${q.items.map((it, i) => {
+      const ok = Q.pm[i] === it[1];
+      return `<div class="pair-row${Q.checked ? (ok ? ' right' : ' miss') : ''}"><span>${esc(it[0])}</span><select data-act="pick" data-i="${i}" aria-label="${esc(it[0])}"${Q.checked ? ' disabled' : ''}><option value="">Wählen …</option>${q.opts.map(o => `<option${Q.pm[i] === o ? ' selected' : ''}>${esc(o)}</option>`).join('')}</select>${Q.checked && !ok ? `<span class="fix">Richtig: <b>${esc(it[1])}</b></span>` : ''}</div>`;
+    }).join('')}</div>`;
+  }
+  const canCheck = q.k === 'multi' ? Object.values(Q.picks).some(Boolean) : q.items && q.items.every((_, i) => Q.pm[i]);
+  const last = Q.i + 1 >= n;
+  return `<div class="q-wrap"><div class="st-head"><h2 class="st-title">Frage ${Q.i + 1} von ${n}</h2><span class="meta" style="display:inline">${topicName(q.topic)}</span></div>
+    <div class="q-prog"><div class="bar-track"><div class="bar-fill" style="width:${(Q.i + (Q.checked ? 1 : 0)) / n * 100}%"></div></div></div>
+    <div class="q-kind">${kind}</div><p class="q-text">${esc(q.q)}</p>${body}
+    ${Q.checked ? `<p class="note ${Q.ok ? 'ok' : 'bad'}"><span class="msr" aria-hidden="true">${Q.ok ? 'check_circle' : 'cancel'}</span><span><b>${Q.ok ? 'Richtig.' : 'Nicht ganz.'}</b> ${esc(q.e)}</span></p>` : ''}
+    <div class="q-actions">${Q.checked ? `<button class="primary" data-act="next">${last ? 'Ergebnis' : 'Weiter'}<span class="msr" aria-hidden="true">arrow_forward</span></button>` : (q.k === 'mc' ? '' : `<button class="primary" id="qCheck" data-act="check"${canCheck ? '' : ' disabled'}>Prüfen</button>`)}</div></div>`;
+}
+
+function renderCards() {
+  if (!F.queue.length) return `<div class="empty"><span class="msr" style="font-size:32px;color:#7fd99a" aria-hidden="true">done_all</span><div class="big">Alle Karten gewusst</div><div>In dieser Auswahl ist nichts mehr offen.</div><button class="primary" data-act="freset">Alle wieder offen</button></div>`;
+  const c = cardById(F.queue[0]);
+  return `<div class="st-head"><h2 class="st-title">Karteikarten</h2><span class="meta" style="display:inline">${F.queue.length} offen</span></div>
+    <div class="fc-wrap"><div class="fc${F.flipped ? ' flipped' : ''}" id="fc" data-act="fflip" role="button" tabindex="0" aria-label="Karte umdrehen"><div class="fc-in">
+      <div class="fc-face"><span class="fc-tag">${esc(topicName(c.topic))}</span><div class="fc-term">${esc(c.front)}</div><span class="fc-hint">Tippen zum Umdrehen</span></div>
+      <div class="fc-face fc-back"><span class="fc-tag">${esc(c.front)}</span><div class="fc-def">${esc(c.back)}</div></div></div></div>
+    <div class="fc-actions"><button data-act="fagain"><span class="msr" aria-hidden="true">replay</span>Nochmal</button><button class="primary" data-act="fknown"><span class="msr" aria-hidden="true">check</span>Gewusst</button></div></div>`;
+}
+
+function render() { renderMeta(); renderPanel(); renderStage(); }
+
+// ---------- actions ----------
+const resetTimers = new WeakMap();
+function confirmThen(btn, fn) {
+  if (btn.classList.contains('confirm')) { fn(); return; }
+  btn.classList.add('confirm'); const txt = btn.lastChild; const old = txt.textContent; txt.textContent = 'Wirklich?';
+  clearTimeout(resetTimers.get(btn)); resetTimers.set(btn, setTimeout(() => { btn.classList.remove('confirm'); txt.textContent = old; }, 3000));
+}
+function setTab(t) {
+  P.tab = t; save();
+  if (t === 'fragen' && !Q.list.length && !Q.finished) startQuiz();
+  if (t === 'karten' && !F.queue.length) startCards();
+  render(); window.scrollTo({ top: 0 });
+}
+
+document.addEventListener('click', e => {
+  const blank = e.target.closest('[data-blank]');
+  if (blank) { const b = activeBlanks().find(b => b.id === blank.dataset.blank); if (b && !D.placed[b.id]) { D.sel = b.id; render(); } return; }
+  const chip = e.target.closest('[data-chip]');
+  if (chip) { attempt(chip.dataset.chip); return; }
+  const tab = e.target.closest('[data-tab]');
+  if (tab) { setTab(tab.dataset.tab); return; }
+  const t = e.target.closest('[data-act]');
+  if (!t || t.tagName === 'INPUT' || t.tagName === 'SELECT') return;
+  const v = t.dataset.v, a = t.dataset.act;
+  if (a === 'topic') { P.topic = v; save(); render(); window.scrollTo({ top: 0 }); }
+  else if (a === 'dia') { D.id = v; D.level = 1; resetDia(); render(); }
+  else if (a === 'gopractice') { D.id = t.dataset.dia; D.mode = 'practice'; D.level = 1; resetDia(); setTab('skizzen'); }
+  else if (a === 'solve') { activeBlanks().forEach(b => D.placed[b.id] = true); D.sel = null; D.solved = true; render(); }
+  else if (a === 'drestart') { resetDia(); render(); }
+  else if (a === 'resetAll') confirmThen(t, () => { P.q = {}; P.c = {}; P.d = {}; save(); Q.list = []; Q.results = {}; F.queue = []; startQuiz(); startCards(); render(); });
+  else if (a === 'opt') { const i = +t.dataset.i, q = cur(); if (Q.checked) return; if (q.k === 'mc') { Q.sel = i; checkQ(); } else { Q.picks[i] = !Q.picks[i]; render(); } }
+  else if (a === 'check') { if (!t.disabled) checkQ(); }
+  else if (a === 'next') nextQ();
+  else if (a === 'qrestart') { startQuiz(); render(); }
+  else if (a === 'qwrong') { startQuiz(true); render(); }
+  else if (a === 'qall') { Q.only = 'all'; startQuiz(); render(); }
+  else if (a === 'fflip') { F.flipped = !F.flipped; $('fc').classList.toggle('flipped', F.flipped); }
+  else if (a === 'fknown') { P.c[F.queue[0]] = 1; save(); F.queue.shift(); F.flipped = false; render(); }
+  else if (a === 'fagain') { F.queue.push(F.queue.shift()); F.flipped = false; render(); }
+  else if (a === 'fshuffle') { startCards(); render(); }
+  else if (a === 'freset') { CARDS.forEach(c => { if (F.scope === 'all' || c.topic === F.scope) delete P.c[c.id]; }); save(); startCards(); render(); }
+});
+
+document.addEventListener('change', e => {
+  const t = e.target, a = t.dataset && t.dataset.act; if (!a) return;
+  if (a === 'dmode') { D.mode = t.value; resetDia(); render(); }
+  else if (a === 'dlevel') { D.level = +t.value; resetDia(); render(); }
+  else if (a === 'qscope') { Q.scope = t.value; startQuiz(); render(); }
+  else if (a === 'qonly') { Q.only = t.value; startQuiz(); render(); }
+  else if (a === 'qshuffle') { Q.shuffle = t.checked; startQuiz(); render(); }
+  else if (a === 'fscope') { F.scope = t.value; startCards(); render(); }
+  else if (a === 'pick') { Q.pm[+t.dataset.i] = t.value; const b = $('qCheck'); if (b) b.disabled = !cur().items.every((_, i) => Q.pm[i]); }
+});
+
+// drag a word onto a gap
+document.addEventListener('dragstart', e => { const c = e.target.closest && e.target.closest('[data-chip]'); if (c) { e.dataTransfer.setData('text/plain', c.dataset.chip); e.dataTransfer.effectAllowed = 'move'; } });
+document.addEventListener('dragover', e => { const b = e.target.closest && e.target.closest('g.blank'); if (b && !b.classList.contains('static') && !b.classList.contains('done')) { e.preventDefault(); b.classList.add('drop'); } });
+document.addEventListener('dragleave', e => { const b = e.target.closest && e.target.closest('g.blank'); if (b) b.classList.remove('drop'); });
+document.addEventListener('drop', e => { const b = e.target.closest && e.target.closest('g.blank'); if (!b) return; e.preventDefault(); b.classList.remove('drop'); attempt(e.dataTransfer.getData('text/plain'), b.dataset.blank); });
+
+// keyboard
+document.addEventListener('keydown', e => {
+  if (document.querySelector('dialog[open]')) return;
+  const inField = e.target.closest && e.target.closest('select, input, textarea');
+  const onBtn = e.target.closest && e.target.closest('button, [role=tab]');
+  if (e.target.matches && e.target.matches('g.blank') && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); e.target.dispatchEvent(new MouseEvent('click', { bubbles: true })); return; }
+  if (inField || e.ctrlKey || e.metaKey || e.altKey) return;
+  if (P.tab === 'fragen' && Q.list.length && !Q.finished) {
+    const q = cur();
+    if (/^[1-9]$/.test(e.key) && q.k !== 'match' && !Q.checked && +e.key <= q.o.length) { const i = +e.key - 1; if (q.k === 'mc') { Q.sel = i; checkQ(); } else { Q.picks[i] = !Q.picks[i]; render(); } }
+    else if (e.key === 'Enter' && !onBtn) { if (Q.checked) nextQ(); else if (q.k === 'multi' ? Object.values(Q.picks).some(Boolean) : q.k === 'match' && q.items.every((_, i) => Q.pm[i])) checkQ(); }
+  } else if (P.tab === 'karten' && F.queue.length) {
+    if (e.key === ' ' && !onBtn) { e.preventDefault(); F.flipped = !F.flipped; $('fc').classList.toggle('flipped', F.flipped); }
+    else if (e.key === 'ArrowLeft') { F.queue.push(F.queue.shift()); F.flipped = false; render(); }
+    else if (e.key === 'ArrowRight') { P.c[F.queue[0]] = 1; save(); F.queue.shift(); F.flipped = false; render(); }
+  }
+});
+
+// ---------- header, help ----------
+$('quickQuiz').onclick = () => { Q.scope = 'all'; Q.only = 'all'; startQuiz(); setTab('fragen'); };
+const dlg = $('howtoDlg');
+$('openHelp').onclick = () => dlg.showModal();
+$('closeHelp').onclick = () => dlg.close();
+$('startEditing').onclick = () => dlg.close();
+dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
+dlg.addEventListener('close', () => { P.seen = 1; save(); });
+
+// ---------- website rail: only when this page runs under /tools/ ----------
+(() => {
+  if (!/\/tools\/[^/]+\/?(index\.html)?$/.test(location.pathname)) return;
+  $('rail').hidden = false; document.body.classList.add('has-rail');
+})();
+
+startQuiz(); startCards(); resetDia(); render();
+if (!P.seen) dlg.showModal();
+})();
+
+</script>
+</body>
+</html>
