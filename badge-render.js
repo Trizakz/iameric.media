@@ -1,4 +1,4 @@
-// The badges as SVG, drawn from plain data (badges.js). Used by the about page and by badge-editor.html, so a
+// The badges as SVG, drawn from plain data (badges.js). Used by the about page and by the Site Manager's badge editor (manage/badges.js), so a
 // badge looks the same in both. A badge is a square tile with soft corners, the icon above the title, and its
 // `level` says how much the interest means: 1 cream, 2 holo (the same size, its own finish and effects). The colour is
 // soft patches running into each other, set a little differently per badge; soft occlusion along the

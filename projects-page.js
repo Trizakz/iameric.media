@@ -14,10 +14,11 @@ const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(
 const shown = date => date.split('-').reverse().join('.'); // 'YYYY-MM-DD' -> 'DD.MM.YYYY'
 const icon = name => `<span class="material-symbols-rounded" aria-hidden="true">${name}</span>`;
 // each category's band colour (the bands round the folders' foot): category-styles.js, set with the pencil beside
-// the title (projects-edit.js, only on localhost); these until one is set
+// the title (it leads to the Site Manager, only on localhost); these until one is set
 export const BAND_DEFAULTS = { photo: '#f2c66d', video: '#ff6b57', graphics: '#8fd0a8', web: '#5c7dff', tool: '#c9c3b6' };
 // the projects plus every tool from tools.js (written by web-tools/publish.js), as a project in the category "tool"
-const ALL = [...PROJECTS, ...TOOLS.map(t => ({ id: t.id, title: t.title, date: t.date, categories: ['tool'], thumb: t.thumb }))];
+// hidden: set in the Site Manager ("public" off); such projects and tools stay off the site
+const ALL = [...PROJECTS.filter(p => !p.hidden), ...TOOLS.filter(t => !t.hidden).map(t => ({ id: t.id, title: t.title, date: t.date, categories: ['tool'], thumb: t.thumb }))];
 export const bandColor = (k, styles = CATEGORY_STYLES) => styles[k] || BAND_DEFAULTS[k] || '#c9c3b6';
 const catsOf = p => p.categories.filter(c => CATEGORIES[c]);
 
@@ -35,7 +36,9 @@ export function card(p) {
     + `<div class="pj-pic">${pic}</div><time class="pj-tab" datetime="${esc(p.date)}">${shown(p.date)}</time>`
     + `<div class="pj-front"><svg class="pj-body" viewBox="0 0 288 288" aria-hidden="true"><path d="${BODY}"/></svg>`
     + `<h2 class="pj-name">${esc(p.title)}</h2></div></div>`
-    + `<p class="pj-stamp" aria-label="${esc(labels)}">${cats.map(c => `<span class="pj-band" style="--band: var(--band-${c})">${icon(CATEGORIES[c].icon)}</span>`).join('')}</p></div></li>`;
+    + `<p class="pj-stamp" aria-label="${esc(labels)}">${cats.map(c => `<span class="pj-band" style="--band: var(--band-${c})">${icon(CATEGORIES[c].icon)}</span>`).join('')}</p></div>`
+    // a project with its own page: one link over the whole tile
+    + (p.page ? `<a class="pj-open" href="work/${esc(p.id)}/" aria-label="${esc(p.title)}"></a>` : '') + '</li>';
 }
 
 // the table view (after beautifului.dev's filter table): a small picture and the title, the date, the categories as
@@ -44,7 +47,7 @@ function table(items) {
   const rows = items.map(p => {
     const cats = catsOf(p);
     const pic = p.thumb ? `<img src="${esc(p.thumb)}" alt="" loading="lazy">` : '';
-    return `<tr data-id="${esc(p.id)}" style="--c: var(--band-${cats[0] || 'tool'})"><td><span class="pt-name"><span class="pt-pic" aria-hidden="true">${pic}</span>${esc(p.title)}</span></td>`
+    return `<tr data-id="${esc(p.id)}" style="--c: var(--band-${cats[0] || 'tool'})"><td><span class="pt-name"><span class="pt-pic" aria-hidden="true">${pic}</span>${p.page ? `<a class="pj-open" href="work/${esc(p.id)}/">${esc(p.title)}</a>` : esc(p.title)}</span></td>`
       + `<td><time datetime="${esc(p.date)}">${shown(p.date)}</time></td>`
       + `<td><span class="pt-tags">${cats.map(c => `<span class="pt-tag" style="--band: var(--band-${c})">${icon(CATEGORIES[c].icon)}${CATEGORIES[c].label}</span>`).join('')}</span></td></tr>`;
   }).join('');
@@ -168,6 +171,12 @@ function insights(root) {
   return t ? timeline(t) : () => {};
 }
 
+// the admin pencil beside the title: a link into the Site Manager (manage/, localhost:5600/manage/)
+export function editLink(root, section) {
+  root.querySelector('h1').insertAdjacentHTML('beforeend', `<a class="tl-edit" href="/manage/#${section}" aria-label="edit in the Site Manager" title="Site Manager"><span class="material-symbols-rounded" aria-hidden="true">edit</span></a>`);
+  window.fitSubTitle?.(root);
+}
+
 export function mount(root) {
   const page = root.querySelector('.pj');
   if (!page) return { dispose() {} };
@@ -177,8 +186,8 @@ export function mount(root) {
   let filter = 'all', newest = true, rows = false, active = -1, found = [];
   Object.keys(CATEGORIES).forEach(k => page.style.setProperty(`--band-${k}`, bandColor(k)));
   const stopInsight = insights(page);
-  // the pencil, only while working on the site locally, never for visitors
-  if (/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) import('./projects-edit.js').then(m => m.mountEditor(root, page));
+  // the pencil, only while working on the site locally, never for visitors: it opens the Site Manager's projects
+  if (/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) editLink(root, 'projects');
 
   const query = () => search.value.trim().toLowerCase();
   const matches = (p, q) => !q || [p.title, ...p.categories.map(c => CATEGORIES[c]?.label || c)].join(' ').toLowerCase().includes(q);

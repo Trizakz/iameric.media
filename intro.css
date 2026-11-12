@@ -18,8 +18,8 @@ html.intro-on .intro-anim {
 }
 /* while it plays, the home's own entrance waits under it */
 html.intro-on .reel,
-html.intro-on .orb,
-html.intro-on .intro {
+html.intro-on .intro,
+html.intro-on .hero-projects {
   animation-play-state: paused;
 }
 .ia-plane {

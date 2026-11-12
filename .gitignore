@@ -1,6 +1,4 @@
 # local only: the badge editor (it saves badges.js, which is uploaded)
-badge-editor.html
-badge-editor.js
 # test pages and unused files from development
 blob-test.html
 fonts.html
@@ -8,6 +6,8 @@ tags.html
 _*.html
 _*.js
 # project notes and dev tooling
+# the Site Manager (local back office: node manage/server.js), never published
+manage/
 PRODUCT.md
 .impeccable/
 .claude/
@@ -15,6 +15,3 @@ PRODUCT.md
 logo/
 # source footage, only the small web versions in assets/ are uploaded
 _media/
-# local only: the tile and band editors behind the red pencils (they save tool-styles.js and category-styles.js, which are uploaded)
-tools-edit.js
-projects-edit.js

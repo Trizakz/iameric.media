@@ -4,7 +4,7 @@
 // version small in the bottom right corner. The logo is two or three letters in the tool's colour on a dark square
 // (like Adobe's app icons), else an image, else the cube.
 // Colour, letters and logo come from tool-styles.js; without an entry a tool takes the next colour of PALETTE.
-// Working on the site locally, a pencil beside the title edits them (tools-edit.js). Runs on tools.html
+// Working on the site locally, a pencil beside the title leads to the Site Manager, where they are edited. Runs on tools.html
 // (mount(document.body)).
 
 import { TOOLS } from './tools.js';
@@ -13,7 +13,7 @@ import { TOOL_STYLES } from './tool-styles.js';
 export const PALETTE = ['#2f5bff', '#ff6b57', '#8fd0a8', '#f2c66d', '#c9c3b6'];
 const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
-export const sorted = () => [...TOOLS].sort((a, b) => b.date.localeCompare(a.date));
+export const sorted = () => TOOLS.filter(t => !t.hidden).sort((a, b) => b.date.localeCompare(a.date));   // hidden: "public" off in the Site Manager
 export const styleOf = (t, i, styles = TOOL_STYLES) => ({
   color: styles[t.id]?.color || PALETTE[i % PALETTE.length],
   logo: styles[t.id]?.logo || null,
@@ -76,6 +76,9 @@ export function mount(root) {
   document.fonts.ready.then(() => fitNotes(list));
   addEventListener('resize', () => fitNotes(list));
   // the pencil, only while working on the site locally, never for visitors
-  if (/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) import('./tools-edit.js').then(m => m.mountEditor(root, list));
+  if (/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) {
+    root.querySelector('h1').insertAdjacentHTML('beforeend', '<a class="tl-edit" href="/manage/#tools" aria-label="edit in the Site Manager" title="Site Manager"><span class="material-symbols-rounded" aria-hidden="true">edit</span></a>');
+    window.fitSubTitle?.(root);
+  }
   return { dispose() {} };
 }

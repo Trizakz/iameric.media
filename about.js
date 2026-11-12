@@ -16,9 +16,9 @@ export function mount(root) {
 
   // the badges
   const pile = page.querySelector('.ab-pile');
-  // a shortcut to the badge editor, only while working on the site locally, never for visitors
+  // a shortcut to the Site Manager's about section, only while working on the site locally, never for visitors
   if (/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) {
-    page.querySelector('.ab-free-text').insertAdjacentHTML('beforeend', '<a class="ab-edit" href="badge-editor.html" target="_blank" rel="noopener" aria-label="edit the badges" title="badge editor"><span class="material-symbols-rounded" aria-hidden="true">edit</span></a>');
+    page.querySelector('.ab-free-text').insertAdjacentHTML('beforeend', '<a class="ab-edit" href="/manage/#about" aria-label="edit in the Site Manager" title="Site Manager"><span class="material-symbols-rounded" aria-hidden="true">edit</span></a>');
   }
   ensureFonts(document, BADGES);
   pile.innerHTML = BADGES.map(b => badgeSVG(b)).join('');

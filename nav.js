@@ -37,3 +37,15 @@ if (track) {
   addEventListener('resize', place);
   place();
 }
+
+// working on the site locally: "manage" (the Site Manager) left of the legal notice in the footer, never for visitors
+if (/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) {
+  const legal = document.querySelector('.site-foot .foot-legal');
+  if (legal) {
+    const end = document.createElement('span');
+    end.className = 'foot-end';
+    legal.replaceWith(end);
+    end.innerHTML = '<a class="foot-manage" href="/manage/">manage</a>';
+    end.append(legal);
+  }
+}

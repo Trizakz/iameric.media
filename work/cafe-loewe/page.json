@@ -1,0 +1,79 @@
+{
+  "theme": {
+    "bg": "#0d0e11",
+    "surface": "#18191d",
+    "text": "#eeeae0",
+    "muted": "#a3a09a",
+    "accent": "#2f5bff",
+    "headFont": "DM Sans",
+    "headWeight": 600,
+    "headTracking": -0.03,
+    "bodyFont": "DM Sans",
+    "size": 17,
+    "radius": 16,
+    "width": 1200,
+    "gap": 24,
+    "metaLayout": "split"
+  },
+  "meta": {
+    "intro": "",
+    "version": "",
+    "changes": [],
+    "tools": [],
+    "links": [],
+    "credits": []
+  },
+  "sections": [
+    {
+      "width": "wide",
+      "bg": "",
+      "text": "",
+      "bgImage": "",
+      "overlay": 0,
+      "padTop": 64,
+      "padBottom": 64,
+      "minH": 0,
+      "valign": "center",
+      "gap": -1,
+      "blocks": [
+        {
+          "id": "bcuinjm",
+          "type": "text",
+          "col": 1,
+          "span": 5,
+          "textAlign": "left",
+          "valign": "start",
+          "pad": 0,
+          "bg": "",
+          "radius": -1,
+          "anim": "rise",
+          "mobileHide": false,
+          "color": "",
+          "html": "<p>Write something about this part of the project.</p>",
+          "size": 0,
+          "cols": 1
+        },
+        {
+          "id": "b4plaug",
+          "type": "image",
+          "col": 7,
+          "span": 6,
+          "textAlign": "left",
+          "valign": "start",
+          "pad": 0,
+          "bg": "",
+          "radius": -1,
+          "anim": "rise",
+          "mobileHide": false,
+          "color": "",
+          "src": "",
+          "alt": "",
+          "caption": "",
+          "ratio": "4/5",
+          "fit": "cover"
+        }
+      ],
+      "id": "soj07k2"
+    }
+  ]
+}

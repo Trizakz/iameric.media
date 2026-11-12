@@ -1,5 +1,5 @@
-// The badges in "things i like" on the about page. Made with badge-editor.html: open it, design the
-// badges, then "Save badges.js". Every badge only stores what differs from DEFAULTS in badge-render.js.
+// The badges in "things i like" on the about page. Made in the Site Manager (manage/, About). Every badge only
+// stores what differs from DEFAULTS in badge-render.js.
 export const PILE = {"cols":6};
 export const BADGES = [
   {

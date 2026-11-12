@@ -19,6 +19,20 @@
   text-decoration: none;
   transition: color 0.25s;
 }
+.site-foot .foot-end {
+  justify-self: end;
+  display: flex;
+  gap: 20px;
+}
+/* the Site Manager link: only on localhost (nav.js), in the admin pencils' strawberry red */
+.site-foot .foot-manage {
+  color: #ff3b5c;
+  text-decoration: none;
+  transition: color 0.25s;
+}
+.site-foot .foot-manage:hover {
+  color: #ff7088;
+}
 .site-foot .foot-legal:hover,
 .site-foot .foot-legal[aria-current="page"] {
   color: var(--text, #eeeae0);
